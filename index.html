@@ -447,7 +447,7 @@
       height: 180px;
       flex-shrink: 0;
     }
-    .news-card.featured .news-card-img-wrap { height: 240px; }
+    .news-card-img-wrap { height: 180px; }
     .news-card.full-row .news-card-img-wrap {
       width: 220px;
       min-width: 220px;
@@ -509,7 +509,7 @@
     .wb-text strong { color: #b45309; }
     /* Grid pembungkus kartu — shadow tipis agar menonjol di latar putih */
     .news-section .news-grid { box-shadow: 0 4px 24px rgba(26,29,46,0.10), 0 1px 4px rgba(26,29,46,0.06); }
-    .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(320px, auto); gap: 2px; background: rgba(255,255,255,0.035); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+    .news-grid { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(420px, auto); gap: 2px; background: rgba(255,255,255,0.035); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
 
     /* News cards */
     .news-card { background: #0e1029; padding: 30px; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: background 0.25s, transform 0.25s; border: none; text-align: left; width: 100%; font-family: 'Sora', sans-serif; }
@@ -519,12 +519,6 @@
     .news-card:hover .news-title { color: #fff; }
     .news-card:hover .news-read { gap: 10px; color: #a5b4fc; }
     .news-card:active { transform: scale(0.995); }
-    .news-card.featured { grid-column: span 2; border-bottom: 2px solid rgba(255,255,255,0.035); }
-    .news-card.featured .news-title { font-size: 19px; line-height: 1.35; }
-    .news-card.featured .news-excerpt { display: block; }
-    .news-card.full-row { grid-column: span 2; flex-direction: row; align-items: center; gap: 36px; border-top: 2px solid rgba(255,255,255,0.035); }
-    .full-row-left { flex: 1; }
-    .full-row-right { flex: 1; border-left: 1px solid rgba(255,255,255,0.06); padding-left: 36px; }
 
     /* Source badge */
     .news-source { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 999px; font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
@@ -538,7 +532,7 @@
 
     .news-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.13); margin-bottom: 10px; letter-spacing: 1px; }
     .news-title { font-size: 14.5px; font-weight: 700; color: rgba(255,255,255,0.87); line-height: 1.45; margin-bottom: 10px; transition: color 0.2s; }
-    .news-excerpt { font-size: 12.5px; color: rgba(255,255,255,0.38); line-height: 1.75; display: none; margin-bottom: 18px; }
+    .news-excerpt { font-size: 12px; color: rgba(255,255,255,0.38); line-height: 1.75; flex: 1; display: block; margin-bottom: 18px; }
     .news-impact { margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; }
     .impact-ico { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
     .impact-ico.red    { background: rgba(250,82,82,0.13); }
@@ -1389,7 +1383,7 @@
       <div class="news-grid reveal reveal-d2">
 
         <!-- ★ ARTIKEL 1 — Featured (Lumpur Lapindo · Kompas) ★ -->
-        <button class="news-card featured" onclick="openModal('modal-1')">
+        <button class="news-card" onclick="openModal('modal-1')">
           <div class="news-card-img-wrap">
             <img
               class="news-card-img"
@@ -1437,11 +1431,12 @@
           <div class="news-cat warning"><div class="news-cat-dot"></div>Salah Koordinat</div>
           <div class="news-num">02 · EKONOMI · 23 AGUSTUS 2022</div>
           <h3 class="news-title">Mata Bor Salah Koordinat di Sorik Marapi, Halliburton Bakal Kena Sanksi</h3>
-          <div class="news-impact" style="margin-top:auto;padding-top:14px;">
+          <p class="news-excerpt">Kesalahan koordinat pengeboran di PLTP Sorik Marapi menyebabkan blowout lumpur panas bercampur gas H2S. Halliburton selaku kontraktor pengeboran terancam sanksi berat dari regulator energi Indonesia atas insiden yang membahayakan keselamatan pekerja dan lingkungan sekitar.</p>
+          <div class="news-impact">
             <div class="impact-ico amber">⛏️</div>
             <div class="impact-txt"><strong>Blowout Lumpur Panas & Gas H2S</strong>PLTP Sorik Marapi · Halliburton Drilling Systems</div>
           </div>
-          <div class="news-meta" style="margin-top:14px;">
+          <div class="news-meta">
             <div class="news-meta-item">23 Agustus 2022</div>
             <div class="meta-div"></div>
             <div class="news-meta-item">Sorik Marapi, Sumut</div>
@@ -1466,11 +1461,12 @@
           <div class="news-cat critical"><div class="news-cat-dot"></div>Kerugian Eksplorasi</div>
           <div class="news-num">03 · ESDM.GO.ID</div>
           <h3 class="news-title">12 KKKS Asing Rugi Rp19 Triliun Cari Cadangan Migas di Laut Dalam Indonesia</h3>
-          <div class="news-impact" style="margin-top:auto;padding-top:14px;">
+          <p class="news-excerpt">Sebanyak 12 Kontraktor Kontrak Kerja Sama asing mencatat kerugian kumulatif Rp19 triliun akibat gagal menemukan cadangan migas di perairan laut dalam Indonesia. Kegagalan eksplorasi ini sebagian disebabkan oleh ketidakakuratan data koordinat dan datum geodetik yang digunakan dalam survei seismik.</p>
+          <div class="news-impact">
             <div class="impact-ico purple">💰</div>
             <div class="impact-txt"><strong>Kerugian Kumulatif: Rp 19 Triliun</strong>12 KKKS asing gagal temukan cadangan migas laut dalam</div>
           </div>
-          <div class="news-meta" style="margin-top:14px;">
+          <div class="news-meta">
             <div class="news-meta-item">Kementerian ESDM RI</div>
             <div class="meta-div"></div>
             <div class="news-meta-item">Laut Dalam Indonesia</div>
@@ -1483,33 +1479,34 @@
           </a>
         </button>
 
-        <!-- ★ ARTIKEL 4 — PAD C Sukowati (Suara Banyuurip) — Full Row ★ -->
-        <button class="news-card full-row" onclick="openModal('modal-4')">
+        <!-- ★ ARTIKEL 4 — PAD C Sukowati (Suara Banyuurip) ★ -->
+        <button class="news-card" onclick="openModal('modal-4')">
           <div class="news-card-img-wrap">
             <img class="news-card-img"
               src="image/berita 4.jpg"
               alt="Sumur minyak Sukowati Bojonegoro"
-              onerror="this.src='image/berita 4.jpg'">
+              onerror="this.parentElement.style.display='none'">
           </div>
-          <div class="full-row-left">
-            <div class="news-source">🗞️ SuaraBanyuurip.com</div>
-            <div class="news-cat info"><div class="news-cat-dot"></div>Mitigasi Risiko</div>
-            <div class="news-num">04 · MIGAS · 21 JUNI 2021</div>
-            <h3 class="news-title" style="font-size:16px;max-width:420px;">Punya Risiko Besar, Lokasi Pengeboran Sumur Baru PAD C Sukowati Digeser ke Selatan</h3>
+          <div class="news-source">🗞️ SuaraBanyuurip.com</div>
+          <div class="news-cat info"><div class="news-cat-dot"></div>Mitigasi Risiko</div>
+          <div class="news-num">04 · MIGAS · 21 JUNI 2021</div>
+          <h3 class="news-title">Punya Risiko Besar, Lokasi Pengeboran Sumur Baru PAD C Sukowati Digeser ke Selatan</h3>
+          <p class="news-excerpt">Pengembangan sumur baru PAD C Sukowati di Banjarsari, Bojonegoro, dipaksa menggeser lokasi pengeboran setelah analisis mendalam menemukan potensi risiko besar berupa patahan geologi besar yang harus dilalui jika tetap menggunakan titik koordinat awal.</p>
+          <div class="news-impact">
+            <div class="impact-ico blue">📍</div>
+            <div class="impact-txt"><strong>Lokasi Digeser Beberapa Ratus Meter</strong>Pertamina EP Cepu Zona 11 · Bojonegoro, Jawa Timur</div>
           </div>
-          <div class="full-row-right">
-            <p class="news-excerpt" style="display:block;margin-bottom:16px;">Pengembangan sumur baru PAD C Sukowati di Banjarsari, Bojonegoro, dipaksa menggeser lokasi pengeboran setelah analisis mendalam menemukan potensi risiko besar berupa patahan geologi besar yang harus dilalui jika tetap menggunakan titik koordinat awal.</p>
-            <div class="news-impact" style="padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);">
-              <div class="impact-ico blue">📍</div>
-              <div class="impact-txt"><strong>Lokasi Digeser Beberapa Ratus Meter</strong>Pertamina EP Cepu Zona 11 · Bojonegoro, Jawa Timur</div>
-            </div>
-            <span class="news-read" style="margin-top:16px;">Baca Selengkapnya <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-            <a href="https://suarabanyuurip.com/2021/06/21/punya-risiko-besar-lokasi-pengeboran-sumur-baru-pad-c-sukowati-digeser-ke-selatan/"
-               target="_blank" class="news-card-link" style="margin-top:12px;" onclick="event.stopPropagation()">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              Buka Artikel Asli
-            </a>
+          <div class="news-meta">
+            <div class="news-meta-item">21 Juni 2021</div>
+            <div class="meta-div"></div>
+            <div class="news-meta-item">Bojonegoro, Jawa Timur</div>
           </div>
+          <span class="news-read">Baca Selengkapnya <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <a href="https://suarabanyuurip.com/2021/06/21/punya-risiko-besar-lokasi-pengeboran-sumur-baru-pad-c-sukowati-digeser-ke-selatan/"
+             target="_blank" class="news-card-link" onclick="event.stopPropagation()">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Buka Artikel Asli
+          </a>
         </button>
 
       </div><!-- /news-grid -->
