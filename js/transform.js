@@ -1004,36 +1004,6 @@ function triggerDownloadGeoJSON(idx) {
   _toast('File GeoJSON berhasil diunduh!', 'green');
 }
 
-// ══════════════════════════════════════════════
-// ★ EXPORT SHAPEFILE
-// ══════════════════════════════════════════════
-function triggerDownloadShapefile(idx) {
-  const entry = dlQueue[idx];
-  if (!entry) return;
-  if (typeof shpwrite === 'undefined') { _toast('Library shapefile belum dimuat.', 'amber'); return; }
-  const asalFeatures = [], hasilFeatures = [];
-  entry.results.forEach(r => {
-    const resid = calcResidual(r.latIn, r.lonIn, r.latOut, r.lonOut, r.from, r.to);
-    const cls   = residualClass(resid.residual);
-    const dist  = calcDistance(r.latIn, r.lonIn, r.latOut, r.lonOut);
-    const bear  = calcBearing(r.latIn, r.lonIn, r.latOut, r.lonOut);
-    const props = { id: String(r.id), datum_as: r.from.toUpperCase(), datum_hs: r.to.toUpperCase(),
-      jarak_m: parseFloat(dist.toFixed(3)), arah_deg: parseFloat(bear.toFixed(2)),
-      resid_m: parseFloat(resid.residual.toFixed(6)), kualitas: cls.label };
-    asalFeatures.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [r.lonIn, r.latIn] },
-      properties: { ...props, lat: r.latIn, lon: r.lonIn } });
-    hasilFeatures.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [r.lonOut, r.latOut] },
-      properties: { ...props, lat: r.latOut, lon: r.lonOut } });
-  });
-  const ts = Date.now();
-  shpwrite.download({ type: 'FeatureCollection', features: asalFeatures },
-    { file: `shifted_asal_${ts}`, folder: `shifted_asal_${ts}`, types: { point: 'titik_asal' } });
-  setTimeout(() => {
-    shpwrite.download({ type: 'FeatureCollection', features: hasilFeatures },
-      { file: `shifted_hasil_${ts}`, folder: `shifted_hasil_${ts}`, types: { point: 'titik_hasil' } });
-    _toast('2 file Shapefile (.zip) berhasil diunduh!', 'green');
-  }, 500);
-}
 
 // ──────────────────────────────────────────────
 // DOWNLOAD QUEUE
@@ -1071,10 +1041,6 @@ function _refreshDlPanel() {
           style="background:#e3f8ff;border-color:#99e9f2;color:#1098ad;transition:all 0.18s ease;"
           onmouseover="this.style.background='#1098ad';this.style.borderColor='#1098ad';this.style.color='#fff';"
           onmouseout="this.style.background='#e3f8ff';this.style.borderColor='#99e9f2';this.style.color='#1098ad';">GeoJSON</button>
-        <button class="btn-dl-sm" onclick="triggerDownloadShapefile(${i})" title="Download Shapefile (.zip)"
-          style="background:#fff0f6;border-color:#f9a8d4;color:#9d174d;transition:all 0.18s ease;"
-          onmouseover="this.style.background='#9d174d';this.style.borderColor='#9d174d';this.style.color='#fff';"
-          onmouseout="this.style.background='#fff0f6';this.style.borderColor='#f9a8d4';this.style.color='#9d174d';">SHP</button>
       </div>`;
     list.appendChild(div);
   });
@@ -1542,7 +1508,6 @@ window.onCSVLoad                = onCSVLoad;
 window.downloadResult           = downloadResult;
 window.triggerDownload          = triggerDownload;
 window.triggerDownloadGeoJSON   = triggerDownloadGeoJSON;
-window.triggerDownloadShapefile = triggerDownloadShapefile;
 window.invertAllPoints          = invertAllPoints;
 window.renderHistory            = renderHistory;
 window.reloadHistory            = reloadHistory;
