@@ -447,8 +447,7 @@
       height: 180px;
       flex-shrink: 0;
     }
-    .news-card.featured .news-card-img-wrap { flex: 1; min-height: 220px; max-height: 420px; }
-    .news-card.featured .news-card-img { height: 100%; }
+    .news-card.featured .news-card-img-wrap { height: 240px; }
     .news-card.full-row .news-card-img-wrap {
       width: 220px;
       min-width: 220px;
@@ -510,7 +509,7 @@
     .wb-text strong { color: #b45309; }
     /* Grid pembungkus kartu — shadow tipis agar menonjol di latar putih */
     .news-section .news-grid { box-shadow: 0 4px 24px rgba(26,29,46,0.10), 0 1px 4px rgba(26,29,46,0.06); }
-    .news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: rgba(255,255,255,0.035); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+    .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(320px, auto); gap: 2px; background: rgba(255,255,255,0.035); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
 
     /* News cards */
     .news-card { background: #0e1029; padding: 30px; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: background 0.25s, transform 0.25s; border: none; text-align: left; width: 100%; font-family: 'Sora', sans-serif; }
@@ -520,8 +519,8 @@
     .news-card:hover .news-title { color: #fff; }
     .news-card:hover .news-read { gap: 10px; color: #a5b4fc; }
     .news-card:active { transform: scale(0.995); }
-    .news-card.featured { grid-row: span 2; border-right: 2px solid rgba(255,255,255,0.035); }
-    .news-card.featured .news-title { font-size: 21px; line-height: 1.32; }
+    .news-card.featured { grid-column: span 2; border-bottom: 2px solid rgba(255,255,255,0.035); }
+    .news-card.featured .news-title { font-size: 19px; line-height: 1.35; }
     .news-card.featured .news-excerpt { display: block; }
     .news-card.full-row { grid-column: span 2; flex-direction: row; align-items: center; gap: 36px; border-top: 2px solid rgba(255,255,255,0.035); }
     .full-row-left { flex: 1; }
