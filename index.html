@@ -553,10 +553,9 @@
     .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
     .modal-box::-webkit-scrollbar { width: 4px; }
     .modal-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-    .modal-hero { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border-radius: 20px 20px 0 0; }
-    .modal-hero-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(79,94,247,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(79,94,247,0.06) 1px, transparent 1px); background-size: 40px 40px; }
-    .modal-hero-icon { position: relative; z-index: 1; font-size: 56px; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4)); }
-    .modal-hero-grad { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to bottom, transparent, #0e1029); }
+    .modal-hero { width: 100%; height: 260px; position: relative; overflow: hidden; border-radius: 20px 20px 0 0; }
+    .modal-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.75); }
+    .modal-hero-grad { position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(to bottom, transparent, #0e1029); }
     .modal-close { position: absolute; top: 16px; right: 16px; z-index: 10; width: 34px; height: 34px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 18px; line-height: 1; transition: background 0.2s, color 0.2s; }
     .modal-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
     .modal-body { padding: 28px 36px 36px; }
@@ -1994,8 +1993,7 @@
   <div class="modal-overlay" id="modal-1" onclick="handleOverlayClick(event,'modal-1')">
     <div class="modal-box">
       <div class="modal-hero" style="background:linear-gradient(135deg,#2d0a00,#1a0d0d);">
-        <div class="modal-hero-bg"></div>
-        <div class="modal-hero-icon">🌋</div>
+        <img class="modal-hero-img" src="image/berita 1.jpg" alt="Lumpur Lapindo Sidoarjo">
         <div class="modal-hero-grad"></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-1')">×</button>
@@ -2038,8 +2036,7 @@
   <div class="modal-overlay" id="modal-2" onclick="handleOverlayClick(event,'modal-2')">
     <div class="modal-box">
       <div class="modal-hero" style="background:linear-gradient(135deg,#1a1000,#201500);">
-        <div class="modal-hero-bg"></div>
-        <div class="modal-hero-icon">⛏️</div>
+        <img class="modal-hero-img" src="image/berita 2.jpg" alt="Pengeboran Sorik Marapi">
         <div class="modal-hero-grad"></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-2')">×</button>
@@ -2084,8 +2081,7 @@
   <div class="modal-overlay" id="modal-3" onclick="handleOverlayClick(event,'modal-3')">
     <div class="modal-box">
       <div class="modal-hero" style="background:linear-gradient(135deg,#1a0d2e,#0d0820);">
-        <div class="modal-hero-bg"></div>
-        <div class="modal-hero-icon">💰</div>
+        <img class="modal-hero-img" src="image/berita 3.jpg" alt="Platform Migas Laut Dalam">
         <div class="modal-hero-grad"></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-3')">×</button>
@@ -2126,8 +2122,7 @@
   <div class="modal-overlay" id="modal-4" onclick="handleOverlayClick(event,'modal-4')">
     <div class="modal-box">
       <div class="modal-hero" style="background:linear-gradient(135deg,#0d1a40,#091530);">
-        <div class="modal-hero-bg"></div>
-        <div class="modal-hero-icon">📍</div>
+        <img class="modal-hero-img" src="image/berita 4.jpg" alt="Sumur PAD C Sukowati">
         <div class="modal-hero-grad"></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-4')">×</button>
