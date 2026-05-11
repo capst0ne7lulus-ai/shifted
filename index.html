@@ -1,0 +1,2544 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shifted. | Transformasi Koordinat Geodetik</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Supabase (untuk login modal) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Sora', sans-serif; background: #ffffff; overflow-x: hidden; overflow-y: auto; }
+    body.modal-open { overflow: hidden; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #ffffff; }
+    ::-webkit-scrollbar-thumb { background: rgba(79,94,247,0.3); border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(79,94,247,0.5); }
+
+    /* ══ NAV ITEMS + DROPDOWN ══ */
+    .nav-items {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: 32px;
+    }
+
+    /* Tombol nav utama */
+    .nav-item-link {
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.80);
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.25s ease, background 0.25s ease;
+      white-space: nowrap;
+      user-select: none;
+      background: transparent;
+      border: none;
+      font-family: 'Sora', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      position: relative;
+    }
+
+    .nav-item-link:hover { color: #ffffff; background: rgba(255,255,255,0.10); }
+
+    /* Chevron icon */
+    .nav-chevron {
+      width: 14px; height: 14px;
+      transition: transform 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    /* Parent aktif → putar chevron */
+    .nav-dropdown-wrap.open .nav-chevron { transform: rotate(180deg); }
+
+    /* Wrapper dropdown */
+    .nav-dropdown-wrap {
+      position: relative;
+    }
+
+    /* Panel dropdown */
+    .nav-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      min-width: 220px;
+      background: #1e2040;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.25);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      z-index: 300;
+    }
+
+    .nav-dropdown-wrap.open .nav-dropdown {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    /* Item di dalam dropdown */
+    .nav-dd-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 18px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.75);
+      transition: background 0.18s, color 0.18s;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      text-decoration: none;
+    }
+
+    .nav-dd-item:last-child { border-bottom: none; }
+
+    .nav-dd-item:hover {
+      background: rgba(79,94,247,0.18);
+      color: #ffffff;
+    }
+
+    /* Icon dalam dropdown */
+    .nav-dd-icon {
+      width: 32px; height: 32px;
+      border-radius: 7px;
+      background: rgba(79,94,247,0.18);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 15px;
+      transition: background 0.18s;
+    }
+
+    .nav-dd-item:hover .nav-dd-icon { background: rgba(79,94,247,0.35); }
+
+    .nav-dd-text { display: flex; flex-direction: column; gap: 2px; }
+    .nav-dd-label { font-size: 13px; font-weight: 600; color: inherit; }
+    .nav-dd-desc  { font-size: 10px; color: rgba(255,255,255,0.38); font-weight: 400; }
+
+    /* ── Saat nav scrolled (putih) — sesuaikan dropdown & tombol ── */
+    .landing-nav.scrolled .nav-item-link {
+      color: #5a6278;
+    }
+    .landing-nav.scrolled .nav-item-link:hover {
+      color: #1a1d2e;
+      background: #f0f2f6;
+    }
+    .landing-nav.scrolled .nav-dropdown {
+      background: #ffffff;
+      border-color: #e4e7ee;
+      box-shadow: 0 8px 32px rgba(26,29,46,0.12), 0 2px 8px rgba(26,29,46,0.06);
+    }
+    .landing-nav.scrolled .nav-dd-item {
+      color: #5a6278;
+      border-bottom-color: #f0f2f6;
+    }
+    .landing-nav.scrolled .nav-dd-item:hover {
+      background: #eef0fd;
+      color: #1a1d2e;
+    }
+    .landing-nav.scrolled .nav-dd-icon {
+      background: rgba(79,94,247,0.08);
+    }
+    .landing-nav.scrolled .nav-dd-item:hover .nav-dd-icon {
+      background: rgba(79,94,247,0.16);
+    }
+    .landing-nav.scrolled .nav-dd-desc { color: #9aa0b4; }
+
+    /* ══ STICKY NAV ══ */
+    .landing-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 44px;
+      transition: background 0.3s ease, box-shadow 0.3s ease,
+                  border-bottom 0.3s ease, padding 0.3s ease;
+    }
+
+    /* Saat scroll → putih persis seperti .header di dashboard */
+    .landing-nav.scrolled {
+      background: #ffffff;
+      border-bottom: 1px solid #e4e7ee;
+      box-shadow: 0 1px 3px rgba(26,29,46,0.06), 0 1px 2px rgba(26,29,46,0.04);
+      padding: 14px 44px;
+    }
+
+    /* Logo: putih saat di atas hero, asli saat nav putih */
+    .nav-logo-icon {
+      width: 36px; height: 36px; object-fit: contain;
+      filter: invert(1) brightness(2); opacity: 0.92;
+      transition: filter 0.3s ease, opacity 0.3s ease;
+    }
+    .nav-logo-name {
+      height: 20px; object-fit: contain;
+      filter: invert(1) brightness(2); opacity: 0.90;
+      transition: filter 0.3s ease, opacity 0.3s ease;
+    }
+    .landing-nav.scrolled .nav-logo-icon { filter: none; opacity: 1; }
+    .landing-nav.scrolled .nav-logo-name { filter: none; opacity: 1; }
+
+    .nav-brand { display: flex; align-items: center; gap: 13px; }
+    .nav-right { display: flex; align-items: center; gap: 14px; }
+
+    /* Badge: ungu transparan saat gelap, biru terang saat putih */
+    .nav-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 14px;
+      background: rgba(79,94,247,0.18);
+      border: 1px solid rgba(79,94,247,0.35);
+      border-radius: 999px;
+      font-size: 10px; font-weight: 600; color: #a5b4fc;
+      letter-spacing: 0.9px; text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .landing-nav.scrolled .nav-badge {
+      background: rgba(79,94,247,0.08);
+      border-color: rgba(79,94,247,0.22);
+      color: #4f5ef7;
+    }
+
+    .nav-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #a5b4fc;
+      animation: pulse 2s ease-in-out infinite;
+      transition: background 0.3s;
+    }
+    .landing-nav.scrolled .nav-dot { background: #4f5ef7; }
+
+    /* Tombol masuk: tetap biru di dua kondisi, sesuaikan shadow */
+    .landing-nav.scrolled .btn-masuk {
+      box-shadow: 0 0 0 1px rgba(79,94,247,0.3), 0 4px 16px rgba(79,94,247,0.25);
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .btn-masuk { display: inline-flex; align-items: center; gap: 9px; padding: 10px 24px; background: #4f5ef7; color: #fff; border: none; border-radius: 999px; font-size: 13px; font-weight: 700; font-family: 'Sora', sans-serif; cursor: pointer; text-decoration: none; transition: all 0.28s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 0 0 1px rgba(79,94,247,0.5), 0 8px 32px rgba(79,94,247,0.4); position: relative; overflow: hidden; }
+    .btn-masuk::before { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); transition: left 0.5s ease; }
+    .btn-masuk:hover::before { left: 150%; }
+    .btn-masuk:hover { background: #3d4de5; transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(79,94,247,0.7), 0 12px 40px rgba(79,94,247,0.55); }
+    .btn-arrow { transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); }
+    .btn-masuk:hover .btn-arrow { transform: translateX(4px); }
+
+    /* ══ HERO — White Theme + Background Image ══ */
+    .hero {
+      position: relative; width: 100%; min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      overflow: hidden; background: #ffffff;
+    }
+
+    /* Background image — tetap ada, lebih terang */
+    .landing-bg {
+      position: absolute; inset: 0;
+      background: url('image/Landing.png') center/cover no-repeat;
+      z-index: 0;
+      transform: scale(1.04);
+      animation: bgZoom 18s ease-in-out infinite alternate;
+      opacity: 100;
+    }
+
+    @keyframes bgZoom { from{transform:scale(1.04)} to{transform:scale(1.10)} }
+
+    /* White gradient overlay agar teks gelap tetap terbaca */
+    .landing-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.78) 0%,
+        rgba(255,255,255,0.55) 40%,
+        rgba(255,255,255,0.82) 80%,
+        rgba(255,255,255,0.97) 100%
+      );
+      z-index: 1;
+    }
+
+    .landing-vignette { display: none; }
+
+    /* Dot grid biru muda */
+    .deco-grid {
+      position: absolute; inset: 0; z-index: 2; pointer-events: none;
+      background-image: radial-gradient(circle, #bfcbf9 1px, transparent 1px);
+      background-size: 32px 32px;
+      opacity: 0.5;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    /* Accent line biru di paling atas */
+    .hero-accent-line {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; z-index: 10;
+      background: linear-gradient(90deg, #4f5ef7 0%, #1e3a8a 50%, #4f5ef7 100%);
+    }
+
+    /* Blob dekoratif navy */
+    .hero-blob-tr {
+      position: absolute; top: -80px; right: -80px;
+      width: 520px; height: 520px; z-index: 2;
+      background: radial-gradient(circle at 60% 40%, #1e2d6b 0%, #0d1540 55%, transparent 75%);
+      border-radius: 50%; opacity: 0.07; pointer-events: none;
+    }
+
+    .hero-blob-bl {
+      position: absolute; bottom: -100px; left: -60px;
+      width: 480px; height: 480px; z-index: 2;
+      background: radial-gradient(circle at 40% 60%, #4f5ef7 0%, #1a2ea8 50%, transparent 72%);
+      border-radius: 50%; opacity: 0.06; pointer-events: none;
+    }
+
+    .landing-content {
+      position: relative; z-index: 5;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      padding: 100px 24px 160px;
+      max-width: 760px; width: 100%;
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 18px;
+      background: rgba(238,240,253,0.9);
+      border: 1px solid rgba(79,94,247,0.28);
+      border-radius: 999px;
+      font-size: 10.5px; font-weight: 600; color: #4f5ef7;
+      letter-spacing: 1px; text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      backdrop-filter: blur(8px);
+      margin-bottom: 28px;
+      animation: fadeUp 0.7s 0.2s cubic-bezier(0.4,0,0.2,1) both;
+    }
+
+    .hero-title {
+      font-size: clamp(36px,5.5vw,62px);
+      font-weight: 800; color: #0f172a;
+      line-height: 1.1; letter-spacing: -1.5px;
+      margin-bottom: 22px;
+      animation: fadeUp 0.7s 0.3s cubic-bezier(0.4,0,0.2,1) both;
+    }
+
+    .hero-title .accent {
+      background: linear-gradient(90deg, #4f5ef7 0%, #1e3a8a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 15px; color: #475569;
+      line-height: 1.85; max-width: 540px;
+      animation: fadeUp 0.7s 0.4s cubic-bezier(0.4,0,0.2,1) both;
+    }
+
+    /* Scroll hint */
+    .scroll-hint {
+      position: absolute; bottom: 100px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 5; display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+      color: #94a3b8;
+      font-size: 9.5px; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      animation: fadeUp 1s 1.2s both;
+    }
+
+    .scroll-mouse {
+      width: 22px; height: 36px;
+      border: 2px solid #cbd5e1;
+      border-radius: 11px;
+      display: flex; justify-content: center; padding-top: 7px;
+    }
+
+    .scroll-wheel {
+      width: 3px; height: 6px;
+      background: #4f5ef7; border-radius: 2px;
+      animation: scrollWheel 1.8s ease-in-out infinite;
+    }
+
+    @keyframes scrollWheel { 0%{transform:translateY(0);opacity:1} 75%{transform:translateY(9px);opacity:0} 100%{transform:translateY(0);opacity:0} }
+
+    /* Stat strip bawah — light */
+    .landing-bottom {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 5;
+      display: flex; align-items: center; justify-content: center;
+      padding: 18px 44px;
+      border-top: 1px solid #e2e8f0;
+      background: rgba(248,250,252,0.96);
+      backdrop-filter: blur(10px);
+      animation: fadeUp 0.7s 0.7s cubic-bezier(0.4,0,0.2,1) both;
+    }
+
+    .bottom-items { display: flex; align-items: center; }
+
+    .bottom-item {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 3px;
+      padding: 0 32px;
+      border-right: 1px solid #e2e8f0;
+    }
+    .bottom-item:last-child { border-right: none; }
+
+    .bottom-val {
+      font-size: 16px; font-weight: 700; color: #1e3a8a;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .bottom-val .unit {
+      font-size: 10px; color: #4f5ef7; font-weight: 600;
+      margin-left: 2px; vertical-align: super;
+    }
+    .bottom-lbl {
+      font-size: 9.5px; font-weight: 600; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+
+    /* ══ SHARED SECTION ══ */
+    .section { width: 100%; max-width: 1160px; margin: 0 auto; padding: 96px 44px; }
+    .section-label { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px; background: rgba(79,94,247,0.10); border: 1px solid rgba(79,94,247,0.22); border-radius: 999px; font-size: 10px; font-weight: 700; color: #a5b4fc; letter-spacing: 1.2px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 18px; }
+    .section-title { font-size: clamp(26px,3.5vw,40px); font-weight: 800; color: #fff; line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 12px; }
+    .section-title .hl { background: linear-gradient(90deg,#f59f00,#ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .section-desc { font-size: 14px; color: rgba(255,255,255,0.42); line-height: 1.8; max-width: 580px; margin-bottom: 48px; }
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s cubic-bezier(0.4,0,0.2,1), transform 0.65s cubic-bezier(0.4,0,0.2,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.10s; }
+    .reveal-d2 { transition-delay: 0.20s; }
+    .reveal-d3 { transition-delay: 0.30s; }
+    .reveal-d4 { transition-delay: 0.40s; }
+
+    /* ══ NEWS CARD IMAGE ══ */
+    .news-card-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      border-radius: 0;
+      margin: -30px -30px 18px -30px;
+      width: calc(100% + 60px);
+      filter: brightness(0.88);
+      transition: filter 0.3s, transform 0.4s;
+    }
+    .news-card:hover .news-card-img {
+      filter: brightness(1.0);
+      transform: scale(1.02);
+    }
+    .news-card-img-wrap {
+      width: calc(100% + 60px);
+      margin: -30px -30px 20px -30px;
+      overflow: hidden;
+      height: 180px;
+      flex-shrink: 0;
+    }
+    .news-card.featured .news-card-img-wrap { height: 220px; }
+    .news-card.full-row .news-card-img-wrap {
+      width: 220px;
+      min-width: 220px;
+      height: 100%;
+      margin: -30px 20px -30px -30px;
+      border-radius: 0;
+    }
+
+    /* Tombol buka artikel di kartu */
+    .news-card-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 12px;
+      padding: 6px 12px;
+      background: rgba(79,94,247,0.12);
+      border: 1px solid rgba(79,94,247,0.25);
+      border-radius: 6px;
+      font-size: 10px; font-weight: 700;
+      color: #a5b4fc;
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.4px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      width: fit-content;
+    }
+    .news-card-link:hover {
+      background: rgba(79,94,247,0.25);
+      border-color: rgba(79,94,247,0.5);
+      color: #c7d2fe;
+    }
+
+    /* Tombol buka artikel di modal */
+    .modal-open-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 16px; margin-right: 10px;
+      padding: 10px 20px;
+      background: #4f5ef7;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px; font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(79,94,247,0.35);
+      cursor: pointer;
+    }
+    .modal-open-link:hover {
+      background: #3d4de5;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(79,94,247,0.45);
+    }
+    .news-section { background: #ffffff; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+    .news-section .section-label { background: rgba(79,94,247,0.08); border-color: rgba(79,94,247,0.2); color: #4f5ef7; }
+    .news-section .section-title { color: #0f172a; }
+    .news-section .section-title .hl { background: linear-gradient(90deg,#f59f00,#ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .news-section .section-desc { color: #64748b; }
+    .warning-banner { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; margin-bottom: 40px; }
+    .wb-icon { width: 36px; height: 36px; flex-shrink: 0; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .wb-text { font-size: 12.5px; color: #64748b; line-height: 1.7; }
+    .wb-text strong { color: #b45309; }
+    /* Grid pembungkus kartu — shadow tipis agar menonjol di latar putih */
+    .news-section .news-grid { box-shadow: 0 4px 24px rgba(26,29,46,0.10), 0 1px 4px rgba(26,29,46,0.06); }
+    .news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: rgba(255,255,255,0.035); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+
+    /* News cards */
+    .news-card { background: #0e1029; padding: 30px; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: background 0.25s, transform 0.25s; border: none; text-align: left; width: 100%; font-family: 'Sora', sans-serif; }
+    .news-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(79,94,247,0.06) 0%,transparent 55%); opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+    .news-card:hover { background: #111436; }
+    .news-card:hover::after { opacity: 1; }
+    .news-card:hover .news-title { color: #fff; }
+    .news-card:hover .news-read { gap: 10px; color: #a5b4fc; }
+    .news-card:active { transform: scale(0.995); }
+    .news-card.featured { grid-row: span 2; border-right: 2px solid rgba(255,255,255,0.035); }
+    .news-card.featured .news-title { font-size: 21px; line-height: 1.32; }
+    .news-card.featured .news-excerpt { display: block; }
+    .news-card.full-row { grid-column: span 2; flex-direction: row; align-items: center; gap: 36px; border-top: 2px solid rgba(255,255,255,0.035); }
+    .full-row-left { flex: 1; }
+    .full-row-right { flex: 1; border-left: 1px solid rgba(255,255,255,0.06); padding-left: 36px; }
+
+    /* Source badge */
+    .news-source { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 999px; font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
+
+    .news-cat { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 12px; width: fit-content; }
+    .news-cat.danger   { background: rgba(250,82,82,0.14);  color: #ff6b6b; border: 1px solid rgba(250,82,82,0.22); }
+    .news-cat.warning  { background: rgba(245,159,0,0.14);  color: #f59f00; border: 1px solid rgba(245,159,0,0.22); }
+    .news-cat.critical { background: rgba(190,75,219,0.14); color: #d4a0f5; border: 1px solid rgba(190,75,219,0.22); }
+    .news-cat.info     { background: rgba(79,94,247,0.14);  color: #a5b4fc; border: 1px solid rgba(79,94,247,0.22); }
+    .news-cat-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+    .news-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.13); margin-bottom: 10px; letter-spacing: 1px; }
+    .news-title { font-size: 14.5px; font-weight: 700; color: rgba(255,255,255,0.87); line-height: 1.45; margin-bottom: 10px; transition: color 0.2s; }
+    .news-excerpt { font-size: 12.5px; color: rgba(255,255,255,0.38); line-height: 1.75; flex: 1; display: none; margin-bottom: 18px; }
+    .news-impact { margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; }
+    .impact-ico { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .impact-ico.red    { background: rgba(250,82,82,0.13); }
+    .impact-ico.amber  { background: rgba(245,159,0,0.13); }
+    .impact-ico.purple { background: rgba(190,75,219,0.13); }
+    .impact-ico.blue   { background: rgba(79,94,247,0.13); }
+    .impact-txt { font-size: 10.5px; color: rgba(255,255,255,0.33); line-height: 1.5; }
+    .impact-txt strong { color: rgba(255,255,255,0.58); display: block; font-size: 11px; }
+    .news-meta { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+    .news-meta-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: rgba(255,255,255,0.22); font-family: 'JetBrains Mono', monospace; }
+    .meta-div { width: 1px; height: 9px; background: rgba(255,255,255,0.1); }
+    .news-read { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; font-size: 11px; font-weight: 700; color: #7c8dfa; letter-spacing: 0.2px; transition: gap 0.22s, color 0.22s; width: fit-content; }
+
+    /* ══ MODAL ══ */
+    .modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(4,5,15,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box { background: #0e1029; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; width: 100%; max-width: 720px; max-height: 88vh; overflow-y: auto; box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.4); transform: translateY(24px) scale(0.97); transition: transform 0.32s cubic-bezier(0.4,0,0.2,1); position: relative; }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    .modal-box::-webkit-scrollbar { width: 4px; }
+    .modal-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .modal-hero { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border-radius: 20px 20px 0 0; }
+    .modal-hero-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(79,94,247,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(79,94,247,0.06) 1px, transparent 1px); background-size: 40px 40px; }
+    .modal-hero-icon { position: relative; z-index: 1; font-size: 56px; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4)); }
+    .modal-hero-grad { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to bottom, transparent, #0e1029); }
+    .modal-close { position: absolute; top: 16px; right: 16px; z-index: 10; width: 34px; height: 34px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 18px; line-height: 1; transition: background 0.2s, color 0.2s; }
+    .modal-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .modal-body { padding: 28px 36px 36px; }
+    .modal-cat { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 14px; }
+    .modal-cat.danger   { background: rgba(250,82,82,0.14);  color: #ff6b6b; border: 1px solid rgba(250,82,82,0.22); }
+    .modal-cat.warning  { background: rgba(245,159,0,0.14);  color: #f59f00; border: 1px solid rgba(245,159,0,0.22); }
+    .modal-cat.critical { background: rgba(190,75,219,0.14); color: #d4a0f5; border: 1px solid rgba(190,75,219,0.22); }
+    .modal-cat.info     { background: rgba(79,94,247,0.14);  color: #a5b4fc; border: 1px solid rgba(79,94,247,0.22); }
+    .modal-title { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.3; margin-bottom: 16px; letter-spacing: -0.3px; }
+    .modal-facts { display: flex; gap: 0; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; margin-bottom: 24px; }
+    .modal-fact { flex: 1; padding: 14px 16px; border-right: 1px solid rgba(255,255,255,0.06); }
+    .modal-fact:last-child { border-right: none; }
+    .modal-fact-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; color: rgba(255,255,255,0.25); font-family: 'JetBrains Mono', monospace; margin-bottom: 5px; }
+    .modal-fact-val { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); font-family: 'JetBrains Mono', monospace; }
+    .modal-fact-val.red    { color: #ff6b6b; }
+    .modal-fact-val.amber  { color: #f59f00; }
+    .modal-fact-val.purple { color: #d4a0f5; }
+    .modal-fact-val.blue   { color: #a5b4fc; }
+    .modal-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 22px 0; }
+    .modal-section-hd { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.3); font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
+    .modal-text { font-size: 13.5px; color: rgba(255,255,255,0.55); line-height: 1.85; margin-bottom: 16px; }
+    .modal-text strong { color: rgba(255,255,255,0.8); }
+    .modal-highlight { padding: 16px 18px; border-radius: 10px; margin-bottom: 16px; }
+    .modal-highlight.red    { background: rgba(250,82,82,0.07);  border: 1px solid rgba(250,82,82,0.18); }
+    .modal-highlight.amber  { background: rgba(245,159,0,0.07);  border: 1px solid rgba(245,159,0,0.18); }
+    .modal-highlight.purple { background: rgba(190,75,219,0.07); border: 1px solid rgba(190,75,219,0.18); }
+    .modal-highlight.blue   { background: rgba(79,94,247,0.07);  border: 1px solid rgba(79,94,247,0.18); }
+    .modal-highlight-title { font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+    .modal-highlight.red .modal-highlight-title    { color: #ff6b6b; }
+    .modal-highlight.amber .modal-highlight-title  { color: #f59f00; }
+    .modal-highlight.purple .modal-highlight-title { color: #d4a0f5; }
+    .modal-highlight.blue .modal-highlight-title   { color: #a5b4fc; }
+    .modal-highlight p { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+    .modal-lessons { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .modal-lessons li { display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; color: rgba(255,255,255,0.52); line-height: 1.6; }
+    .lesson-dot { width: 6px; height: 6px; border-radius: 50%; background: #4f5ef7; flex-shrink: 0; margin-top: 6px; }
+    .modal-src-link { display: inline-flex; align-items: center; gap: 7px; margin-top: 20px; padding: 9px 16px; background: rgba(79,94,247,0.10); border: 1px solid rgba(79,94,247,0.22); border-radius: 8px; font-size: 11px; font-weight: 600; color: #a5b4fc; text-decoration: none; transition: all 0.2s; }
+    .modal-src-link:hover { background: rgba(79,94,247,0.2); color: #c7d2fe; }
+    .modal-footer { display: flex; align-items: center; justify-content: space-between; padding: 20px 36px; border-top: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); border-radius: 0 0 20px 20px; }
+    .modal-footer-meta { font-size: 10.5px; color: rgba(255,255,255,0.22); font-family: 'JetBrains Mono', monospace; }
+    .btn-modal-close { padding: 9px 22px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 600; font-family: 'Sora', sans-serif; cursor: pointer; transition: all 0.2s; }
+    .btn-modal-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    /* ══ VIDEO SECTION ══ */
+    .video-section { background: #f8fafc; border-top: 1px solid #e2e8f0; }
+    .video-section .section-label { background: rgba(79,94,247,0.08); border-color: rgba(79,94,247,0.2); color: #4f5ef7; }
+    .video-section .section-title { color: #0f172a; }
+    .video-section .section-desc { color: #64748b; }
+    .video-section .cta-block p { color: #64748b; }
+    .video-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .video-card { border-radius: 14px; overflow: hidden; border: 1px solid #e2e8f0; background: #ffffff; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; box-shadow: 0 2px 8px rgba(26,29,46,0.06); }
+    .video-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(79,94,247,0.15), 0 4px 12px rgba(26,29,46,0.08); border-color: rgba(79,94,247,0.3); }
+    .video-card.v-featured { grid-column: span 2; }
+    .video-embed { width: 100%; aspect-ratio: 16/9; background: #f1f5f9; }
+    .video-ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: linear-gradient(135deg,#eef0fd,#e0e7ff); cursor: pointer; transition: background 0.3s; }
+    .video-ph:hover { background: linear-gradient(135deg,#e0e7ff,#c7d2fe); }
+    .play-ring { width: 62px; height: 62px; background: rgba(79,94,247,0.15); border: 2px solid rgba(79,94,247,0.35); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+    .video-ph:hover .play-ring { background: rgba(79,94,247,0.28); border-color: rgba(79,94,247,0.6); transform: scale(1.08); }
+    .play-ring svg { margin-left: 4px; }
+    .ph-label { font-size: 10px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; letter-spacing: 1.2px; text-transform: uppercase; }
+    .video-info { padding: 20px 22px; }
+    .video-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; background: rgba(79,94,247,0.08); border: 1px solid rgba(79,94,247,0.18); border-radius: 999px; font-size: 9px; font-weight: 700; color: #4f5ef7; letter-spacing: 0.8px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
+    .video-title { font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.45; margin-bottom: 8px; }
+    .video-card.v-featured .video-title { font-size: 17px; }
+    .video-desc { font-size: 11.5px; color: #64748b; line-height: 1.7; }
+    .video-meta { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+    .vm-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; }
+    .cta-block { text-align: center; margin-top: 60px; }
+    .cta-block p { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+
+    /* ══ FOOTER ══ */
+    .site-footer { background: #0f172a; border-top: 1px solid rgba(255,255,255,0.06); padding: 38px 44px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .footer-brand img { height: 18px; filter: invert(1) brightness(2); opacity: 0.5; }
+    .footer-copy { font-size: 10.5px; color: rgba(255,255,255,0.25); font-family: 'JetBrains Mono', monospace; }
+    .footer-links { display: flex; align-items: center; gap: 20px; }
+    .footer-link { font-size: 11px; color: rgba(255,255,255,0.3); text-decoration: none; transition: color 0.2s; }
+    .footer-link:hover { color: rgba(255,255,255,0.7); }
+
+    /* ══ YOUTUBE THUMBNAIL PLAYER ══ */
+    .yt-thumb {
+      width: 100%; height: 100%;
+      background: #000 center/cover no-repeat;
+      position: relative; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .yt-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.2);
+      transition: background 0.25s;
+    }
+    .yt-thumb:hover .yt-overlay { background: rgba(0,0,0,0.08); }
+    .yt-play {
+      position: relative; z-index: 2;
+      width: 70px; height: 70px;
+      background: rgba(255,0,0,0.92);
+      border: none; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+      transition: transform 0.22s, background 0.22s, box-shadow 0.22s;
+    }
+    .yt-thumb:hover .yt-play {
+      transform: scale(1.10);
+      background: #ff0000;
+      box-shadow: 0 8px 32px rgba(255,0,0,0.4);
+    }
+    .yt-play svg { margin-left: 4px; }
+
+    /* iframe yang di-load setelah klik */
+    .yt-iframe {
+      width: 100%; height: 100%;
+      border: none; display: block;
+    }
+
+    /* ══ ABOUT / PROFIL SECTION ══ */
+    .about-section { background: #ffffff; border-top: 1px solid #e2e8f0; }
+    .about-section .section-label { background: rgba(79,94,247,0.08); border-color: rgba(79,94,247,0.2); color: #4f5ef7; }
+    .about-section .section-title { color: #0f172a; }
+    .about-section .section-desc  { color: #64748b; margin-bottom: 0; }
+
+    /* Feature cards */
+    .about-features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 48px;
+    }
+
+    .feat-card {
+      padding: 26px 24px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+
+    .feat-card:hover {
+      border-color: rgba(79,94,247,0.3);
+      box-shadow: 0 8px 32px rgba(79,94,247,0.10);
+      transform: translateY(-3px);
+    }
+
+    .feat-icon {
+      width: 44px; height: 44px;
+      background: rgba(79,94,247,0.08);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .feat-title {
+      font-size: 14px; font-weight: 700; color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .feat-desc {
+      font-size: 12.5px; color: #64748b; line-height: 1.7;
+    }
+
+    /* Stats row */
+    .about-stats {
+      display: flex;
+      gap: 0;
+      margin-top: 48px;
+      background: #0f172a;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .about-stat {
+      flex: 1;
+      padding: 32px 24px;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .about-stat:last-child { border-right: none; }
+
+    .about-stat-val {
+      font-size: 32px; font-weight: 800;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .about-stat-val span { color: #4f5ef7; }
+
+    .about-stat-lbl {
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+
+    /* Tech stack pills */
+    .about-tech {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-top: 40px;
+    }
+
+    .tech-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 999px;
+      font-size: 12px; font-weight: 600; color: #475569;
+      font-family: 'JetBrains Mono', monospace;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .tech-pill:hover {
+      border-color: rgba(79,94,247,0.35);
+      color: #4f5ef7;
+      background: #eef0fd;
+    }
+
+    .tech-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+    }
+
+    /* ══ DEVELOPER SECTION ══ */
+    .dev-section {
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+    }
+    .dev-section .section-label { background: rgba(79,94,247,0.08); border-color: rgba(79,94,247,0.2); color: #4f5ef7; }
+    .dev-section .section-title { color: #0f172a; }
+    .dev-section .section-desc  { color: #64748b; margin-bottom: 0; }
+
+    .dev-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 24px;
+      margin-top: 52px;
+      max-width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Baris 1: 3 kartu — masing-masing 2 kolom */
+    .dev-card:nth-child(1) { grid-column: 1 / 3; }
+    .dev-card:nth-child(2) { grid-column: 3 / 5; }
+    .dev-card:nth-child(3) { grid-column: 5 / 7; }
+
+    /* Baris 2: 2 kartu — centered (kolom 2-4 dan 4-6, offset 1) */
+    .dev-card:nth-child(4) { grid-column: 2 / 4; }
+    .dev-card:nth-child(5) { grid-column: 4 / 6; }
+
+    .dev-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(26,29,46,0.06);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    }
+
+    .dev-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(79,94,247,0.14), 0 4px 12px rgba(26,29,46,0.07);
+      border-color: rgba(79,94,247,0.28);
+    }
+
+    .dev-avatar {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #e2e8f0;
+      margin-bottom: 20px;
+      transition: border-color 0.28s;
+    }
+
+    .dev-card:hover .dev-avatar { border-color: #4f5ef7; }
+
+    /* Fallback avatar jika gambar tidak ada */
+    .dev-avatar-fallback {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f5ef7, #1e3a8a);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; color: #fff;
+      margin-bottom: 20px;
+      border: 3px solid #e2e8f0;
+      flex-shrink: 0;
+    }
+
+    .dev-name {
+      font-size: 15px; font-weight: 700; color: #0f172a;
+      margin-bottom: 6px; line-height: 1.3;
+    }
+
+    .dev-role {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px;
+      background: rgba(79,94,247,0.08);
+      border: 1px solid rgba(79,94,247,0.18);
+      border-radius: 999px;
+      font-size: 10px; font-weight: 700; color: #4f5ef7;
+      letter-spacing: 0.6px; text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 14px;
+    }
+
+    .dev-divider { width: 40px; height: 2px; background: #e2e8f0; border-radius: 2px; margin: 0 auto 14px; }
+
+    .dev-prodi {
+      font-size: 12px; color: #64748b; line-height: 1.6;
+    }
+
+    .dev-prodi strong { color: #1e3a8a; display: block; margin-bottom: 2px; }
+
+    .dev-email-link {
+      display: inline-flex; align-items: center; gap: 7px;
+      margin-top: 14px;
+      padding: 8px 16px;
+      background: rgba(79,94,247,0.07);
+      border: 1px solid rgba(79,94,247,0.18);
+      border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+      color: #4f5ef7; text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      word-break: break-all; text-align: center;
+    }
+    .dev-email-link:hover {
+      background: #4f5ef7; color: #fff;
+      border-color: #4f5ef7;
+    }
+
+    .dev-linkedin-link {
+      display: inline-flex; align-items: center; gap: 7px;
+      margin-top: 8px;
+      padding: 8px 16px;
+      background: rgba(10,102,194,0.07);
+      border: 1px solid rgba(10,102,194,0.20);
+      border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+      color: #0a66c2; text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      text-align: center;
+    }
+    .dev-linkedin-link:hover {
+      background: #0a66c2; color: #fff;
+      border-color: #0a66c2;
+    }
+
+    /* ══ SEARCH ENGINE ══ */
+    .search-fab {
+      position: fixed;
+      bottom: 88px; right: 20px;
+      z-index: 500;
+      width: 48px; height: 48px;
+      background: #4f5ef7;
+      border: none; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(79,94,247,0.45);
+      transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+      color: #fff;
+    }
+    .search-fab:hover {
+      transform: scale(1.10);
+      box-shadow: 0 8px 32px rgba(79,94,247,0.55);
+      background: #3d4de5;
+    }
+
+    /* Modal search */
+    .search-modal {
+      position: fixed; inset: 0; z-index: 900;
+      background: rgba(8,9,26,0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex; align-items: flex-start;
+      justify-content: center;
+      padding-top: 80px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .search-modal.open { opacity: 1; pointer-events: all; }
+
+    .search-box {
+      width: 100%; max-width: 640px;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+      transform: translateY(-16px) scale(0.97);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    }
+    .search-modal.open .search-box { transform: translateY(0) scale(1); }
+
+    .search-input-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .search-input-row svg { color: #94a3b8; flex-shrink: 0; }
+
+    .search-input {
+      flex: 1; border: none; outline: none;
+      font-size: 16px; font-family: 'Sora', sans-serif;
+      color: #0f172a;
+      background: transparent;
+    }
+    .search-input::placeholder { color: #94a3b8; }
+
+    .search-close {
+      width: 28px; height: 28px;
+      border: none; border-radius: 6px;
+      background: #f1f5f9; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #64748b; font-size: 16px;
+      transition: background 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+    .search-close:hover { background: #e2e8f0; color: #0f172a; }
+
+    /* Hasil pencarian */
+    .search-results {
+      max-height: 420px; overflow-y: auto;
+      padding: 8px 0;
+    }
+    .search-results::-webkit-scrollbar { width: 4px; }
+    .search-results::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+    .search-empty {
+      padding: 32px 20px; text-align: center;
+      font-size: 13px; color: #94a3b8;
+    }
+
+    .search-result-item {
+      display: flex; align-items: flex-start; gap: 13px;
+      padding: 12px 20px; cursor: pointer;
+      border: none; background: transparent;
+      width: 100%; text-align: left;
+      font-family: 'Sora', sans-serif;
+      transition: background 0.15s;
+    }
+    .search-result-item:hover { background: #f8fafc; }
+
+    .sri-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: rgba(79,94,247,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0; margin-top: 1px;
+    }
+
+    .sri-text { display: flex; flex-direction: column; gap: 2px; }
+    .sri-title { font-size: 13px; font-weight: 600; color: #0f172a; }
+    .sri-desc  { font-size: 11.5px; color: #64748b; line-height: 1.5; }
+
+    .sri-title mark {
+      background: rgba(79,94,247,0.15);
+      color: #4f5ef7; border-radius: 3px;
+      padding: 0 2px; font-weight: 700;
+    }
+
+    .search-section-hd {
+      padding: 8px 20px 4px;
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: #94a3b8; font-family: 'JetBrains Mono', monospace;
+    }
+
+    .search-shortcut-hint {
+      padding: 10px 20px;
+      border-top: 1px solid #f1f5f9;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10.5px; color: #94a3b8;
+    }
+    .search-shortcut-hint kbd {
+      padding: 2px 6px; background: #f1f5f9;
+      border: 1px solid #e2e8f0; border-radius: 4px;
+      font-size: 10px; font-family: 'JetBrains Mono', monospace;
+      color: #475569;
+    }
+
+    /* ══ CONTACT SECTION ══ */
+    .contact-section {
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+    }
+    .contact-section .section-label {
+      background: rgba(79,94,247,0.08);
+      border-color: rgba(79,94,247,0.2); color: #4f5ef7;
+    }
+    .contact-section .section-title { color: #0f172a; }
+    .contact-section .section-desc  { color: #64748b; margin-bottom: 0; }
+
+    .contact-grid {
+      display: flex; gap: 24px; justify-content: center;
+      flex-wrap: wrap; margin-top: 48px;
+    }
+
+    .contact-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 32px 28px;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; width: 280px;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+    .contact-card:hover {
+      border-color: rgba(79,94,247,0.3);
+      box-shadow: 0 8px 32px rgba(79,94,247,0.10);
+      transform: translateY(-4px);
+    }
+
+    .contact-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, #4f5ef7, #1e3a8a);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin-bottom: 16px;
+      border: 3px solid #e2e8f0;
+      transition: border-color 0.25s;
+    }
+    .contact-card:hover .contact-avatar { border-color: #4f5ef7; }
+
+    .contact-name {
+      font-size: 14px; font-weight: 700; color: #0f172a;
+      margin-bottom: 14px; line-height: 1.35;
+    }
+
+    .contact-email-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 18px;
+      background: rgba(79,94,247,0.07);
+      border: 1px solid rgba(79,94,247,0.18);
+      border-radius: 999px;
+      font-size: 11.5px; font-weight: 600;
+      color: #4f5ef7; text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.2px;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      word-break: break-all;
+    }
+    .contact-email-link:hover {
+      background: #4f5ef7; color: #fff;
+      border-color: #4f5ef7;
+    }
+
+    /* ══ LOGIN MODAL POPUP ══ */
+    .login-modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(8,9,26,0.80);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .login-modal-overlay.open {
+      opacity: 1; pointer-events: all;
+    }
+
+    .login-modal-box {
+      background: #ffffff;
+      border-radius: 20px;
+      width: 100%; max-width: 400px;
+      padding: 40px 36px 36px;
+      text-align: center;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.25);
+      transform: translateY(24px) scale(0.96);
+      transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+      position: relative;
+    }
+    .login-modal-overlay.open .login-modal-box {
+      transform: translateY(0) scale(1);
+    }
+
+    /* Tombol close (×) */
+    .login-modal-close {
+      position: absolute; top: 14px; right: 14px;
+      width: 32px; height: 32px;
+      border: none; border-radius: 50%;
+      background: #f1f5f9; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; line-height: 1; color: #64748b;
+      transition: background 0.2s, color 0.2s;
+    }
+    .login-modal-close:hover { background: #e2e8f0; color: #0f172a; }
+
+    /* Logo */
+    .lm-logo {
+      width: 180px; height: 120px;
+      object-fit: contain;
+      display: block; margin: 0 auto 4px;
+    }
+
+    /* Subtitle */
+    .lm-subtitle {
+      font-size: 13px; color: #64748b;
+      margin-bottom: 22px;
+    }
+
+    /* Input */
+    .lm-input {
+      width: 100%; padding: 11px 14px;
+      margin-bottom: 12px;
+      border-radius: 9px;
+      border: 1.5px solid #e2e8f0;
+      font-size: 14px; font-family: 'Sora', sans-serif;
+      color: #0f172a; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #f8fafc;
+    }
+    .lm-input:focus {
+      border-color: #4f5ef7;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79,94,247,0.12);
+    }
+    .lm-input::placeholder { color: #94a3b8; }
+
+    /* Submit button */
+    .lm-btn {
+      width: 100%; padding: 12px;
+      border: none; border-radius: 9px;
+      background: #4f5ef7; color: #fff;
+      font-size: 14px; font-weight: 700;
+      font-family: 'Sora', sans-serif;
+      cursor: pointer; letter-spacing: 0.3px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(79,94,247,0.35);
+      position: relative; overflow: hidden;
+    }
+    .lm-btn::before {
+      content: '';
+      position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transition: left 0.5s ease;
+    }
+    .lm-btn:hover::before { left: 150%; }
+    .lm-btn:hover    { background: #3d4de5; box-shadow: 0 6px 24px rgba(79,94,247,0.45); }
+    .lm-btn:active   { transform: scale(0.98); }
+    .lm-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Tombol Kembali di dalam modal */
+    .lm-btn-back {
+      width: 100%; padding: 11px;
+      margin-top: 10px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 9px;
+      background: #f8fafc;
+      color: #5a6278;
+      font-size: 13px; font-weight: 600;
+      font-family: 'Sora', sans-serif;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+    }
+    .lm-btn-back:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #1a1d2e;
+      transform: translateX(-2px);
+    }
+    .lm-btn-back:hover svg { transform: translateX(-2px); }
+    .lm-btn-back svg { transition: transform 0.2s; }
+
+    /* Error */
+    .lm-error {
+      color: #ef4444; font-size: 12px;
+      margin-top: 10px; display: none;
+      padding: 8px 12px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 7px;
+    }
+
+    /* Divider */
+    .lm-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 18px 0 0;
+    }
+    .lm-divider-line { flex: 1; height: 1px; background: #e2e8f0; }
+    .lm-divider-text { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+
+  <!-- ══ NAV ══ -->
+  <nav class="landing-nav" id="main-nav">
+    <div class="nav-brand">
+      <img src="image/Logo.png" alt="Logo" class="nav-logo-icon">
+      <img src="image/Nama.png" alt="Shifted" class="nav-logo-name">
+    </div>
+
+    <!-- Nav items: Informasi (dropdown) & Tentang (dropdown) -->
+    <div class="nav-items">
+
+      <!-- ★ INFORMASI ★ -->
+      <div class="nav-dropdown-wrap" id="dd-informasi">
+        <button class="nav-item-link" onclick="toggleDropdown('dd-informasi')">
+          Informasi
+          <svg class="nav-chevron" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="nav-dropdown">
+
+          <button class="nav-dd-item" onclick="scrollToSection('section-news'); closeAllDropdowns()">
+            <div class="nav-dd-icon">📰</div>
+            <div class="nav-dd-text">
+              <span class="nav-dd-label">Berita</span>
+            </div>
+          </button>
+
+          <button class="nav-dd-item" onclick="scrollToSection('section-video'); closeAllDropdowns()">
+            <div class="nav-dd-icon">🎬</div>
+            <div class="nav-dd-text">
+              <span class="nav-dd-label">Video</span>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ★ TENTANG ★ -->
+      <div class="nav-dropdown-wrap" id="dd-tentang">
+        <button class="nav-item-link" onclick="toggleDropdown('dd-tentang')">
+          Tentang
+          <svg class="nav-chevron" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="nav-dropdown">
+
+          <button class="nav-dd-item" onclick="scrollToSection('section-about'); closeAllDropdowns()">
+            <div class="nav-dd-icon">🗺️</div>
+            <div class="nav-dd-text">
+              <span class="nav-dd-label">Profil Dashboard Shifted.</span>
+            </div>
+          </button>
+
+          <button class="nav-dd-item" onclick="scrollToSection('section-developer'); closeAllDropdowns()">
+            <div class="nav-dd-icon">👩‍💻</div>
+            <div class="nav-dd-text">
+              <span class="nav-dd-label">Developer</span>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ★ HUBUNGI KAMI — item mandiri, tanpa dropdown ★ -->
+      <button class="nav-item-link" onclick="scrollToSection('section-developer')">
+        Hubungi Kami
+      </button>
+
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-badge"><div class="nav-dot"></div>version 1.0.0</div>
+      <a href="#" class="btn-masuk" onclick="openLoginModal(); return false;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Masuk ke Dashboard
+        <svg class="btn-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero">
+    <div class="hero-accent-line"></div>
+    <div class="landing-bg"></div>
+    <div class="landing-overlay"></div>
+    <div class="hero-blob-tr"></div>
+    <div class="hero-blob-bl"></div>
+    <div class="deco-grid"></div>
+    <div class="landing-content">
+      <div class="hero-tag">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Geodetic Coordinate Transformation System
+      </div>
+      <h1 class="hero-title">Transformasi Koordinat<br><span class="accent">ID74 ↔ WGS 84</span></h1>
+      <p class="hero-subtitle">Platform transformasi koordinat geodetik presisi tinggi menggunakan metode <strong style="color:#1e3a8a;">Molodensky-Badekas 10 Parameter</strong> dengan visualisasi peta interaktif berbasis GIS untuk keperluan survei dan pemetaan pada Wilayah Kerja PT. Pertamina Hulu Rokan</p>
+    </div>
+    <div class="scroll-hint"><div class="scroll-mouse"><div class="scroll-wheel"></div></div>Scroll</div>
+    <div class="landing-bottom">
+      <div class="bottom-items">
+        <div class="bottom-item"><span class="bottom-val">10<span class="unit">P</span></span><span class="bottom-lbl">Molodensky-Badekas</span></div>
+        <div class="bottom-item"><span class="bottom-val"><5<span style="font-size:14px;">cm</span></span><span class="bottom-lbl">Akurasi Parameter Transformasi</span></div>
+        <div class="bottom-item"><span class="bottom-val">ID74</span><span class="bottom-lbl">Datum Asal</span></div>
+        <div class="bottom-item"><span class="bottom-val">WGS84</span><span class="bottom-lbl">Datum Tujuan</span></div>
+        <div class="bottom-item"><span class="bottom-val">GIS</span><span class="bottom-lbl">Visualisasi</span></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══ NEWS SECTION ══ -->
+  <section class="news-section" id="section-news">
+    <div class="section">
+
+      <div class="reveal">
+        <div class="section-label">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Berita
+        </div>
+        <h2 class="section-title">Insiden Nyata yang<br><span class="hl">Mengguncang Industri</span></h2>
+        <p class="section-desc">Kumpulan berita mengenai kasus-kasus kesalahan operasional pengeboran di Indonesia yang menyebabkan kerugian besar serta pentingnya akurasi koordinat dan datum dalam setiap tahap operasi migas.</p>
+      </div>
+
+      <div class="warning-banner reveal reveal-d1">
+        <div class="wb-icon">⚠️</div>
+        <div class="wb-text"><strong>Catatan Penting:</strong> Kesalahan operasional pengeboran — termasuk inkonsistensi datum koordinat — dapat memicu semburan liar, kerugian finansial triliunan rupiah, dan dampak lingkungan jangka panjang yang tidak dapat dipulihkan.</div>
+      </div>
+
+      <div class="news-grid reveal reveal-d2">
+
+        <!-- ★ ARTIKEL 1 — Featured (Lumpur Lapindo · Kompas) ★ -->
+        <button class="news-card featured" onclick="openModal('modal-1')">
+          <div class="news-card-img-wrap">
+            <img
+              class="news-card-img"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Lapindo_mud_2007.jpg/800px-Lapindo_mud_2007.jpg"
+              alt="Lumpur Lapindo Sidoarjo 2007"
+              onerror="this.parentElement.style.display='none'"
+            >
+          </div>
+          <div class="news-source">🗞️ Kompas.com</div>
+          <div class="news-cat danger"><div class="news-cat-dot"></div>Kesalahan Pengeboran</div>
+          <div class="news-num">01 · NASIONAL · 7 AGUSTUS 2012</div>
+          <h3 class="news-title">Pakar: Lumpur Sidoarjo Murni Kesalahan Pengeboran</h3>
+          <p class="news-excerpt">Hasil penelitian Drilling Engineers Club mengungkapkan bahwa luapan lumpur di Sidoarjo, Jawa Timur, diakibatkan oleh kesalahan operasional pengeboran yang disengaja atau intentional default — bukan bencana alam seperti yang diklaim sebelumnya.</p>
+          <div class="news-impact">
+            <div class="impact-ico red">🌋</div>
+            <div class="impact-txt"><strong>Dampak: Ribuan Hektar Tenggelam</strong>Semburan lumpur panas sejak 2006 · Sidoarjo, Jawa Timur</div>
+          </div>
+          <div class="news-meta">
+            <div class="news-meta-item">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              7 Agustus 2012
+            </div>
+            <div class="meta-div"></div>
+            <div class="news-meta-item">Sidoarjo, Jawa Timur</div>
+            <div class="meta-div"></div>
+            <div class="news-meta-item">PT Lapindo Brantas</div>
+          </div>
+          <span class="news-read">Baca Selengkapnya <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <a href="https://nasional.kompas.com/read/2012/08/07/19093138/pakar-lumpur-sidoarjo-murni-kesalahan-pengeboran"
+             target="_blank" class="news-card-link" onclick="event.stopPropagation()">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Buka Artikel Asli
+          </a>
+        </button>
+
+        <!-- ★ ARTIKEL 2 — Halliburton Sorik Marapi (IDX Channel) ★ -->
+        <button class="news-card" onclick="openModal('modal-2')">
+          <div class="news-card-img-wrap">
+            <img class="news-card-img"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Geothermal_well_head_Indonesia.jpg/800px-Geothermal_well_head_Indonesia.jpg"
+              alt="Pengeboran panas bumi Sorik Marapi"
+              onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Wellhead_geothermal.jpg/800px-Wellhead_geothermal.jpg'">
+          </div>
+          <div class="news-source">🗞️ IDX Channel</div>
+          <div class="news-cat warning"><div class="news-cat-dot"></div>Salah Koordinat</div>
+          <div class="news-num">02 · EKONOMI · 23 AGUSTUS 2022</div>
+          <h3 class="news-title">Mata Bor Salah Koordinat di Sorik Marapi, Halliburton Bakal Kena Sanksi</h3>
+          <div class="news-impact" style="margin-top:auto;padding-top:14px;">
+            <div class="impact-ico amber">⛏️</div>
+            <div class="impact-txt"><strong>Blowout Lumpur Panas & Gas H2S</strong>PLTP Sorik Marapi · Halliburton Drilling Systems</div>
+          </div>
+          <div class="news-meta" style="margin-top:14px;">
+            <div class="news-meta-item">23 Agustus 2022</div>
+            <div class="meta-div"></div>
+            <div class="news-meta-item">Sorik Marapi, Sumut</div>
+          </div>
+          <span class="news-read">Baca Selengkapnya <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <a href="https://www.idxchannel.com/economics/mata-bor-salah-koordinat-di-sorik-marapi-halliburton-bakal-kena-sanksi"
+             target="_blank" class="news-card-link" onclick="event.stopPropagation()">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Buka Artikel Asli
+          </a>
+        </button>
+
+        <!-- ★ ARTIKEL 3 — KKKS Asing Rugi (ESDM) ★ -->
+        <button class="news-card" onclick="openModal('modal-3')">
+          <div class="news-card-img-wrap">
+            <img class="news-card-img"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Oil_platform_P-51_%28Brazil%29.jpg/800px-Oil_platform_P-51_%28Brazil%29.jpg"
+              alt="Platform migas laut dalam"
+              onerror="this.parentElement.style.display='none'">
+          </div>
+          <div class="news-source">🗞️ Kementerian ESDM</div>
+          <div class="news-cat critical"><div class="news-cat-dot"></div>Kerugian Eksplorasi</div>
+          <div class="news-num">03 · ESDM.GO.ID</div>
+          <h3 class="news-title">12 KKKS Asing Rugi Rp19 Triliun Cari Cadangan Migas di Laut Dalam Indonesia</h3>
+          <div class="news-impact" style="margin-top:auto;padding-top:14px;">
+            <div class="impact-ico purple">💰</div>
+            <div class="impact-txt"><strong>Kerugian Kumulatif: Rp 19 Triliun</strong>12 KKKS asing gagal temukan cadangan migas laut dalam</div>
+          </div>
+          <div class="news-meta" style="margin-top:14px;">
+            <div class="news-meta-item">Kementerian ESDM RI</div>
+            <div class="meta-div"></div>
+            <div class="news-meta-item">Laut Dalam Indonesia</div>
+          </div>
+          <span class="news-read">Baca Selengkapnya <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <a href="https://www.esdm.go.id/id/media-center/news-archives/12-kkks-asing-rugi-rp19-triliun-cari-cadangan-migas-di-laut-dalam-indonesia"
+             target="_blank" class="news-card-link" onclick="event.stopPropagation()">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Buka Artikel Asli
+          </a>
+        </button>
+
+        <!-- ★ ARTIKEL 4 — PAD C Sukowati (Suara Banyuurip) — Full Row ★ -->
+        <button class="news-card full-row" onclick="openModal('modal-4')">
+          <div class="news-card-img-wrap">
+            <img class="news-card-img"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Oil_well_Sukowati.jpg/800px-Oil_well_Sukowati.jpg"
+              alt="Sumur minyak Sukowati Bojonegoro"
+              onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Oil_well_Indonesia.jpg/800px-Oil_well_Indonesia.jpg'">
+          </div>
+          <div class="full-row-left">
+            <div class="news-source">🗞️ SuaraBanyuurip.com</div>
+            <div class="news-cat info"><div class="news-cat-dot"></div>Mitigasi Risiko</div>
+            <div class="news-num">04 · MIGAS · 21 JUNI 2021</div>
+            <h3 class="news-title" style="font-size:16px;max-width:420px;">Punya Risiko Besar, Lokasi Pengeboran Sumur Baru PAD C Sukowati Digeser ke Selatan</h3>
+          </div>
+          <div class="full-row-right">
+            <p class="news-excerpt" style="display:block;margin-bottom:16px;">Pengembangan sumur baru PAD C Sukowati di Banjarsari, Bojonegoro, dipaksa menggeser lokasi pengeboran setelah analisis mendalam menemukan potensi risiko besar berupa patahan geologi besar yang harus dilalui jika tetap menggunakan titik koordinat awal.</p>
+            <div class="news-impact" style="padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);">
+              <div class="impact-ico blue">📍</div>
+              <div class="impact-txt"><strong>Lokasi Digeser Beberapa Ratus Meter</strong>Pertamina EP Cepu Zona 11 · Bojonegoro, Jawa Timur</div>
+            </div>
+            <span class="news-read" style="margin-top:16px;">Baca Selengkapnya <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            <a href="https://suarabanyuurip.com/2021/06/21/punya-risiko-besar-lokasi-pengeboran-sumur-baru-pad-c-sukowati-digeser-ke-selatan/"
+               target="_blank" class="news-card-link" style="margin-top:12px;" onclick="event.stopPropagation()">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Buka Artikel Asli
+            </a>
+          </div>
+        </button>
+
+      </div><!-- /news-grid -->
+    </div>
+  </section>
+
+
+  <!-- ══ VIDEO SECTION ══ -->
+  <section class="video-section" id="section-video">
+    <div class="section">
+      <div class="reveal">
+        <div class="section-label">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          Video Edukasi
+        </div>
+        <h2 class="section-title">Pelajari Lebih Dalam<br><span style="background:linear-gradient(90deg,#7c8dfa,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Transformasi Datum</span></h2>
+        <p class="section-desc">Koleksi video edukasi mengenai datum dalam operasi pengeboran, metode Molodensky-Badekas, dan penerapan sistem koordinat geodetik di industri migas.</p>
+      </div>
+      <div class="video-grid">
+
+        <!-- A Simple Explanation of Datum (Featured, full width) -->
+        <div class="video-card v-featured reveal reveal-d1">
+          <div class="video-embed" id="ve-1">
+            <div class="yt-thumb" onclick="loadYT('ve-1','xKGlMp__jog')"
+                 style="background-image:url('https://img.youtube.com/vi/xKGlMp__jog/maxresdefault.jpg');">
+              <div class="yt-overlay"></div>
+              <button class="yt-play" aria-label="Putar video">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="video-info">
+            <div class="video-tag">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Featured · YouTube
+            </div>
+            <div class="video-title">A Simple Explanation of Datum</div>
+            <div class="video-desc">Klik video di atas untuk memutar video langsung di halaman ini.</div>
+            <div class="video-meta">
+              <div class="vm-item">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                YouTube
+              </div>
+              <a href="https://youtu.be/xKGlMp__jog" target="_blank" style="font-size:10px;color:#4f5ef7;font-family:'JetBrains Mono',monospace;text-decoration:none;">Buka di YouTube ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- What are Datum Geodetics? (full width) -->
+        <div class="video-card v-featured reveal reveal-d2">
+          <div class="video-embed" id="ve-2">
+            <div class="yt-thumb" onclick="loadYT('ve-2','kXTHaMY3cVk')"
+                 style="background-image:url('https://img.youtube.com/vi/kXTHaMY3cVk/maxresdefault.jpg');">
+              <div class="yt-overlay"></div>
+              <button class="yt-play" aria-label="Putar video">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="video-info">
+            <div class="video-tag">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              YouTube
+            </div>
+            <div class="video-title">What are Datum Geodetics?</div>
+            <div class="video-desc">Klik video di atas untuk memutar video langsung di halaman ini.</div>
+            <div class="video-meta">
+              <div class="vm-item">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                YouTube
+              </div>
+              <a href="https://youtu.be/kXTHaMY3cVk" target="_blank" style="font-size:10px;color:#4f5ef7;font-family:'JetBrains Mono',monospace;text-decoration:none;">Buka di YouTube ↗</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ ABOUT / PROFIL DASHBOARD ══ -->
+  <section class="about-section" id="section-about">
+    <div class="section">
+
+      <div class="reveal">
+        <div class="section-label">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Tentang
+        </div>
+        <h2 class="section-title" style="color:#0f172a;">Profil Dashboard<br><span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Shifted.</span></h2>
+        <p class="section-desc" style="color:#64748b; margin-bottom:0;">
+          <strong style="color:#1e3a8a;">Shifted.</strong> adalah dashboard WebGIS berbasis web yang dirancang untuk melakukan transformasi datum geodetik secara presisi tinggi antar sistem referensi koordinat <strong style="color:#1e3a8a;">Indonesia Datum 1974 (ID74)</strong> dan <strong style="color:#1e3a8a;">World Geodetic System 1984 (WGS 84)</strong>. Platform ini dikembangkan sebagai bagian dari Capstone Project mahasiswa Teknik Geodesi dan Geomatika dalam lingkup operasional PT Pertamina Hulu Rokan.
+        </p>
+      </div>
+
+      <!-- Feature cards -->
+      <div class="about-features reveal reveal-d1">
+
+        <div class="feat-card">
+          <div class="feat-icon">🔢</div>
+          <div class="feat-title">Molodensky-Badekas 10 Parameter</div>
+          <div class="feat-desc">Dashboard transformasi menggunakan metode Molodensky-Badekas dengan 10 parameter yang diturunkan dari 9 titik sekutu, memberikan akurasi sub-sentimeter pada wilayah operasi Pertamina Hulu Rokan.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">🗺️</div>
+          <div class="feat-title">Visualisasi Peta GIS Interaktif</div>
+          <div class="feat-desc">Peta interaktif berbasis Leaflet.js menampilkan titik koordinat asal dan hasil transformasi secara real-time, dilengkapi layer WMS dari Supabase untuk fasilitas dan area kerja Pertamina Hulu Rokan.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">📂</div>
+          <div class="feat-title">Batch Processing CSV</div>
+          <div class="feat-desc">Mendukung transformasi titik koordinat sekaligus melalui unggah file CSV, dengan output berupa tabel hasil lengkap dan file CSV yang dapat diunduh untuk digunakan di QGIS maupun ArcGIS.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">↔️</div>
+          <div class="feat-title">Transformasi Dua Arah</div>
+          <div class="feat-desc">Mendukung konversi ID74 → WGS84 maupun WGS84 → ID74 dengan tombol tukar datum, serta dua format koordinat: Decimal Degree (DD) dan Degree-Minute-Second (DMS).</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">🛰️</div>
+          <div class="feat-title">Integrasi Supabase</div>
+          <div class="feat-desc">Layer data spasial disimpan ke dalam Supabase, termasuk data fasilitas akan ditampilkan langsung di atas peta dengan kontrol visibilitas per layer dan pengaturan opacity.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">🔒</div>
+          <div class="feat-title">Autentikasi & Keamanan</div>
+          <div class="feat-desc">Sistem login berbasis username dan ID pegawai dengan proteksi halaman dashboard. Setiap mengakses ke dalam dashboard diverifikasi terlebih dahulu, memastikan data transformasi hanya dapat diakses oleh pengguna yang berwenang.</div>
+        </div>
+
+      </div>
+
+      <!-- Stats -->
+      <div class="about-stats reveal reveal-d2">
+        <div class="about-stat">
+          <div class="about-stat-val">10<span>P</span></div>
+          <div class="about-stat-lbl">Parameter Transformasi</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-val">9</span></div>
+          <div class="about-stat-lbl">Titik sekutu</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-val">&lt;0.5<span>cm</span></div>
+          <div class="about-stat-lbl">Ketelitian Posisi</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-val">2<span>←→</span></div>
+          <div class="about-stat-lbl">Arah Transformasi</div>
+        </div>
+      </div>
+
+      <!-- Tech stack -->
+      <div class="reveal reveal-d3" style="margin-top:40px;">
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:16px;font-family:'JetBrains Mono',monospace;">Teknologi yang Digunakan</p>
+        <div class="about-tech">
+          <span class="tech-pill"><span class="tech-dot" style="background:#f59f00;"></span>MATLAB</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#e76f51;"></span>Java</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#4f5ef7;"></span>JavaScript</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#38b2ac;"></span>Leaflet.js</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#48bb78;"></span>Supabase</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#ed64a6;"></span>HTML & CSS</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#9f7aea;"></span>WebGIS</span>
+          <span class="tech-pill"><span class="tech-dot" style="background:#0ca678;"></span>Molodensky-Badekas</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══ DEVELOPER SECTION ══ -->
+  <section class="dev-section" id="section-developer">
+    <div class="section">
+
+      <div class="reveal" style="text-align:center;">
+        <div class="section-label" style="margin:0 auto 18px;">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Tim Pengembang
+        </div>
+        <h2 class="section-title" style="color:#0f172a;">Developer<br><span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Shifted.</span></h2>
+        <p class="section-desc" style="color:#64748b; margin:12px auto 0; max-width:480px;">
+          Dikembangkan oleh mahasiswa Teknik Geodesi dan Geomatika sebagai bagian dari Capstone Project berjudul <em>"Pembangunan Sistem Informasi Transformasi Datum"</em> di lingkungan PT Pertamina Hulu Rokan.
+        </p>
+      </div>
+
+      <div class="dev-grid reveal reveal-d1">
+
+        <!-- Developer 1 -->
+        <div class="dev-card">
+          <img
+            src="image/nash.png"
+            alt="Nashwa Clarissa Maharani"
+            class="dev-avatar"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          >
+          <div class="dev-avatar-fallback" style="display:none;">👩‍💻</div>
+          <div class="dev-name">Nashwa Clarissa Maharani</div>
+          <div class="dev-role">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+            Developer
+          </div>
+          <div class="dev-divider"></div>
+          <div class="dev-prodi">
+            <strong>Teknik Geodesi dan Geomatika</strong>
+            Institut Teknologi Bandung
+          </div>
+          <a href="mailto:nashwaclarissaa@gmail.com" class="dev-email-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            nashwaclarissaa@gmail.com
+          </a>
+          <a href="https://www.linkedin.com/in/nashwa-maharani" target="_blank" class="dev-linkedin-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+              <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+            </svg>
+            LinkedIn
+          </a>
+        </div>
+
+        <!-- Developer 2 -->
+        <div class="dev-card">
+          <img
+            src="image/zaza.png"
+            alt="Balqis Ainnurra Azzahra"
+            class="dev-avatar"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          >
+          <div class="dev-avatar-fallback" style="display:none;">👩‍💻</div>
+          <div class="dev-name">Balqis Ainnurra Azzahra</div>
+          <div class="dev-role">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+            Developer
+          </div>
+          <div class="dev-divider"></div>
+          <div class="dev-prodi">
+            <strong>Teknik Geodesi dan Geomatika</strong>
+            Institut Teknologi Bandung
+          </div>
+          <a href="mailto:balqisainnurraazzahra@gmail.com" class="dev-email-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            balqisainnurraazzahra@gmail.com
+          </a>
+          <a href="https://www.linkedin.com/in/balqisainnurraazzahra" target="_blank" class="dev-linkedin-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+              <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+            </svg>
+            LinkedIn
+          </a>
+        </div>
+
+        <!-- Developer 3 — Firza -->
+        <div class="dev-card">
+          <img
+            src="image/firza.png"
+            alt="Firza Apta Zahranda"
+            class="dev-avatar"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          >
+          <div class="dev-avatar-fallback" style="display:none;">👩‍💻</div>
+          <div class="dev-name">Firza Apta Zahranda</div>
+          <div class="dev-role">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+            Developer
+          </div>
+          <div class="dev-divider"></div>
+          <div class="dev-prodi">
+            <strong>Teknik Geodesi dan Geomatika</strong>
+            Institut Teknologi Bandung
+          </div>
+          <a href="mailto:zahrandafirza@gmail.com" class="dev-email-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            zahrandafirza@gmail.com
+          </a>
+          <a href="https://www.linkedin.com/in/firzahranda" target="_blank" class="dev-linkedin-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+              <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+            </svg>
+            LinkedIn
+          </a>
+        </div>
+
+        <!-- Developer 4 — Hisanah -->
+        <div class="dev-card">
+          <img
+            src="image/hisa.png"
+            alt="Hisanah Jenahara Fayumi"
+            class="dev-avatar"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          >
+          <div class="dev-avatar-fallback" style="display:none;">👩‍💻</div>
+          <div class="dev-name">Hisanah Jenahara Fayumi</div>
+          <div class="dev-role">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+            Developer
+          </div>
+          <div class="dev-divider"></div>
+          <div class="dev-prodi">
+            <strong>Teknik Geodesi dan Geomatika</strong>
+            Institut Teknologi Bandung
+          </div>
+          <a href="mailto:hisa.fayjen@gmail.com" class="dev-email-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            hisa.fayjen@gmail.com
+          </a>
+          <a href="https://www.linkedin.com/in/hisanahjenahara" target="_blank" class="dev-linkedin-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+              <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+            </svg>
+            LinkedIn
+          </a>
+        </div>
+
+        <!-- Developer 5 — Kamil -->
+        <div class="dev-card">
+          <img
+            src="image/kamil.png"
+            alt="Kamil Hayyunaji Fabriano"
+            class="dev-avatar"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          >
+          <div class="dev-avatar-fallback" style="display:none;">👨‍💻</div>
+          <div class="dev-name">Kamil Hayyunaji Fabriano</div>
+          <div class="dev-role">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+            Developer
+          </div>
+          <div class="dev-divider"></div>
+          <div class="dev-prodi">
+            <strong>Teknik Geodesi dan Geomatika</strong>
+            Institut Teknologi Bandung
+          </div>
+          <a href="mailto:kamilhayyunaji@gmail.com" class="dev-email-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            kamilhayyunaji@gmail.com
+          </a>
+          <a href="https://www.linkedin.com/in/kamilhf" target="_blank" class="dev-linkedin-link">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/>
+              <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+            </svg>
+            LinkedIn
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Capstone info -->
+      <div class="reveal reveal-d2" style="margin-top:52px; padding:28px 32px; background:#0f172a; border-radius:16px; text-align:center;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,0.35);font-family:'JetBrains Mono',monospace;margin-bottom:14px;">Capstone Project</p>
+        <p style="font-size:15px;font-weight:700;color:#fff;line-height:1.55;max-width:620px;margin:0 auto 16px;">
+          Pembangunan Sistem Informasi Transformasi Datum Menggunakan Data Perubahan Kerangka dan Data Deformasi Lempeng di Lingkungan Pertamina Hulu Rokan
+        </p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.38);margin-bottom:20px;">
+          Teknik Geodesi dan Geomatika · Institut Teknologi Bandung
+        </p>
+        <a href="#" class="btn-masuk" style="font-size:13px;padding:10px 28px;display:inline-flex;" onclick="openLoginModal(); return false;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Masuk ke Dashboard
+          <svg class="btn-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══ LOGIN MODAL POPUP ══ -->
+  <div class="login-modal-overlay" id="login-modal" onclick="handleLoginOverlay(event)">
+    <div class="login-modal-box">
+
+      <button class="login-modal-close" onclick="closeLoginModal()">×</button>
+
+      <img src="image/Nama.png" alt="Shifted Logo" class="lm-logo">
+      <p class="lm-subtitle">Login untuk masuk ke dashboard</p>
+
+      <input id="lm-user" type="text"     class="lm-input" placeholder="Username" autocomplete="username">
+      <input id="lm-pass" type="password" class="lm-input" placeholder="Password" autocomplete="current-password">
+
+      <button class="lm-btn" id="lm-btn" onclick="loginModal()">Masuk</button>
+
+      <button class="lm-btn-back" onclick="closeLoginModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Kembali
+      </button>
+
+      <p class="lm-error" id="lm-error"></p>
+
+      <div class="lm-divider">
+        <div class="lm-divider-line"></div>
+        <span class="lm-divider-text">Platform Transformasi Koordinat Geodetik</span>
+        <div class="lm-divider-line"></div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══ SEARCH FAB ══ -->
+  <button class="search-fab" onclick="openSearch()" title="Cari (Ctrl+K)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="M21 21l-4.35-4.35"/>
+    </svg>
+  </button>
+
+  <!-- ══ SEARCH MODAL ══ -->
+  <div class="search-modal" id="search-modal" onclick="handleSearchOverlay(event)">
+    <div class="search-box">
+      <div class="search-input-row">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input
+          class="search-input" id="search-input"
+          type="text" placeholder="Cari di Shifted. ..."
+          oninput="runSearch(this.value)"
+          autocomplete="off"
+        >
+        <button class="search-close" onclick="closeSearch()">×</button>
+      </div>
+      <div class="search-results" id="search-results">
+        <div class="search-empty">Ketik kata kunci untuk mulai mencari...</div>
+      </div>
+      <div class="search-shortcut-hint">
+        <kbd>↵</kbd> pilih &nbsp;·&nbsp; <kbd>Esc</kbd> tutup &nbsp;·&nbsp; <kbd>Ctrl</kbd><kbd>K</kbd> buka
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="site-footer">
+    <div class="footer-brand"><img src="image/Nama.png" alt="Shifted"></div>
+    <div class="footer-copy">© 2024 Shifted. · Geodetic Coordinate Transformation System · v1.0.0</div>
+    <div class="footer-links">
+      <a href="#" class="footer-link" onclick="scrollToSection('section-about'); return false;">Tentang</a>
+      <a href="#" class="footer-link" onclick="scrollToSection('section-developer'); return false;">Dokumentasi</a>
+      <a href="#" class="footer-link" onclick="scrollToSection('section-developer'); return false;">Hubungi Kami</a>
+      <a href="login.html" class="footer-link">Dashboard</a>
+    </div>
+  </footer>
+
+
+  <!-- ══════════════════════════════════
+       MODAL 1 — Lumpur Lapindo (Kompas)
+  ══════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-1" onclick="handleOverlayClick(event,'modal-1')">
+    <div class="modal-box">
+      <div class="modal-hero" style="background:linear-gradient(135deg,#2d0a00,#1a0d0d);">
+        <div class="modal-hero-bg"></div>
+        <div class="modal-hero-icon">🌋</div>
+        <div class="modal-hero-grad"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-1')">×</button>
+      <div class="modal-body">
+        <div class="modal-cat danger"><div class="news-cat-dot"></div>Kesalahan Pengeboran · Nasional</div>
+        <h2 class="modal-title">Pakar: Lumpur Sidoarjo Murni Kesalahan Pengeboran</h2>
+        <div class="modal-facts">
+          <div class="modal-fact"><div class="modal-fact-label">Sumber</div><div class="modal-fact-val">Kompas.com</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Tanggal</div><div class="modal-fact-val">7 Agustus 2012</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Lokasi</div><div class="modal-fact-val">Sidoarjo, Jatim</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Perusahaan</div><div class="modal-fact-val red">PT Lapindo Brantas</div></div>
+        </div>
+        <div class="modal-section-hd">Ringkasan Berita</div>
+        <p class="modal-text">Hasil penelitian <strong>Drilling Engineers Club</strong> yang disampaikan di Mahkamah Konstitusi mengungkapkan bahwa luapan lumpur di Sidoarjo, Jawa Timur, diakibatkan oleh <strong>kesalahan operasional pengeboran yang disengaja</strong> — bukan bencana alam akibat gempa Yogyakarta seperti yang diklaim pihak Lapindo.</p>
+        <p class="modal-text">Kersam Sumanta, anggota Drilling Engineers Club, menyatakan bahwa kesalahan utama meliputi tidak dipatuhinya prosedur operasi baku industri migas global, serta tidak dipasangnya <strong>casing 9 5/8 inci</strong> yang telah disepakati dalam program pengeboran dan disetujui BP MIGAS.</p>
+        <div class="modal-divider"></div>
+        <div class="modal-section-hd">Temuan Teknis Utama</div>
+        <p class="modal-text">Batasan tekanan maksimum di permukaan <strong>tidak dipatuhi</strong> oleh operator dan insinyur pengeboran saat menanggulangi semburan, sehingga melampaui kekuatan formasi di bawah selubung 13 5/8 di kedalaman 1.092 meter. Akibatnya terjadi rekahan hingga permukaan yang menjadi jalur keluarnya lumpur dari lubang bor.</p>
+        <div class="modal-highlight red">
+          <div class="modal-highlight-title">⛔ Pernyataan Kunci Pakar</div>
+          <p>"Semburan lumpur Lapindo di Desa Siring tidak disebabkan oleh bencana alam, tetapi karena kesalahan operasi pemboran yang disengaja — tidak terbantahkan." — Kersam Sumanta, Drilling Engineers Club</p>
+        </div>
+        <div class="modal-section-hd">Relevansi dengan Akurasi Koordinat</div>
+        <p class="modal-text">Kasus ini menunjukkan bahwa <strong>kelalaian teknis dalam operasi pengeboran</strong> — termasuk ketidakpatuhan pada prosedur standar — dapat mengakibatkan bencana yang tidak dapat dipulihkan. Akurasi koordinat dan datum merupakan salah satu lapisan perlindungan kritis dalam perencanaan titik bor.</p>
+        <a href="https://nasional.kompas.com/read/2012/08/07/19093138/pakar-lumpur-sidoarjo-murni-kesalahan-pengeboran" target="_blank" class="modal-open-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Buka Artikel di Kompas.com
+        </a>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer-meta">Kompas.com · 7 Agustus 2012 · Sidoarjo, Jawa Timur</div>
+        <button class="btn-modal-close" onclick="closeModal('modal-1')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       MODAL 2 — Halliburton Sorik Marapi (IDX Channel)
+  ══════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-2" onclick="handleOverlayClick(event,'modal-2')">
+    <div class="modal-box">
+      <div class="modal-hero" style="background:linear-gradient(135deg,#1a1000,#201500);">
+        <div class="modal-hero-bg"></div>
+        <div class="modal-hero-icon">⛏️</div>
+        <div class="modal-hero-grad"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-2')">×</button>
+      <div class="modal-body">
+        <div class="modal-cat warning"><div class="news-cat-dot"></div>Salah Koordinat · Sanksi</div>
+        <h2 class="modal-title">Mata Bor Salah Koordinat di Sorik Marapi, Halliburton Bakal Kena Sanksi</h2>
+        <div class="modal-facts">
+          <div class="modal-fact"><div class="modal-fact-label">Sumber</div><div class="modal-fact-val">IDX Channel</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Tanggal</div><div class="modal-fact-val">23 Agustus 2022</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Lokasi</div><div class="modal-fact-val">Sorik Marapi, Sumut</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Kontraktor</div><div class="modal-fact-val amber">Halliburton</div></div>
+        </div>
+        <div class="modal-section-hd">Ringkasan Berita</div>
+        <p class="modal-text">Komisi VII DPR RI dibuat geram dengan kasus <strong>blowout lumpur panas dan gas H2S</strong> di PLTP Sorik Marapi, Sumatera Utara, yang disebabkan oleh kesalahan perusahaan kontraktor jasa pengeboran <strong>Halliburton Drilling Systems Indonesia</strong>.</p>
+        <p class="modal-text">Kejadian bermula dari <strong>kesalahan koordinat mata bor</strong> yang menyebabkan pengeboran dilakukan tidak sesuai jalur yang direncanakan. Semburan liar (blowout) yang mengandung gas H2S berbahaya pun terjadi, mengancam keselamatan pekerja dan lingkungan sekitar lokasi pengeboran panas bumi.</p>
+        <div class="modal-divider"></div>
+        <div class="modal-highlight amber">
+          <div class="modal-highlight-title">⚠️ Respons DPR RI</div>
+          <p>Komisi VII DPR RI menyatakan akan memberikan sanksi tegas kepada Halliburton Drilling Systems Indonesia atas serangkaian kesalahan fatal dalam aktivitas pemboran panas bumi di Indonesia, termasuk insiden di Sorik Marapi ini.</p>
+        </div>
+        <div class="modal-section-hd">Pelajaran Penting</div>
+        <ul class="modal-lessons">
+          <li><div class="lesson-dot"></div>Koordinat mata bor harus diverifikasi secara independen sebelum operasi dimulai.</li>
+          <li><div class="lesson-dot"></div>Inkonsistensi datum antara data desain dan sistem navigasi pengeboran dapat mengakibatkan blowout.</li>
+          <li><div class="lesson-dot"></div>Kontraktor pengeboran bertanggung jawab penuh atas akurasi posisi pengeboran yang dilaksanakan.</li>
+        </ul>
+        <a href="https://www.idxchannel.com/economics/mata-bor-salah-koordinat-di-sorik-marapi-halliburton-bakal-kena-sanksi" target="_blank" class="modal-open-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Buka Artikel di IDX Channel
+        </a>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer-meta">IDX Channel · 23 Agustus 2022 · Sorik Marapi, Sumatera Utara</div>
+        <button class="btn-modal-close" onclick="closeModal('modal-2')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       MODAL 3 — KKKS Asing Rugi (ESDM)
+  ══════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-3" onclick="handleOverlayClick(event,'modal-3')">
+    <div class="modal-box">
+      <div class="modal-hero" style="background:linear-gradient(135deg,#1a0d2e,#0d0820);">
+        <div class="modal-hero-bg"></div>
+        <div class="modal-hero-icon">💰</div>
+        <div class="modal-hero-grad"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-3')">×</button>
+      <div class="modal-body">
+        <div class="modal-cat critical"><div class="news-cat-dot"></div>Kerugian Eksplorasi · ESDM</div>
+        <h2 class="modal-title">12 KKKS Asing Rugi Rp19 Triliun Cari Cadangan Migas di Laut Dalam Indonesia</h2>
+        <div class="modal-facts">
+          <div class="modal-fact"><div class="modal-fact-label">Sumber</div><div class="modal-fact-val">ESDM.go.id</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Jumlah KKKS</div><div class="modal-fact-val purple">12 KKKS Asing</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Total Kerugian</div><div class="modal-fact-val red">Rp 19 Triliun</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Area</div><div class="modal-fact-val">Laut Dalam</div></div>
+        </div>
+        <div class="modal-section-hd">Ringkasan Berita</div>
+        <p class="modal-text">Sebanyak <strong>12 Kontraktor Kontrak Kerja Sama (KKKS) asing</strong> mengalami kerugian total hingga <strong>Rp 19 triliun</strong> dalam upaya pencarian cadangan minyak dan gas bumi di perairan laut dalam Indonesia. Operasi eksplorasi yang gagal ini menjadi sorotan Kementerian ESDM RI.</p>
+        <p class="modal-text">Kegagalan eksplorasi di laut dalam kerap dikaitkan dengan kompleksitas teknis yang tinggi, termasuk <strong>tantangan akurasi posisi dan penentuan koordinat</strong> di lingkungan bawah laut yang mengharuskan transformasi datum yang presisi antara sistem referensi yang digunakan.</p>
+        <div class="modal-divider"></div>
+        <div class="modal-highlight purple">
+          <div class="modal-highlight-title">📊 Konteks Strategis</div>
+          <p>Kerugian eksplorasi skala besar ini menunjukkan betapa krusialnya akurasi teknis dalam seluruh rantai operasi migas — mulai dari perencanaan hingga eksekusi pengeboran. Kesalahan sekecil apapun dalam penentuan posisi dapat berujung pada kerugian triliunan rupiah.</p>
+        </div>
+        <div class="modal-section-hd">Relevansi dengan Transformasi Datum</div>
+        <p class="modal-text">Di lingkungan laut dalam, transformasi antara datum yang digunakan dalam survei seismik dengan datum operasional pengeboran harus dilakukan dengan presisi tinggi. Ketidakakuratan dalam transformasi koordinat dapat menyebabkan sumur eksplorasi meleset dari target reservoir yang telah dipetakan.</p>
+        <a href="https://www.esdm.go.id/id/media-center/news-archives/12-kkks-asing-rugi-rp19-triliun-cari-cadangan-migas-di-laut-dalam-indonesia" target="_blank" class="modal-open-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Buka Artikel di ESDM.go.id
+        </a>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer-meta">Kementerian ESDM RI · Laut Dalam Indonesia</div>
+        <button class="btn-modal-close" onclick="closeModal('modal-3')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       MODAL 4 — PAD C Sukowati (Suara Banyuurip)
+  ══════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-4" onclick="handleOverlayClick(event,'modal-4')">
+    <div class="modal-box">
+      <div class="modal-hero" style="background:linear-gradient(135deg,#0d1a40,#091530);">
+        <div class="modal-hero-bg"></div>
+        <div class="modal-hero-icon">📍</div>
+        <div class="modal-hero-grad"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-4')">×</button>
+      <div class="modal-body">
+        <div class="modal-cat info"><div class="news-cat-dot"></div>Mitigasi Risiko · Migas</div>
+        <h2 class="modal-title">Punya Risiko Besar, Lokasi Pengeboran Sumur Baru PAD C Sukowati Digeser ke Selatan</h2>
+        <div class="modal-facts">
+          <div class="modal-fact"><div class="modal-fact-label">Sumber</div><div class="modal-fact-val">SuaraBanyuurip.com</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Tanggal</div><div class="modal-fact-val">21 Juni 2021</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Lokasi</div><div class="modal-fact-val">Bojonegoro, Jatim</div></div>
+          <div class="modal-fact"><div class="modal-fact-label">Operator</div><div class="modal-fact-val blue">Pertamina EP Cepu</div></div>
+        </div>
+        <div class="modal-section-hd">Ringkasan Berita</div>
+        <p class="modal-text">Pengembangan sumur baru <strong>PAD C Sukowati</strong> di Banjarsari, Bojonegoro, yang ditargetkan berproduksi tahun 2024, dipaksa untuk menggeser lokasi pengeboran ke arah selatan. Keputusan ini diambil setelah analisis mendalam oleh para ahli menemukan bahwa <strong>titik koordinat awal yang ditetapkan berpotensi memiliki risiko besar</strong>.</p>
+        <p class="modal-text">Ahmad Setiadi, Senior Officer Relations & CID Pertamina EP Cepu Zona 11, menyatakan: "Lokasinya tetap di Banjarsari. Akan tetapi setelah dianalisis mempunyai risiko besar jika tidak digeser agak ke selatan." Lokasi awal yang ditetapkan oleh perusahaan lama yakni <strong>JOB Pertamina Petrochina East Java (PPEJ)</strong> ternyata melewati patahan geologi besar.</p>
+        <div class="modal-divider"></div>
+        <div class="modal-section-hd">Detail Teknis</div>
+        <p class="modal-text">Posisi pengeboran yang direncanakan adalah secara <strong>miring dari utara mengebor ke selatan</strong>, dengan potensi minyak tepat di bawah alun-alun Kota Bojonegoro. Cadangan minyak yang ditargetkan mencapai <strong>1 hingga 3 juta barel</strong>, namun yang dapat diekstraksi diperkirakan hanya 500 ribu hingga 1,5 juta barel.</p>
+        <div class="modal-highlight blue">
+          <div class="modal-highlight-title">📍 Keputusan Penggeseran Koordinat</div>
+          <p>Seluruh ahli di Jakarta menyatakan pengeboran harus digeser beberapa ratus meter ke selatan dari koordinat awal. Ini merupakan contoh nyata bagaimana analisis koordinat yang teliti dapat mencegah risiko besar — baik risiko operasional maupun risiko terhadap keselamatan warga kota Bojonegoro.</p>
+        </div>
+        <div class="modal-section-hd">Pelajaran Penting</div>
+        <ul class="modal-lessons">
+          <li><div class="lesson-dot"></div>Verifikasi koordinat titik bor terhadap data geologi (patahan, sesar) wajib dilakukan sebelum finalisasi lokasi.</li>
+          <li><div class="lesson-dot"></div>Pergeseran lokasi pengeboran meski hanya beberapa ratus meter dapat mencegah risiko blowout dan keselamatan publik.</li>
+          <li><div class="lesson-dot"></div>Alih kelola operasi antara perusahaan (JOB PPEJ ke Pertamina EP Cepu) harus disertai validasi ulang seluruh data koordinat.</li>
+        </ul>
+        <a href="https://suarabanyuurip.com/2021/06/21/punya-risiko-besar-lokasi-pengeboran-sumur-baru-pad-c-sukowati-digeser-ke-selatan/" target="_blank" class="modal-open-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Buka Artikel di SuaraBanyuurip.com
+        </a>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer-meta">SuaraBanyuurip.com · 21 Juni 2021 · Bojonegoro, Jawa Timur</div>
+        <button class="btn-modal-close" onclick="closeModal('modal-4')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ AUTO POPUP — Informasi Cakupan Wilayah Transformasi Datum ══ -->
+  <div id="wkr-info-overlay" onclick="closeWkrInfoOverlay(event)" style="
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(8,9,26,0.65);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;
+    padding:24px;opacity:0;transition:opacity 0.22s ease;">
+    <div id="wkr-info-box" style="
+      background:#ffffff;border-radius:18px;
+      padding:32px 28px 24px;width:100%;max-width:380px;
+      text-align:center;position:relative;
+      box-shadow:0 20px 60px rgba(0,0,0,0.18),0 4px 16px rgba(0,0,0,0.08);
+      transform:translateY(20px) scale(0.96);
+      transition:transform 0.26s cubic-bezier(0.34,1.56,0.64,1);
+      font-family:'Sora',sans-serif;">
+      <button onclick="dismissWkrInfo()" style="
+        position:absolute;top:14px;right:14px;
+        width:28px;height:28px;border-radius:50%;
+        background:#f1f5f9;border:none;
+        display:flex;align-items:center;justify-content:center;
+        cursor:pointer;color:#94a3b8;font-size:18px;line-height:1;
+        transition:background 0.2s,color 0.2s;"
+        onmouseover="this.style.background='#e2e8f0';this.style.color='#475569';"
+        onmouseout="this.style.background='#f1f5f9';this.style.color='#94a3b8';">×</button>
+      <div style="
+        width:56px;height:56px;border-radius:50%;
+        background:#fff7ed;border:2px solid #fed7aa;
+        display:flex;align-items:center;justify-content:center;
+        margin:0 auto 16px;color:#f97316;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="3"/>
+        </svg>
+      </div>
+      <h3 style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:4px;letter-spacing:-0.3px;">Informasi</h3>
+      <p style="font-size:12.5px;font-weight:600;color:#f97316;margin-bottom:12px;">Cakupan Wilayah Transformasi Datum</p>
+      <p style="font-size:12px;color:#64748b;line-height:1.65;margin-bottom:8px;">
+        Transformasi datum hanya dapat dilakukan pada koordinat yang berada dalam <strong>Wilayah Kerja (WK) Rokan, Riau</strong> dan belum divalidasi diluar wilayah tersebut.
+      </p>
+      <button onclick="dismissWkrInfo()" style="
+        width:100%;padding:11px 14px;
+        border:none;border-radius:10px;
+        background:#f97316;color:#fff;
+        font-size:13px;font-weight:700;font-family:'Sora',sans-serif;
+        cursor:pointer;
+        box-shadow:0 4px 14px rgba(249,115,22,0.3);
+        transition:background 0.2s,transform 0.15s,box-shadow 0.2s;"
+        onmouseover="this.style.background='#ea6c0a';this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(249,115,22,0.4)';"
+        onmouseout="this.style.background='#f97316';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(249,115,22,0.3)';">
+        Mengerti
+      </button>
+    </div>
+  </div>
+
+
+  <script>
+    // ══════════════════════════════════════
+    // LOGIN MODAL
+    // ══════════════════════════════════════
+    function openLoginModal() {
+      const modal = document.getElementById('login-modal');
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => document.getElementById('lm-user').focus(), 80);
+      // Reset state
+      document.getElementById('lm-user').value = '';
+      document.getElementById('lm-pass').value = '';
+      document.getElementById('lm-error').style.display = 'none';
+    }
+
+    function closeLoginModal() {
+      document.getElementById('login-modal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function handleLoginOverlay(e) {
+      if (e.target === document.getElementById('login-modal')) closeLoginModal();
+    }
+
+    // Fungsi login khusus modal (memakai auth.js yang sama)
+    async function loginModal() {
+      const userEl  = document.getElementById('lm-user');
+      const passEl  = document.getElementById('lm-pass');
+      const errEl   = document.getElementById('lm-error');
+      const btn     = document.getElementById('lm-btn');
+      const user    = userEl.value.trim();
+      const pass    = passEl.value.trim();
+
+      errEl.style.display = 'none';
+
+      if (!user || !pass) {
+        errEl.textContent   = 'Username dan password wajib diisi.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      // ── Admin hardcode ──
+      if (user === 'admin' && pass === '12345') {
+        localStorage.setItem('isLogin', 'true');
+        localStorage.setItem('shifted_user', JSON.stringify({ nama: 'Admin', tipe: 'Admin', nipnim: '-' }));
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      // ── Supabase lookup ──
+      btn.textContent = 'Memverifikasi…'; btn.disabled = true;
+
+      try {
+        const client = window.supabase?.createClient
+          ? window.supabase.createClient(
+              'https://nacqjhpwmnafzghrnvvv.supabase.co',
+              'sb_publishable_l13aqUmqoqS2L63BAW47tg_BEefQ2nG'
+            )
+          : null;
+
+        if (!client) throw new Error('Supabase tidak tersedia');
+
+        const { data, error } = await client
+          .from('users')
+          .select('id, nama, nip_nim, tipe')
+          .ilike('nama', user)
+          .single();
+
+        if (error || !data) {
+          errEl.textContent = 'Username tidak ditemukan.';
+          errEl.style.display = 'block'; return;
+        }
+
+        if (String(data.nip_nim) !== String(pass)) {
+          errEl.textContent = 'Password salah.';
+          errEl.style.display = 'block'; return;
+        }
+
+        localStorage.setItem('isLogin', 'true');
+        localStorage.setItem('shifted_user', JSON.stringify({
+          nama: data.nama, tipe: data.tipe, nipnim: data.nip_nim
+        }));
+        window.location.href = 'dashboard.html';
+
+      } catch (err) {
+        errEl.textContent   = 'Terjadi kesalahan. Coba lagi.';
+        errEl.style.display = 'block';
+      } finally {
+        btn.textContent = 'Masuk'; btn.disabled = false;
+      }
+    }
+
+    // Enter key di dalam modal
+    document.addEventListener('keydown', function(e) {
+      const modal = document.getElementById('login-modal');
+      if (e.key === 'Enter' && modal.classList.contains('open')) {
+        loginModal();
+      }
+      if (e.key === 'Escape') {
+        closeLoginModal();
+        closeSearch();
+        closeAllDropdowns();
+      }
+    });
+
+    // ══════════════════════════════════════
+    // SEARCH ENGINE
+    // ══════════════════════════════════════
+
+    // Index konten yang dapat dicari
+    const SEARCH_INDEX = [
+      // Hero
+      { icon:'🛰️', title:'Transformasi Koordinat ID74 ↔ WGS84', desc:'Platform transformasi koordinat geodetik presisi tinggi dengan visualisasi GIS interaktif.', section:'hero', keywords:'transformasi koordinat datum geodetik shifted' },
+      // News
+      { icon:'🌋', title:'Lumpur Sidoarjo — Kesalahan Pengeboran', desc:'Pakar: Lumpur Sidoarjo murni akibat kesalahan operasional pengeboran yang disengaja.', section:'section-news', keywords:'lumpur sidoarjo lapindo pengeboran kesalahan berita' },
+      { icon:'⛏️', title:'Mata Bor Salah Koordinat — Halliburton', desc:'Blowout di Sorik Marapi akibat koordinat mata bor yang keliru. Halliburton terancam sanksi.', section:'section-news', keywords:'halliburton sorik marapi koordinat blowout sanksi berita' },
+      { icon:'💰', title:'12 KKKS Asing Rugi Rp19 Triliun', desc:'KKKS asing gagal menemukan cadangan migas di laut dalam Indonesia.', section:'section-news', keywords:'kkks asing rugi triliun migas eksplorasi berita esdm' },
+      { icon:'📍', title:'PAD C Sukowati — Lokasi Pengeboran Digeser', desc:'Risiko patahan geologi menyebabkan lokasi pengeboran PAD C digeser ke selatan.', section:'section-news', keywords:'sukowati bojonegoro pengeboran risiko lokasi digeser berita' },
+      // Video
+      { icon:'🎬', title:'Simple Explanation of Datum', desc:'Video penjelasan singkat mengenai datum geodetik dalam penentuan posisi di Bumi.', section:'section-video', keywords:'video datum geodetik penjelasan youtube' },
+      { icon:'🎬', title:'What are Geodetic Datums?', desc:'Video edukasi tentang datum geodetik dan penggunaannya dalam sistem koordinat.', section:'section-video', keywords:'video datum geodetik edukasi youtube' },
+      // About
+      { icon:'🗺️', title:'Profil Dashboard Shifted.', desc:'Platform WebGIS untuk transformasi datum ID74 ↔ WGS84 menggunakan Molodensky-Badekas 10 Parameter.', section:'section-about', keywords:'profil dashboard shifted webgis transformasi molodensky badekas' },
+      { icon:'🔢', title:'Molodensky-Badekas 10 Parameter', desc:'Engine transformasi dengan 9 titik kontrol proyek, akurasi sub-sentimeter.', section:'section-about', keywords:'molodensky badekas 10 parameter titik kontrol akurasi engine' },
+      { icon:'📂', title:'Batch Processing CSV', desc:'Transformasi massal ratusan titik koordinat via upload file CSV.', section:'section-about', keywords:'batch csv upload transformasi massal koordinat' },
+      { icon:'🛰️', title:'Integrasi GeoServer WMS', desc:'Layer pipeline dan batas wilayah kerja dari GeoServer ditampilkan di peta.', section:'section-about', keywords:'geoserver wms layer pipeline peta integrasi' },
+      // Developer
+      { icon:'👩‍💻', title:'Developer — Nashwa Clarissa Maharani', desc:'Mahasiswi Teknik Geodesi dan Geomatika ITB, pengembang platform Shifted.', section:'section-developer', keywords:'nashwa clarissa developer pengembang itb geodesi' },
+      { icon:'👩‍💻', title:'Developer — Balqis Ainnurra Azzahra', desc:'Mahasiswi Teknik Geodesi dan Geomatika ITB, pengembang platform Shifted.', section:'section-developer', keywords:'balqis ainnurra azzahra developer pengembang itb geodesi' },
+      // Contact
+      { icon:'✉️', title:'Hubungi Kami', desc:'Kontak developer: balqisainnurraazzahra@gmail.com · nashwaclarissaa@gmail.com', section:'section-contact', keywords:'hubungi kontak email balqis nashwa developer' },
+      { icon:'📧', title:'Email Balqis Ainnurra Azzahra', desc:'balqisainnurraazzahra@gmail.com', section:'section-contact', keywords:'email balqis kontak hubungi' },
+      { icon:'📧', title:'Email Nashwa Clarissa Maharani', desc:'nashwaclarissaa@gmail.com', section:'section-contact', keywords:'email nashwa kontak hubungi' },
+      // Capstone
+      { icon:'🎓', title:'Capstone Project — Pertamina Hulu Rokan', desc:'Sistem Informasi Transformasi Datum menggunakan data deformasi lempeng di lingkungan PHR.', section:'section-developer', keywords:'capstone project pertamina hulu rokan itb geodesi transformasi datum' },
+    ];
+
+    function openSearch() {
+      document.getElementById('search-modal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => document.getElementById('search-input').focus(), 80);
+      runSearch('');
+    }
+
+    function closeSearch() {
+      document.getElementById('search-modal').classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('search-input').value = '';
+    }
+
+    function handleSearchOverlay(e) {
+      if (e.target === document.getElementById('search-modal')) closeSearch();
+    }
+
+    function highlight(text, query) {
+      if (!query) return text;
+      const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+      return text.replace(re, '<mark>$1</mark>');
+    }
+
+    function runSearch(query) {
+      const q   = query.trim().toLowerCase();
+      const res = document.getElementById('search-results');
+
+      if (!q) {
+        // Tampilkan semua section sebagai shortcut
+        res.innerHTML = `
+          <div class="search-section-hd">Navigasi Cepat</div>
+          ${SEARCH_INDEX.slice(0,6).map(item => `
+            <button class="search-result-item" onclick="goToResult('${item.section}')">
+              <div class="sri-icon">${item.icon}</div>
+              <div class="sri-text">
+                <div class="sri-title">${item.title}</div>
+                <div class="sri-desc">${item.desc}</div>
+              </div>
+            </button>`).join('')}`;
+        return;
+      }
+
+      const hits = SEARCH_INDEX.filter(item =>
+        item.keywords.includes(q) ||
+        item.title.toLowerCase().includes(q) ||
+        item.desc.toLowerCase().includes(q)
+      );
+
+      if (!hits.length) {
+        res.innerHTML = `<div class="search-empty">Tidak ada hasil untuk "<strong>${query}</strong>".<br>Coba kata kunci lain.</div>`;
+        return;
+      }
+
+      res.innerHTML = `
+        <div class="search-section-hd">${hits.length} hasil ditemukan</div>
+        ${hits.map(item => `
+          <button class="search-result-item" onclick="goToResult('${item.section}')">
+            <div class="sri-icon">${item.icon}</div>
+            <div class="sri-text">
+              <div class="sri-title">${highlight(item.title, query)}</div>
+              <div class="sri-desc">${highlight(item.desc, query)}</div>
+            </div>
+          </button>`).join('')}`;
+    }
+
+    function goToResult(sectionId) {
+      closeSearch();
+      if (sectionId === 'hero') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      setTimeout(() => scrollToSection(sectionId), 120);
+    }
+
+    // Ctrl+K atau / → buka search
+    document.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey && e.key === 'k') || (e.key === '/' && document.activeElement.tagName !== 'INPUT')) {
+        e.preventDefault();
+        openSearch();
+      }
+      if (e.key === 'Escape') closeSearch();
+    });
+
+    // ── Dropdown nav ──
+    function toggleDropdown(id) {
+      const wrap = document.getElementById(id);
+      const isOpen = wrap.classList.contains('open');
+      closeAllDropdowns();
+      if (!isOpen) wrap.classList.add('open');
+    }
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.nav-dropdown-wrap.open')
+        .forEach(w => w.classList.remove('open'));
+    }
+
+    // Klik di luar dropdown → tutup
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.nav-dropdown-wrap')) closeAllDropdowns();
+    });
+
+    // ── Smooth scroll ke section ──
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const navH = document.getElementById('main-nav').offsetHeight;
+      const top  = el.getBoundingClientRect().top + window.pageYOffset - navH - 12;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+
+    // ── YouTube lazy loader ──
+    function loadYT(containerId, videoId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const iframe = document.createElement('iframe');
+      iframe.className = 'yt-iframe';
+      iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      container.innerHTML = '';
+      container.appendChild(iframe);
+    }
+
+    // Sticky nav
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 50); }, { passive: true });
+
+    // Scroll reveal
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+    }, { threshold: 0.10, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+    // ══ AUTO POPUP — WK Rokan Info ══
+    function dismissWkrInfo() {
+      const overlay = document.getElementById('wkr-info-overlay');
+      overlay.style.opacity = '0';
+      setTimeout(() => { overlay.style.display = 'none'; }, 230);
+    }
+    function closeWkrInfoOverlay(e) {
+      if (e.target === document.getElementById('wkr-info-overlay')) dismissWkrInfo();
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.getElementById('wkr-info-overlay');
+      overlay.style.display = 'flex';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        document.getElementById('wkr-info-box').style.transform = 'translateY(0) scale(1)';
+      }));
+    });
+
+    // Modal
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+      document.body.classList.add('modal-open');
+      document.querySelector('#' + id + ' .modal-box').scrollTop = 0;
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+      document.body.classList.remove('modal-open');
+    }
+    function handleOverlayClick(e, id) {
+      if (e.target === document.getElementById(id)) closeModal(id);
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const wkrOverlay = document.getElementById('wkr-info-overlay');
+        if (wkrOverlay && wkrOverlay.style.display === 'flex') { dismissWkrInfo(); return; }
+        document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+        document.body.classList.remove('modal-open');
+      }
+    });
+  </script>
+
+</body>
+</html>

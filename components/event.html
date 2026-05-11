@@ -1,0 +1,31 @@
+<!-- ============================================================
+     components/event.html
+     Event templates (popup, toast) for Shifted. Dashboard
+     (Assembled inside dashboard.html)
+     ============================================================ -->
+
+<!-- Map Click Popup Template (used in map.js) -->
+<template id="tpl-popup">
+  <div class="map-popup">
+    <div class="map-popup-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+           stroke="#4f5ef7" stroke-width="2.5" stroke-linecap="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+      Koordinat Klik
+    </div>
+    <div class="map-popup-row">
+      <div class="map-popup-label">WGS 84</div>
+      <div class="map-popup-coord" id="pop-wgs84">—</div>
+    </div>
+    <div class="map-popup-row">
+      <div class="map-popup-label">ID 74 (estimasi)</div>
+      <div class="map-popup-coord" id="pop-id74" style="color:#0ca678;">—</div>
+    </div>
+    <div class="map-popup-divider"></div>
+    <button class="btn-use-coord" onclick="window.MapController.useClickedCoord()">
+      ⇄ Gunakan Koordinat Ini
+    </button>
+  </div>
+</template>

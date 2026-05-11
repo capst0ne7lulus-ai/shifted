@@ -1,0 +1,553 @@
+/**
+ * js/map.js
+ * Leaflet Map Controller — Shifted. Dashboard
+ * ─ Map init, basemap switching, markers, click events
+ * ─ plotPointPair : plot titik asal + hasil + garis putus-putus
+ */
+
+
+
+'use strict';
+let originLayer = null;
+let resultLayer = null;
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+let _map          = null;
+let _baseTile     = null;
+let _markers      = null;   // LayerGroup: transform result markers
+let _plotGroup    = null;   // LayerGroup: plotPointPair (pairs + dashed lines)
+let _clickedCoord = null;
+
+// ──────────────────────────────────────────────
+// BASEMAP DEFINITIONS
+// ──────────────────────────────────────────────
+const TILES = {
+  osm: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    opts: {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    },
+  },
+  satellite: {
+    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+    opts: {
+      attribution: '© Google Maps',
+      maxZoom: 20,
+      subdomains: [],
+    },
+  },
+  terrain: {
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    opts: {
+      attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a>',
+      maxZoom: 17,
+    },
+  },
+  dark: {
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    opts: {
+      attribution: '© <a href="https://carto.com/attributions">CARTO</a>',
+      maxZoom: 19,
+      subdomains: 'abcd',
+    },
+  },
+};
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+function initMap() {
+  originLayer = L.layerGroup().addTo(_map);
+  resultLayer = L.layerGroup().addTo(_map);
+  _map = L.map('map', {
+    center: [-2.5, 118.0],
+    zoom: 5,
+    zoomControl: false,
+    attributionControl: true,
+  });
+
+  const bm = TILES.osm;
+  _baseTile = L.tileLayer(bm.url, bm.opts).addTo(_map);
+
+  _markers   = L.layerGroup().addTo(_map);
+  _plotGroup = L.layerGroup().addTo(_map);
+
+  _map.on('click',     _onMapClick);
+  _map.on('mousemove', _onMouseMove);
+  _map.on('mouseout',  _onMouseOut);
+
+  // Inject legend CSS once
+  _injectLegendCSS();
+}
+
+// ──────────────────────────────────────────────
+// BASEMAP
+// ──────────────────────────────────────────────
+function switchBasemap(key) {
+  if (!_map || !TILES[key]) return;
+  if (_baseTile) _map.removeLayer(_baseTile);
+  const bm = TILES[key];
+  _baseTile = L.tileLayer(bm.url, bm.opts).addTo(_map);
+  _baseTile.setZIndex(0);
+}
+
+// ──────────────────────────────────────────────
+// ★ PLOT POINT PAIR
+//   Plots source marker, result marker + dashed connecting line
+//   Called from transform.js → window.plotPointPair(...)
+// ──────────────────────────────────────────────
+
+/**
+ * @param {number} latIn   - Latitude titik asal
+ * @param {number} lonIn   - Longitude titik asal
+ * @param {number} latOut  - Latitude titik hasil transformasi
+ * @param {number} lonOut  - Longitude titik hasil transformasi
+ * @param {string|number} [id] - Identifier titik (opsional)
+ */
+function plotPointPair(latIn, lonIn, latOut, lonOut, id) {
+  if (!_plotGroup) return;
+
+  const label = id != null ? `#${id}` : '';
+
+  // ── Hitung jarak & arah ──
+  const dist    = _haversine(latIn, lonIn, latOut, lonOut);
+  const bearing = _bearing(latIn, lonIn, latOut, lonOut);
+  const dir     = _bearingLabel(bearing);
+  const distStr = dist >= 1000
+    ? `${(dist / 1000).toFixed(3)} km`
+    : `${dist.toFixed(2)} m`;
+
+  // ── Garis putus-putus ──
+  const dashedLine = L.polyline(
+    [[latIn, lonIn], [latOut, lonOut]],
+    {
+      color:     '#4f5ef7',
+      weight:    2,
+      opacity:   0.75,
+      dashArray: '6, 8',         // pola: 6px garis, 8px spasi
+      dashOffset: '0',
+      lineJoin:  'round',
+    }
+  );
+
+  // ── Marker ASAL (teal) ──
+  const iconAsal = L.divIcon({
+    className: '',
+    html: `
+      <div style="
+        width:13px; height:13px;
+        background:#0ca678;
+        border:2.5px solid #fff;
+        border-radius:50%;
+        box-shadow:0 2px 8px rgba(12,166,120,0.55);
+        position:relative;
+      ">
+        <div style="
+          position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+          background:#0ca678; color:#fff;
+          font-size:9px; font-weight:700; font-family:'Sora',sans-serif;
+          padding:2px 6px; border-radius:10px; white-space:nowrap;
+          box-shadow:0 1px 4px rgba(0,0,0,0.18);
+        ">Asal ${label}</div>
+      </div>`,
+    iconSize:   [13, 13],
+    iconAnchor: [6, 6],
+  });
+
+  const markerAsal = L.marker([latIn, lonIn], { icon: iconAsal });
+  markerAsal.bindPopup(_popupAsal(latIn, lonIn, label), { maxWidth: 240 });
+
+  // ── Marker HASIL (biru/indigo) ──
+  const iconHasil = L.divIcon({
+    className: '',
+    html: `
+      <div style="
+        width:13px; height:13px;
+        background:#4f5ef7;
+        border:2.5px solid #fff;
+        border-radius:50%;
+        box-shadow:0 2px 8px rgba(79,94,247,0.55);
+        position:relative;
+      ">
+        <div style="
+          position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+          background:#4f5ef7; color:#fff;
+          font-size:9px; font-weight:700; font-family:'Sora',sans-serif;
+          padding:2px 6px; border-radius:10px; white-space:nowrap;
+          box-shadow:0 1px 4px rgba(0,0,0,0.18);
+        ">Hasil ${label}</div>
+      </div>`,
+    iconSize:   [13, 13],
+    iconAnchor: [6, 6],
+  });
+
+  const markerHasil = L.marker([latOut, lonOut], { icon: iconHasil });
+  markerHasil.bindPopup(_popupHasil(latOut, lonOut, distStr, dir, label), { maxWidth: 260 });
+
+  // ── Tambah ke plotGroup ──
+  _plotGroup.addLayer(dashedLine);
+  _plotGroup.addLayer(markerAsal);
+  _plotGroup.addLayer(markerHasil);
+}
+
+// ──────────────────────────────────────────────
+// CLEAR ALL PLOTS
+// ──────────────────────────────────────────────
+function clearAllPlots() {
+  if (_plotGroup) _plotGroup.clearLayers();
+  if (_markers)   _markers.clearLayers();
+  _hideLegend();
+}
+
+// ──────────────────────────────────────────────
+// FIT MAP TO PLOT GROUP
+// ──────────────────────────────────────────────
+function fitToPlots() {
+  if (!_map || !_plotGroup) return;
+  const layers = [];
+  _plotGroup.eachLayer(l => layers.push(l));
+  if (!layers.length) return;
+
+  // Collect all latlngs
+  const bounds = L.latLngBounds([]);
+  layers.forEach(l => {
+    if (l.getLatLng)  bounds.extend(l.getLatLng());
+    if (l.getLatLngs) l.getLatLngs().forEach(pt => bounds.extend(pt));
+  });
+
+  if (bounds.isValid()) {
+    _map.fitBounds(bounds, { padding: [60, 60], maxZoom: 14, animate: true });
+  }
+}
+
+// ──────────────────────────────────────────────
+// MAP LEGEND (summary box — hanya untuk manual)
+// ──────────────────────────────────────────────
+function showManualLegend(latIn, lonIn, latOut, lonOut) {
+  const dist    = _haversine(latIn, lonIn, latOut, lonOut);
+  const bearing = _bearing(latIn, lonIn, latOut, lonOut);
+  const dir     = _bearingLabel(bearing);
+  const distStr = dist >= 1000
+    ? `${(dist / 1000).toFixed(3)} km`
+    : `${dist.toFixed(2)} m`;
+
+  let el = document.getElementById('map-legend');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'map-legend';
+    document.body.appendChild(el);
+  }
+
+  el.innerHTML = `
+    <div class="ml-title">📍 Hasil Transformasi</div>
+    <div class="ml-row">
+      <span class="ml-dot" style="background:#0ca678;"></span>
+      <span class="ml-key">Asal</span>
+      <span class="ml-val">${latIn.toFixed(6)}, ${lonIn.toFixed(6)}</span>
+    </div>
+    <div class="ml-row">
+      <span class="ml-dot" style="background:#4f5ef7;"></span>
+      <span class="ml-key">Hasil</span>
+      <span class="ml-val">${latOut.toFixed(6)}, ${lonOut.toFixed(6)}</span>
+    </div>
+    <div class="ml-divider"></div>
+    <div class="ml-row">
+      <span class="ml-key">Jarak</span>
+      <span class="ml-val" style="color:#4f5ef7; font-weight:600;">${distStr}</span>
+    </div>
+    <div class="ml-row">
+      <span class="ml-key">Arah</span>
+      <span class="ml-val">${bearing.toFixed(1)}° ${dir}</span>
+    </div>
+    <div class="ml-row" style="margin-top:4px;">
+      <span style="display:inline-block; width:28px; height:2px;
+        background:repeating-linear-gradient(90deg,#4f5ef7 0,#4f5ef7 6px,transparent 6px,transparent 14px);
+        vertical-align:middle; margin-right:6px;"></span>
+      <span class="ml-key" style="color:var(--text-muted);">Garis putus-putus = selisih datum</span>
+    </div>
+  `;
+  el.style.display = 'block';
+}
+
+function showCSVLegend(count, totalDist, minDist, maxDist) {
+  let el = document.getElementById('map-legend');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'map-legend';
+    document.body.appendChild(el);
+  }
+
+  const fmtDist = v => v >= 1000 ? `${(v/1000).toFixed(3)} km` : `${v.toFixed(2)} m`;
+
+  el.innerHTML = `
+    <div class="ml-title">📂 Batch Transformasi</div>
+    <div class="ml-row">
+      <span class="ml-dot" style="background:#0ca678;"></span>
+      <span class="ml-key">Titik Asal</span>
+      <span class="ml-val">${count} titik</span>
+    </div>
+    <div class="ml-row">
+      <span class="ml-dot" style="background:#4f5ef7;"></span>
+      <span class="ml-key">Titik Hasil</span>
+      <span class="ml-val">${count} titik</span>
+    </div>
+    <div class="ml-divider"></div>
+    <div class="ml-row">
+      <span class="ml-key">Jarak Min</span>
+      <span class="ml-val">${fmtDist(minDist)}</span>
+    </div>
+    <div class="ml-row">
+      <span class="ml-key">Jarak Maks</span>
+      <span class="ml-val">${fmtDist(maxDist)}</span>
+    </div>
+    <div class="ml-row">
+      <span class="ml-key">Rata-rata</span>
+      <span class="ml-val" style="color:#4f5ef7; font-weight:600;">
+        ${fmtDist(totalDist / count)}
+      </span>
+    </div>
+    <div class="ml-row" style="margin-top:4px;">
+      <span style="display:inline-block; width:28px; height:2px;
+        background:repeating-linear-gradient(90deg,#4f5ef7 0,#4f5ef7 6px,transparent 6px,transparent 14px);
+        vertical-align:middle; margin-right:6px;"></span>
+      <span class="ml-key" style="color:var(--text-muted);">Garis = selisih datum per titik</span>
+    </div>
+  `;
+  el.style.display = 'block';
+}
+
+function _hideLegend() {
+  const el = document.getElementById('map-legend');
+  if (el) el.style.display = 'none';
+}
+
+// ──────────────────────────────────────────────
+// POPUP HTML HELPERS
+// ──────────────────────────────────────────────
+function _popupAsal(lat, lon, label) {
+  return `
+    <div class="map-popup">
+      <div class="map-popup-title" style="color:#0ca678;">
+        🟢 Titik Asal ${label}
+      </div>
+      <div class="map-popup-row">
+        <div class="map-popup-label">Koordinat (Datum Asal)</div>
+        <div class="map-popup-coord" style="color:#0ca678;">
+          ${lat.toFixed(8)}<br>${lon.toFixed(8)}
+        </div>
+      </div>
+    </div>`;
+}
+
+function _popupHasil(lat, lon, distStr, dir, label) {
+  return `
+    <div class="map-popup">
+      <div class="map-popup-title" style="color:#4f5ef7;">
+        🔵 Titik Hasil ${label}
+      </div>
+      <div class="map-popup-row">
+        <div class="map-popup-label">Koordinat (Datum Tujuan)</div>
+        <div class="map-popup-coord" style="color:#4f5ef7;">
+          ${lat.toFixed(8)}<br>${lon.toFixed(8)}
+        </div>
+      </div>
+      <div class="map-popup-divider"></div>
+      <div class="map-popup-row">
+        <div class="map-popup-label">Selisih dari Titik Asal</div>
+        <div class="map-popup-coord" style="color:#f59f00;">
+          ${distStr} · ${dir}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ──────────────────────────────────────────────
+// MAP CLICK
+// ──────────────────────────────────────────────
+function _onMapClick(e) {
+  const { lat, lng } = e.latlng;
+  _clickedCoord = { lat, lon: lng };
+
+  let id74 = { lat: lat - 0.0002, lon: lng - 0.0003 };
+  if (window.TE) {
+    try { id74 = window.TE.wgs84ToId74(lat, lng); } catch(_) {}
+  }
+
+  const content = `
+    <div class="map-popup">
+      <div class="map-popup-title">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="#4f5ef7" stroke-width="2.5" stroke-linecap="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        Koordinat Klik
+      </div>
+      <div class="map-popup-row">
+        <div class="map-popup-label">WGS 84</div>
+        <div class="map-popup-coord">${lat.toFixed(6)}, ${lng.toFixed(6)}</div>
+      </div>
+      <div class="map-popup-row">
+        <div class="map-popup-label">ID 74 (estimasi)</div>
+        <div class="map-popup-coord" style="color:#0ca678;">
+          ${id74.lat.toFixed(6)}, ${id74.lon.toFixed(6)}
+        </div>
+      </div>
+      <div class="map-popup-divider"></div>
+      <button class="btn-use-coord" onclick="MapController.useClickedCoord()">
+        ⇄ Gunakan Koordinat Ini
+      </button>
+    </div>`;
+
+  L.popup({ maxWidth: 240, closeButton: true })
+    .setLatLng(e.latlng)
+    .setContent(content)
+    .openOn(_map);
+}
+
+// ──────────────────────────────────────────────
+// MOUSE MOVE
+// ──────────────────────────────────────────────
+function _onMouseMove(e) {
+  const el = document.getElementById('coord-status');
+  if (el) {
+    el.innerHTML = `<span>${e.latlng.lat.toFixed(6)}</span>, <span>${e.latlng.lng.toFixed(6)}</span>`;
+  }
+}
+
+function _onMouseOut() {
+  const el = document.getElementById('coord-status');
+  if (el) el.innerHTML = '—';
+}
+
+// ──────────────────────────────────────────────
+// ZOOM
+// ──────────────────────────────────────────────
+const zoomIn  = () => _map?.zoomIn();
+const zoomOut = () => _map?.zoomOut();
+
+// ──────────────────────────────────────────────
+// USE CLICKED COORD
+// ──────────────────────────────────────────────
+function useClickedCoord() {
+  if (!_clickedCoord) return;
+  const inp = document.getElementById('coord-val');
+  if (inp) inp.value = `${_clickedCoord.lat.toFixed(6)}, ${_clickedCoord.lon.toFixed(6)}`;
+  _map?.closePopup();
+  window.UI?.openPanel('panel-transform');
+}
+
+// ──────────────────────────────────────────────
+// HAVERSINE + BEARING UTILITIES
+// ──────────────────────────────────────────────
+function _haversine(lat1, lon1, lat2, lon2) {
+  const R  = 6371000;
+  const r  = Math.PI / 180;
+  const φ1 = lat1 * r, φ2 = lat2 * r;
+  const dφ = (lat2 - lat1) * r;
+  const dλ = (lon2 - lon1) * r;
+  const a  = Math.sin(dφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(dλ/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function _bearing(lat1, lon1, lat2, lon2) {
+  const r  = Math.PI / 180;
+  const dλ = (lon2 - lon1) * r;
+  const y  = Math.sin(dλ) * Math.cos(lat2 * r);
+  const x  = Math.cos(lat1*r)*Math.sin(lat2*r) - Math.sin(lat1*r)*Math.cos(lat2*r)*Math.cos(dλ);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+function _bearingLabel(b) {
+  const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+  return dirs[Math.round(b / 45) % 8];
+}
+
+// ──────────────────────────────────────────────
+// INJECT LEGEND CSS
+// ──────────────────────────────────────────────
+function _injectLegendCSS() {
+  if (document.getElementById('map-legend-style')) return;
+  const style = document.createElement('style');
+  style.id = 'map-legend-style';
+  style.textContent = `
+    #map-legend {
+      position: fixed;
+      bottom: 90px;
+      left: 20px;
+      z-index: 700;
+      width: 260px;
+      background: rgba(255,255,255,0.97);
+      border: 1px solid #dde1ec;
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 32px rgba(26,29,46,0.13), 0 2px 8px rgba(26,29,46,0.06);
+      display: none;
+      backdrop-filter: blur(10px);
+      font-family: 'Sora', sans-serif;
+      animation: legendIn 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    @keyframes legendIn {
+      from { opacity:0; transform: translateY(8px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .ml-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a1d2e;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #e4e7ee;
+      padding-bottom: 8px;
+    }
+    .ml-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+    .ml-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1.5px solid #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .ml-key {
+      font-size: 10.5px;
+      color: #5a6278;
+      flex-shrink: 0;
+      min-width: 52px;
+    }
+    .ml-val {
+      font-size: 10.5px;
+      color: #1a1d2e;
+      font-family: 'JetBrains Mono', monospace;
+      word-break: break-all;
+    }
+    .ml-divider {
+      height: 1px;
+      background: #e4e7ee;
+      margin: 8px 0;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// ──────────────────────────────────────────────
+// EXPOSE
+// ──────────────────────────────────────────────
+window.MapController = {
+  initMap, switchBasemap,
+  plotPointPair, clearAllPlots, fitToPlots,
+  showManualLegend, showCSVLegend,
+  zoomIn, zoomOut,
+  useClickedCoord,
+  get map() { return _map; },
+};
+
+// Shorthand globals (dipakai transform.js)
+window.plotPointPair  = plotPointPair;
+window.clearAllPlots  = clearAllPlots;
+window.fitToPlots     = fitToPlots;

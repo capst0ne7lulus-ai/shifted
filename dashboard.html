@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shifted. | Transformasi Koordinat ID74 ↔ WGS84</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <!-- Dashboard Stylesheet -->
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+      HEADER — dimuat dari header.html
+  ════════════════════════════════════════════ -->
+  <div id="site-header"></div>
+
+
+  <!-- ════════════════════════════════════════════
+      MAP
+  ════════════════════════════════════════════ -->
+  <div id="map"></div>
+
+
+  <!-- ════════════════════════════════════════════
+      FLOATING PANEL — LAYER
+  ════════════════════════════════════════════ -->
+  <div class="floating-panel" id="panel-layer">
+    <div class="panel-hd">
+      <div class="panel-hd-left">
+        <div class="panel-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+          </svg>
+        </div>
+        <span class="panel-title">Manajemen Layer</span>
+      </div>
+      <button class="panel-close-btn" onclick="closePanel('panel-layer')">×</button>
+    </div>
+    <div class="panel-bd">
+      <p class="help-txt" style="margin-bottom:14px;">
+        Aktifkan atau nonaktifkan layer yang ditampilkan pada peta.
+      </p>
+
+      <!-- 1. Batas Area WK Rokan -->
+      <div class="layer-card">
+        <div class="layer-left">
+          <div class="layer-pip" style="background:#06b6d4;"></div>
+          <div>
+            <div class="layer-nm">
+              Batas Area WK Rokan
+              <span id="wkrokan-layer-status" style="
+                font-size:9px;font-weight:600;
+                font-family:var(--font-mono);
+                color:var(--text-muted);
+                margin-left:6px;
+                vertical-align:middle;
+              "></span>
+            </div>
+            <div class="layer-tp">Supabase · WK_Rokan</div>
+          </div>
+        </div>
+        <label class="tog">
+          <input type="checkbox" id="toggle-wkrokan"
+                 onchange="MapController.toggleWkRokanLayer(this.checked)
+                           .then(() => _updateWkRokanStatus(this.checked))">
+          <span class="tog-track"></span>
+        </label>
+      </div>
+
+      <!-- 2. Batas Area Minas dan Kota Batak -->
+      <div class="layer-card">
+        <div class="layer-left">
+          <div class="layer-pip" style="background:#f59f00;"></div>
+          <div>
+            <div class="layer-nm">
+              Batas Area Minas dan Kota Batak
+              <span id="supabase-layer-status" style="
+                font-size:9px;font-weight:600;
+                font-family:var(--font-mono);
+                color:var(--text-muted);
+                margin-left:6px;
+                vertical-align:middle;
+              "></span>
+            </div>
+            <div class="layer-tp">Supabase · Minas_Batak</div>
+          </div>
+        </div>
+        <label class="tog">
+          <input type="checkbox" id="toggle-supabase"
+                 onchange="MapController.toggleSupabaseLayer(this.checked)
+                           .then(() => _updateSupabaseStatus(this.checked))">
+          <span class="tog-track"></span>
+        </label>
+      </div>
+
+      <!-- 3. Well WK Rokan -->
+      <div class="layer-card">
+        <div class="layer-left">
+          <div class="layer-pip" style="background:#8b5cf6;"></div>
+          <div>
+            <div class="layer-nm">
+              Well WK Rokan
+              <span id="well-layer-status" style="
+                font-size:9px;font-weight:600;
+                font-family:var(--font-mono);
+                color:var(--text-muted);
+                margin-left:6px;
+                vertical-align:middle;
+              "></span>
+            </div>
+            <div class="layer-tp">Supabase · Well</div>
+          </div>
+        </div>
+        <label class="tog">
+          <input type="checkbox" id="toggle-well"
+                 onchange="MapController.toggleWellLayer(this.checked)
+                           .then(() => _updateWellStatus(this.checked))">
+          <span class="tog-track"></span>
+        </label>
+      </div>
+
+      <!-- 4. Pipeline WK Rokan -->
+      <div class="layer-card">
+        <div class="layer-left">
+          <div class="layer-pip" style="background:#e64d3d;"></div>
+          <div>
+            <div class="layer-nm">
+              Pipeline WK Rokan
+              <span id="pipeline-layer-status" style="
+                font-size:9px;font-weight:600;
+                font-family:var(--font-mono);
+                color:var(--text-muted);
+                margin-left:6px;
+                vertical-align:middle;
+              "></span>
+            </div>
+            <div class="layer-tp">Supabase · Pipeline</div>
+          </div>
+        </div>
+        <label class="tog">
+          <input type="checkbox" id="toggle-pipeline"
+                 onchange="MapController.togglePipelineLayer(this.checked)
+                           .then(() => _updatePipelineStatus(this.checked))">
+          <span class="tog-track"></span>
+        </label>
+      </div>
+
+      <div class="layer-card">
+        <div class="layer-left">
+          <div class="layer-pip" style="background:#0ca678;"></div>
+          <div>
+            <div class="layer-nm">Titik Asal</div>
+            <div class="layer-tp">Point Layer</div>
+          </div>
+        </div>
+        <label class="tog">
+          <input type="checkbox" checked onchange="toggleLayer('origin', this.checked)">
+          <span class="tog-track"></span>
+        </label>
+      </div>
+
+      <div class="layer-card">
+        <div class="layer-left">
+          <div class="layer-pip" style="background:#4f5ef7;"></div>
+          <div>
+            <div class="layer-nm">Titik Hasil</div>
+            <div class="layer-tp">Point Layer</div>
+          </div>
+        </div>
+        <label class="tog">
+          <input type="checkbox" checked onchange="toggleLayer('result', this.checked)">
+          <span class="tog-track"></span>
+        </label>
+      </div>
+
+
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      FLOATING PANEL — BASEMAP
+  ════════════════════════════════════════════ -->
+  <div class="floating-panel" id="panel-basemap">
+    <div class="panel-hd">
+      <div class="panel-hd-left">
+        <div class="panel-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+            <line x1="8" y1="2" x2="8" y2="18"/>
+            <line x1="16" y1="6" x2="16" y2="22"/>
+          </svg>
+        </div>
+        <span class="panel-title">Pilih Basemap</span>
+      </div>
+      <button class="panel-close-btn" onclick="closePanel('panel-basemap')">×</button>
+    </div>
+    <div class="panel-bd">
+      <div class="basemap-grid">
+
+        <div class="bm-card on" id="bm-osm" onclick="selectBasemap('osm')">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#b2dfdb,#e8f5e9);">
+            🗺️
+            <div class="bm-check">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="bm-name">OpenStreetMap</div>
+        </div>
+
+        <div class="bm-card" id="bm-satellite" onclick="selectBasemap('satellite')">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#0d1b4b,#1a3a7a);">
+            🛰️
+            <div class="bm-check">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="bm-name">Google Satellite</div>
+        </div>
+
+        <div class="bm-card" id="bm-terrain" onclick="selectBasemap('terrain')">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#d7ccc8,#f5f0eb);">
+            🏔️
+            <div class="bm-check">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="bm-name">Terrain</div>
+        </div>
+
+        <div class="bm-card" id="bm-dark" onclick="selectBasemap('dark')">
+          <div class="bm-thumb" style="background:linear-gradient(135deg,#1a1a2e,#16213e);">
+            🌑
+            <div class="bm-check">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="bm-name">Dark Mode</div>
+        </div>
+
+      </div>
+
+      <div class="divider"></div>
+      <p class="help-txt">
+        💡 Klik peta untuk mengambil koordinat secara interaktif.
+        Google Satellite menyajikan citra beresolusi tinggi.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      FLOATING PANEL — TRANSFORMASI
+  ════════════════════════════════════════════ -->
+  <div class="floating-panel" id="panel-transform">
+    <div class="panel-hd">
+      <div class="panel-hd-left">
+        <div class="panel-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 16V4m0 0L3 8m4-4l4 4"/>
+            <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+          </svg>
+        </div>
+        <span class="panel-title">Transformasi Koordinat</span>
+      </div>
+      <button class="panel-close-btn" onclick="closePanel('panel-transform')">×</button>
+    </div>
+    <div class="panel-bd">
+
+      <div class="field">
+        <label class="field-label">Datum Asal</label>
+        <select class="field-select" id="datum-asal">
+          <option value="wgs84">WGS 84</option>
+          <option value="id74" selected>ID 74</option>
+        </select>
+      </div>
+
+      <button class="btn-swap" onclick="swapDatum()">
+        <span class="swap-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 16V4m0 0L3 8m4-4l4 4"/>
+            <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+          </svg>
+        </span>
+        Tukar Datum
+      </button>
+
+      <div class="field" style="margin-top:10px;">
+        <label class="field-label">Datum Tujuan</label>
+        <select class="field-select" id="datum-tujuan">
+          <option value="wgs84" selected>WGS 84</option>
+          <option value="id74">ID 74</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Format Koordinat Input</label>
+        <select class="field-select" id="fmt-coord-input"
+                onchange="updateCoordPlaceholder(this.value)">
+          <option value="dd">DD — Decimal Degree</option>
+          <option value="dms">DMS — Derajat Menit Detik</option>
+          <option value="utm">UTM 47N</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Format Koordinat Output</label>
+        <select class="field-select" id="fmt-coord-output">
+          <option value="dd">DD — Decimal Degree</option>
+          <option value="dms">DMS — Derajat Menit Detik</option>
+          <option value="utm">UTM 47N</option>
+        </select>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="radio-list">
+        <div class="radio-opt">
+          <div class="radio-row">
+            <input type="radio" name="imode" id="r-manual" value="manual" checked
+                    onchange="switchInputMode('manual')">
+            <label class="radio-lbl" for="r-manual">Input Koordinat Asal</label>
+          </div>
+          <div id="sec-manual" class="radio-content">
+
+            <!-- Input biasa (DD / DMS / DDM) -->
+            <div id="input-regular">
+              <input type="text" class="field-input" id="coord-val"
+                      placeholder="-6.2088, 106.8456">
+              <p class="help-txt">Format: Lat, Lon dipisahkan koma</p>
+            </div>
+
+            <!-- Input UTM 47N — tampil saat format UTM 47N dipilih -->
+            <div id="input-utm" style="display:none;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;
+                padding:6px 10px;background:#f0f1ff;border:1.5px solid rgba(79,94,247,0.2);
+                border-radius:7px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4f5ef7"
+                     stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="8" stroke-width="3"/>
+                  <line x1="12" y1="12" x2="12" y2="16"/>
+                </svg>
+                <span style="font-size:10px;font-weight:600;color:#4f5ef7;">UTM Zone 47S — WK Rokan</span>
+              </div>
+              <div style="margin-bottom:6px;">
+                <div style="font-size:10px;font-weight:600;color:#5a6278;margin-bottom:4px;">Easting (m)</div>
+                <input type="text" class="field-input" id="utm-easting"
+                       placeholder="722369.000" inputmode="decimal">
+              </div>
+              <div style="margin-bottom:2px;">
+                <div style="font-size:10px;font-weight:600;color:#5a6278;margin-bottom:4px;">Northing (m)</div>
+                <input type="text" class="field-input" id="utm-northing"
+                       placeholder="10143752.000" inputmode="decimal">
+              </div>
+              <p class="help-txt">Contoh WK Rokan: E 722369 · N 10143752</p>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="radio-opt" style="margin-top:6px;">
+          <div class="radio-row">
+            <input type="radio" name="imode" id="r-csv" value="csv"
+                    onchange="switchInputMode('csv')">
+            <label class="radio-lbl" for="r-csv">Upload File Koordinat (.csv)</label>
+          </div>
+          <div id="sec-csv" class="radio-content" style="display:none;">
+            <label class="file-btn" for="csv-upload">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18M9 21V9"/>
+              </svg>
+              <span id="csv-name">Choose File</span>
+              <input type="file" id="csv-upload" accept=".csv" onchange="onCSVLoad(this)">
+            </label>
+            <p class="help-txt">Kolom wajib: id, lat, lon</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Efek Epok Toggle -->
+      <div style="padding:10px 12px;background:#f8f9fb;border:1.5px solid #e4e7ee;
+        border-radius:var(--radius-sm);margin-top:10px;margin-bottom:6px;">
+
+        <!-- Baris atas: ikon + judul + badge + toggle -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4f5ef7"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <div style="font-size:11px;font-weight:700;color:var(--text-primary);">
+              Efek Epok
+              <span id="epoch-effect-badge" style="font-size:9px;font-weight:700;padding:1px 7px;
+                border-radius:10px;margin-left:5px;background:#f4f5f7;color:#9aa0b4;">Nonaktif</span>
+            </div>
+          </div>
+          <label class="tog" title="Aktifkan koreksi efek epok terhadap parameter epok 2021" style="cursor:pointer;flex-shrink:0;">
+            <input type="checkbox" id="epoch-effect-toggle" onchange="toggleEpochEffect(this.checked)">
+            <span class="tog-track"></span>
+          </label>
+        </div>
+
+        <!-- Baris bawah: epok target + nilai koreksi -->
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid #e4e7ee;">
+
+          <!-- Label header -->
+          <div style="font-size:10px;font-weight:700;color:#5a6278;
+                      text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">
+            Epok Target
+          </div>
+
+          <!-- Grid 2 kolom: Bulan | Tahun -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+
+            <!-- Bulan -->
+            <div>
+              <div style="font-size:9px;font-weight:600;color:#9aa0b4;
+                          text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">
+                Bulan
+              </div>
+              <select id="epoch-target-month"
+                      style="width:100%;padding:6px 8px;font-size:11px;
+                             border:1.5px solid #e4e7ee;border-radius:var(--radius-xs);
+                             background:#fafbfc;color:var(--text-primary);
+                             font-family:var(--font);outline:none;cursor:pointer;
+                             transition:border-color 0.2s;"
+                      onchange="setEpochTargetMonth(this.value)"
+                      onfocus="this.style.borderColor='#4f5ef7'"
+                      onblur="this.style.borderColor='#e4e7ee'">
+                <option value="1"  selected>Januari</option>
+                <option value="2" >Februari</option>
+                <option value="3" >Maret</option>
+                <option value="4" >April</option>
+                <option value="5" >Mei</option>
+                <option value="6" >Juni</option>
+                <option value="7" >Juli</option>
+                <option value="8" >Agustus</option>
+                <option value="9" >September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+            </div>
+
+            <!-- Tahun -->
+            <div>
+              <div style="font-size:9px;font-weight:600;color:#9aa0b4;
+                          text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">
+                Tahun
+              </div>
+              <input id="epoch-target-year" type="text" inputmode="numeric"
+                     value="2026" maxlength="4" placeholder="cth: 2026"
+                     style="width:100%;padding:6px 8px;font-size:11px;
+                            border:1.5px solid #e4e7ee;border-radius:var(--radius-xs);
+                            font-family:var(--font-mono);color:var(--text-primary);
+                            background:#fafbfc;outline:none;box-sizing:border-box;
+                            transition:border-color 0.2s,box-shadow 0.2s;"
+                     oninput="_onEpochYearInput(this)"
+                     onfocus="this.style.borderColor='#4f5ef7';this.style.boxShadow='0 0 0 3px rgba(79,94,247,0.12)'"
+                     onblur="_onEpochYearBlur(this)">
+            </div>
+          </div>
+
+          <!-- Pesan error tahun -->
+          <div id="epoch-year-error" style="
+            display:none;margin-bottom:6px;
+            font-size:10px;font-weight:500;color:#dc2626;
+            background:#fff1f1;border:1.5px solid #fca5a5;
+            border-radius:6px;padding:5px 9px;line-height:1.5;
+          "></div>
+
+          <!-- dt label -->
+          <div id="epoch-dt-label" style="
+            font-size:9.5px;font-weight:700;color:#4f5ef7;
+            font-family:var(--font-mono);margin-bottom:5px;">
+          </div>
+
+          <!-- Delta koreksi -->
+          <div id="epoch-effect-info"
+               style="font-size:9px;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:2px;">
+          </div>
+          <div style="font-size:9px;color:var(--text-muted);">
+            Total 3D: <span id="epoch-total" style="font-family:var(--font-mono);">—</span> mm
+            &nbsp;·&nbsp; Vx/Vy/Vz = 2.25/0.58/0.33 mm/bln
+          </div>
+
+        </div>
+
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:6px;">
+        <button type="button" class="btn-primary" onclick="runTransform()" style="flex:1;">
+          Transformasi
+        </button>
+        <button type="button" onclick="resetTransform()" title="Reset semua input" style="
+          flex-shrink:0;
+          padding:11px 14px;
+          background:#f4f5f7;
+          border:1.5px solid #e4e7ee;
+          border-radius:var(--radius-sm);
+          font-size:12px;
+          font-weight:600;
+          font-family:var(--font);
+          color:#5a6278;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          gap:5px;
+          transition:all var(--trans);
+          white-space:nowrap;
+        "
+        onmouseover="this.style.background='#fee2e2';this.style.borderColor='#fca5a5';this.style.color='#dc2626';"
+        onmouseout="this.style.background='#f4f5f7';this.style.borderColor='#e4e7ee';this.style.color='#5a6278';">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+          Reset
+        </button>
+      </div>
+
+      <!-- ★ Tombol Tukar Datum Seluruhnya — muncul setelah ada hasil transformasi -->
+      <button type="button" id="btn-invert-all" onclick="invertAllPoints()" style="
+        display:none;
+        width:100%;
+        margin-top:8px;
+        padding:10px 14px;
+        background:#fff8e1;
+        border:1.5px solid #f59f00;
+        border-radius:var(--radius-sm);
+        font-size:12px;
+        font-weight:600;
+        font-family:var(--font);
+        color:#f59f00;
+        cursor:pointer;
+        align-items:center;
+        justify-content:center;
+        gap:7px;
+        transition:all var(--trans);
+      "
+      onmouseover="this.style.background='#f59f00';this.style.color='#fff';"
+      onmouseout="this.style.background='#fff8e1';this.style.color='#f59f00';">
+        <span id="invert-label">Tukar Datum Seluruh Titik</span>
+      </button>
+
+      <div id="table-preview" style="display:none; margin-top:16px;">
+        <div class="result-tag" style="margin-bottom:8px;">
+          📊 Preview Hasil CSV
+        </div>
+        <div style="max-height:220px; overflow:auto;">
+          <table id="preview-table" style="width:100%; font-size:11px;">
+            <thead>
+              <tr style="text-align:left; border-bottom:1px solid #eee;">
+                <th>ID</th>
+                <th>Asal</th>
+                <th>Hasil</th>
+                <th>Jarak (m)</th>
+                <th>Arah</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="result-box" id="result-box">
+        <div class="result-tag">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Hasil Transformasi
+        </div>
+        <div class="result-vals" id="result-vals">—</div>
+        <div class="result-format" id="result-fmt"></div>
+        <button class="btn-dl-inline" onclick="downloadResult()">↓ Download CSV</button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      FLOATING PANEL — DOWNLOAD
+  ════════════════════════════════════════════ -->
+  <div class="floating-panel" id="panel-download">
+    <div class="panel-hd">
+      <div class="panel-hd-left">
+        <div class="panel-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <span class="panel-title">Download Hasil</span>
+      </div>
+      <button class="panel-close-btn" onclick="closePanel('panel-download')">×</button>
+    </div>
+    <div class="panel-bd">
+      <div id="dl-list">
+        <div class="dl-empty" id="dl-empty">
+          <span class="dl-empty-icon">📂</span>
+          Belum ada hasil transformasi.<br>
+          Lakukan transformasi koordinat terlebih dahulu.
+        </div>
+      </div>
+      <div class="divider"></div>
+      <p class="help-txt">
+        File CSV siap digunakan di <strong>QGIS</strong>, <strong>ArcGIS</strong>,
+        maupun <strong>Google Earth</strong>.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      FLOATING PANEL — INFO
+  ════════════════════════════════════════════ -->
+  <div class="floating-panel" id="panel-info">
+    <div class="panel-hd">
+      <div class="panel-hd-left">
+        <div class="panel-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8"  x2="12" y2="8"  stroke-width="3" stroke-linecap="round"/>
+            <line x1="12" y1="12" x2="12" y2="16"/>
+          </svg>
+        </div>
+        <span class="panel-title">Informasi Dashboard</span>
+      </div>
+      <button class="panel-close-btn" onclick="closePanel('panel-info')">×</button>
+    </div>
+    <div class="panel-bd">
+      <div class="info-sec">
+        <div class="info-sec-title">Tentang</div>
+        <p class="info-p">
+          <strong>Shifted.</strong> adalah dashboard transformasi koordinat geodetik untuk konversi antara
+          datum Indonesia (ID74) dan sistem referensi global WGS 84 secara akurat dan real-time
+          langsung pada peta interaktif.
+        </p>
+      </div>
+
+      <div class="info-sec">
+        <div class="info-sec-title">Datum yang Didukung</div>
+        <div>
+          <span class="info-chip">🌐 WGS 84</span>
+          <span class="info-chip">🇮🇩 ID 74</span>
+        </div>
+      </div>
+
+      <div class="info-sec">
+        <div class="info-sec-title">Metode Transformasi</div>
+        <p class="info-p">
+          Menggunakan <strong>Molodensky-Badekas 10-parameter</strong> dengan titik
+          sekutu sebanyak 9 titik untuk mendapatkan akurasi sub-meter di area proyek.
+        </p>
+      </div>
+
+      <div class="info-sec">
+        <div class="info-sec-title">Parameter ID74 → WGS84</div>
+        <div class="code-block">
+          ΔX &nbsp;: −21.198 m<br>
+          ΔY &nbsp;: −28.407 m<br>
+          ΔZ &nbsp;: +4.646 m<br>
+          S &nbsp;&nbsp;: 0.9999905<br>
+          Src : Indonesia Datum 1974<br>
+          Dst : World Geodetic System 1984
+        </div>
+      </div>
+
+      <div class="info-sec">
+        <div class="info-sec-title">Shortcut Keyboard</div>
+        <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>1</kbd> &nbsp;— Layer</div>
+        <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>2</kbd> &nbsp;— Basemap</div>
+        <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>3</kbd> &nbsp;— Transformasi</div>
+        <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>4</kbd> &nbsp;— Download</div>
+        <div class="shortcut-row"><kbd>Esc</kbd> &nbsp;— Tutup semua panel</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="info-row"><span class="info-key">versi</span><span class="info-val">v1.0.0</span></div>
+      <div class="info-row"><span class="info-key">parameter</span><span class="info-val">Molodensky-Badekas 10P</span></div>
+      <div class="info-row"><span class="info-key">peta</span><span class="info-val">Leaflet 1.9.4</span></div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      FLOATING PANEL — RIWAYAT
+  ════════════════════════════════════════════ -->
+  <div class="floating-panel" id="panel-history">
+    <div class="panel-hd">
+      <div class="panel-hd-left">
+        <div class="panel-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <span class="panel-title">
+          Riwayat
+          <span id="history-count" style="
+            font-size:9px;font-weight:700;
+            background:var(--accent);color:#fff;
+            padding:1px 6px;border-radius:10px;
+            margin-left:5px;vertical-align:middle;
+          ">0</span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button onclick="clearAllHistory()" title="Hapus semua riwayat" style="
+          font-size:10px;font-weight:600;font-family:var(--font);
+          padding:4px 9px;border-radius:var(--radius-xs);cursor:pointer;
+          background:transparent;border:1px solid var(--border);
+          color:var(--text-muted);transition:all var(--trans);
+        " onmouseover="this.style.background='#fee2e2';this.style.borderColor='#fca5a5';this.style.color='#dc2626';"
+           onmouseout="this.style.background='transparent';this.style.borderColor='var(--border)';this.style.color='var(--text-muted)';">
+          Hapus Semua
+        </button>
+        <button class="panel-close-btn" onclick="closePanel('panel-history')">×</button>
+      </div>
+    </div>
+    <div class="panel-bd">
+      <p class="help-txt" style="margin-bottom:12px;">
+        Setiap transformasi otomatis tersimpan. Klik <strong>Muat Ulang</strong> untuk menampilkan kembali hasil di peta.
+      </p>
+      <div id="history-empty" style="
+        text-align:center;padding:24px 16px;
+        color:var(--text-muted);font-size:12px;line-height:1.8;
+      ">
+        <span style="font-size:28px;display:block;margin-bottom:8px;">🕐</span>
+        Belum ada riwayat.<br>Lakukan transformasi koordinat terlebih dahulu.
+      </div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      STATUS BAR (bottom-right)
+  ════════════════════════════════════════════ -->
+  <div class="status-bar">
+    <div class="status-pill">Skala: <span id="scale-status">—</span></div>
+    <div class="status-pill">Basemap: <span id="bm-status">OSM</span></div>
+    <div class="status-pill">Kursor: <span id="coord-status">—</span></div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      TOAST NOTIFICATION
+  ════════════════════════════════════════════ -->
+  <div class="toast" id="toast">
+    <div class="toast-dot green" id="toast-dot"></div>
+    <span id="toast-txt">Dashboard siap</span>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      BOTTOM TOOLBAR
+  ════════════════════════════════════════════ -->
+  <div class="toolbar">
+    <button class="tb-btn" id="tb-layer" data-tip="Layer (Ctrl+1)">
+      <svg viewBox="0 0 24 24">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+      </svg>
+    </button>
+    <button class="tb-btn" id="tb-basemap" data-tip="Basemap (Ctrl+2)">
+      <svg viewBox="0 0 24 24">
+        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+        <line x1="8" y1="2" x2="8" y2="18"/>
+        <line x1="16" y1="6" x2="16" y2="22"/>
+      </svg>
+    </button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="tb-transform" data-tip="Transformasi (Ctrl+3)">
+      <svg viewBox="0 0 24 24">
+        <path d="M7 16V4m0 0L3 8m4-4l4 4"/>
+        <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+      </svg>
+    </button>
+    <button class="tb-btn" id="tb-download" data-tip="Download (Ctrl+4)">
+      <svg viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+    </button>
+    <button class="tb-btn" id="tb-history" data-tip="Riwayat (Ctrl+6)">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    </button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="tb-measure-dist" data-tip="Ukur Jarak (M)"
+            onclick="MapController.measureStart('distance')">
+      <svg viewBox="0 0 24 24">
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <polyline points="2 8 2 16"/>
+        <polyline points="22 8 22 16"/>
+      </svg>
+    </button>
+    <button class="tb-btn" id="tb-measure-area" data-tip="Ukur Luas (N)"
+            onclick="MapController.measureStart('area')">
+      <svg viewBox="0 0 24 24">
+        <polygon points="12 2 22 8 22 16 12 22 2 16 2 8"/>
+      </svg>
+    </button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="tb-zoomin" data-tip="Zoom In (+)">
+      <svg viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <line x1="11" y1="8"  x2="11" y2="14"/>
+        <line x1="8"  y1="11" x2="14" y2="11"/>
+      </svg>
+    </button>
+    <button class="tb-btn" id="tb-zoomout" data-tip="Zoom Out (-)">
+      <svg viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <line x1="8"  y1="11" x2="14" y2="11"/>
+      </svg>
+    </button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="tb-info" data-tip="Informasi (Ctrl+5)">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8"  x2="12" y2="8"  stroke-width="2.5"/>
+        <line x1="12" y1="12" x2="12" y2="16"/>
+      </svg>
+    </button>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      LOGOUT CONFIRMATION POPUP
+      Diletakkan di dashboard.html (bukan header.html)
+      agar getElementById bekerja dengan benar.
+  ════════════════════════════════════════════ -->
+  <div id="logout-overlay" onclick="handleLogoutOverlay(event)" style="
+    position:fixed; inset:0; z-index:9999;
+    background:rgba(8,9,26,0.65);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center;
+    padding:24px;
+    opacity:0; transition:opacity 0.22s ease;
+  ">
+    <div id="logout-box" style="
+      background:#ffffff; border-radius:18px;
+      padding:36px 32px 28px; width:100%; max-width:340px;
+      text-align:center;
+      box-shadow:0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08);
+      transform:translateY(20px) scale(0.96);
+      transition:transform 0.26s cubic-bezier(0.34,1.56,0.64,1);
+      font-family:'Sora',sans-serif;
+    ">
+
+      <!-- Icon -->
+      <div style="
+        width:60px; height:60px; border-radius:50%;
+        background:#fef2f2; border:2px solid #fecaca;
+        display:flex; align-items:center; justify-content:center;
+        margin:0 auto 18px; color:#ef4444;
+      ">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </div>
+
+      <!-- Teks -->
+      <h3 style="font-size:16px; font-weight:700; color:#0f172a; margin-bottom:8px; letter-spacing:-0.2px;">
+        Keluar dari Dashboard?
+      </h3>
+      <p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:26px;">
+        Apakah Anda yakin ingin keluar dari dashboard?
+      </p>
+
+      <!-- Tombol -->
+      <div style="display:flex; gap:10px;">
+        <button onclick="closeLogoutConfirm()" style="
+          flex:1; padding:11px 14px;
+          border:1.5px solid #e2e8f0; border-radius:10px;
+          background:#f8fafc; color:#475569;
+          font-size:13px; font-weight:600; font-family:'Sora',sans-serif;
+          cursor:pointer; transition:background 0.2s, border-color 0.2s, color 0.2s;
+        "
+        onmouseover="this.style.background='#f1f5f9';this.style.borderColor='#cbd5e1';this.style.color='#1e293b';"
+        onmouseout="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0';this.style.color='#475569';">
+          Tidak
+        </button>
+        <button onclick="logout()" style="
+          flex:1; padding:11px 14px;
+          border:none; border-radius:10px;
+          background:#ef4444; color:#ffffff;
+          font-size:13px; font-weight:700; font-family:'Sora',sans-serif;
+          cursor:pointer;
+          display:flex; align-items:center; justify-content:center; gap:7px;
+          box-shadow:0 4px 14px rgba(239,68,68,0.28);
+          transition:background 0.2s, transform 0.15s, box-shadow 0.2s;
+        "
+        onmouseover="this.style.background='#dc2626';this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(239,68,68,0.38)';"
+        onmouseout="this.style.background='#ef4444';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(239,68,68,0.28)';">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Iya, Keluar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      MODAL — KONFIRMASI HAPUS RIWAYAT
+  ════════════════════════════════════════════ -->
+  <div id="confirm-delete-history-overlay" onclick="handleDeleteHistoryOverlay(event)" style="
+    position:fixed; inset:0; z-index:9999;
+    background:rgba(8,9,26,0.65);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center;
+    padding:24px;
+    opacity:0; transition:opacity 0.22s ease;
+  ">
+    <div id="confirm-delete-history-box" style="
+      background:#ffffff; border-radius:18px;
+      padding:36px 32px 28px; width:100%; max-width:340px;
+      text-align:center;
+      box-shadow:0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.08);
+      transform:translateY(20px) scale(0.96);
+      transition:transform 0.26s cubic-bezier(0.34,1.56,0.64,1);
+      font-family:'Sora',sans-serif;
+    ">
+      <!-- Icon -->
+      <div style="
+        width:60px; height:60px; border-radius:50%;
+        background:#fef2f2; border:2px solid #fecaca;
+        display:flex; align-items:center; justify-content:center;
+        margin:0 auto 18px; color:#ef4444;
+      ">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+          <path d="M10 11v6"/>
+          <path d="M14 11v6"/>
+          <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+        </svg>
+      </div>
+      <!-- Teks -->
+      <h3 style="font-size:16px; font-weight:700; color:#0f172a; margin-bottom:8px; letter-spacing:-0.2px;"
+          id="confirm-delete-history-title">Hapus Riwayat?</h3>
+      <p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:26px;"
+         id="confirm-delete-history-msg">Apakah Anda yakin ingin menghapus riwayat ini?</p>
+      <!-- Tombol -->
+      <div style="display:flex; gap:10px;">
+        <button onclick="closeDeleteHistoryConfirm()" style="
+          flex:1; padding:11px 14px;
+          border:1.5px solid #e2e8f0; border-radius:10px;
+          background:#f8fafc; color:#475569;
+          font-size:13px; font-weight:600; font-family:'Sora',sans-serif;
+          cursor:pointer; transition:background 0.2s, border-color 0.2s, color 0.2s;
+        "
+        onmouseover="this.style.background='#f1f5f9';this.style.borderColor='#cbd5e1';this.style.color='#1e293b';"
+        onmouseout="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0';this.style.color='#475569';">
+          Batal
+        </button>
+        <button id="confirm-delete-history-btn" onclick="executeDeleteHistory()" style="
+          flex:1; padding:11px 14px;
+          border:none; border-radius:10px;
+          background:#ef4444; color:#ffffff;
+          font-size:13px; font-weight:700; font-family:'Sora',sans-serif;
+          cursor:pointer;
+          display:flex; align-items:center; justify-content:center; gap:7px;
+          box-shadow:0 4px 14px rgba(239,68,68,0.28);
+          transition:background 0.2s, transform 0.15s, box-shadow 0.2s;
+        "
+        onmouseover="this.style.background='#dc2626';this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(239,68,68,0.38)';"
+        onmouseout="this.style.background='#ef4444';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(239,68,68,0.28)';">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+          </svg>
+          Ya, Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════
+      SCRIPTS
+  ════════════════════════════════════════════ -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mapbox/shp-write@0.3.2/shpwrite.js"></script>
+
+  <script src="js/transform.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/event.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/search.js"></script>
+
+  <script>
+    requireLogin();
+
+    // Inisialisasi tampilan efek epok setelah semua script dimuat
+    window.addEventListener('load', function () {
+      if (typeof _updateEpochUI === 'function') _updateEpochUI();
+    });
+
+    // ════════════════════════════════════════
+    // LOGOUT CONFIRMATION POPUP
+    // Fungsi ini dipanggil oleh header.html via onclick="openLogoutConfirm()"
+    // Harus didefinisikan di sini (dashboard.html) karena script di dalam
+    // fetch() innerHTML tidak dieksekusi browser.
+    // ════════════════════════════════════════
+
+    function openLogoutConfirm() {
+      var overlay = document.getElementById('logout-overlay');
+      if (!overlay) return;
+      overlay.style.display = 'flex';
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          overlay.style.opacity = '1';
+          var box = document.getElementById('logout-box');
+          if (box) box.style.transform = 'translateY(0) scale(1)';
+        });
+      });
+    }
+
+    function closeLogoutConfirm() {
+      var overlay = document.getElementById('logout-overlay');
+      if (!overlay) return;
+      overlay.style.opacity = '0';
+      var box = document.getElementById('logout-box');
+      if (box) box.style.transform = 'translateY(20px) scale(0.96)';
+      setTimeout(function () { overlay.style.display = 'none'; }, 230);
+    }
+
+    function handleLogoutOverlay(e) {
+      if (e.target === document.getElementById('logout-overlay')) {
+        closeLogoutConfirm();
+      }
+    }
+
+    // Esc → tutup popup logout
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeLogoutConfirm();
+    });
+
+    // ════════════════════════════════════════
+    // LOAD HEADER + INJECT NAMA USER
+    // ════════════════════════════════════════
+
+    fetch('header.html')
+      .then(function (res) { return res.text(); })
+      .then(function (html) {
+        document.getElementById('site-header').innerHTML = html;
+
+        // Isi nama & tipe user dari session auth.js
+        var user = getSession();
+        if (user) {
+          var nameEl = document.getElementById('header-user-name');
+          var tipeEl = document.getElementById('header-user-tipe');
+          if (nameEl) nameEl.textContent = user.nama || '—';
+          if (tipeEl) tipeEl.textContent = user.tipe || '—';
+        }
+
+        // Inject search bar ke dalam header (sebelum .header-actions)
+        var headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+          var searchEl = document.createElement('div');
+          searchEl.className = 'header-search';
+          searchEl.innerHTML = [
+            '<div class="header-search-wrap">',
+            '  <span class="header-search-icon">',
+            '    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"',
+            '         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">',
+            '      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+            '    </svg>',
+            '  </span>',
+            '  <input id="search-input" type="text" placeholder="Cari nama daerah..." autocomplete="off">',
+            '  <button id="search-clear-btn" onclick="GeoSearch.clearInput()" title="Hapus">&#x2715;</button>',
+            '</div>',
+            '<div id="search-results"></div>'
+          ].join('');
+          headerActions.parentNode.insertBefore(searchEl, headerActions);
+          GeoSearch.init();
+        }
+
+      })
+      .catch(function (err) {
+        console.error('Gagal memuat header.html:', err);
+      });
+
+    // ════════════════════════════════════════
+    // HELPER STATUS LAYER SUPABASE
+    // ════════════════════════════════════════
+
+    function _updateSupabaseStatus(on) {
+      var el = document.getElementById('supabase-layer-status');
+      if (!el) return;
+      el.textContent = on ? '● Aktif' : '';
+      el.style.color = on ? '#f59f00' : 'var(--text-muted)';
+    }
+
+    function _updateWellStatus(on) {
+      var el = document.getElementById('well-layer-status');
+      if (!el) return;
+      el.textContent = on ? '● Aktif' : '';
+      el.style.color = on ? '#8b5cf6' : 'var(--text-muted)';
+    }
+
+    // ── Validasi input tahun efek epok ──
+    function _onEpochYearInput(el) {
+      var val = el.value.trim();
+      var errEl = document.getElementById('epoch-year-error');
+
+      // Hanya angka yang boleh diketik
+      el.value = val.replace(/[^0-9]/g, '');
+
+      // Belum 4 digit → bersihkan error, tapi jangan proses dulu
+      if (el.value.length < 4) {
+        errEl.style.display = 'none';
+        el.style.borderColor = '#e4e7ee';
+        return;
+      }
+
+      _validateAndApplyYear(el);
+    }
+
+    function _onEpochYearBlur(el) {
+      el.style.boxShadow = 'none';
+      if (el.value.trim() === '') {
+        el.value = '2026';
+        _validateAndApplyYear(el);
+        return;
+      }
+      _validateAndApplyYear(el);
+    }
+
+    function _validateAndApplyYear(el) {
+      var errEl = document.getElementById('epoch-year-error');
+      var val   = el.value.trim();
+
+      if (!/^\d{4}$/.test(val)) {
+        errEl.textContent    = '⚠ Format tahun tidak valid. Gunakan 4 digit angka (contoh: 2026).';
+        errEl.style.display  = 'block';
+        el.style.borderColor = '#fca5a5';
+        el.style.boxShadow   = '0 0 0 3px rgba(252,165,165,0.25)';
+        return;
+      }
+
+      var num = parseInt(val);
+      if (num < 1900 || num > 2200) {
+        errEl.textContent    = '⚠ Tahun harus antara 1900 dan 2200.';
+        errEl.style.display  = 'block';
+        el.style.borderColor = '#fca5a5';
+        el.style.boxShadow   = '0 0 0 3px rgba(252,165,165,0.25)';
+        return;
+      }
+
+      // Valid — reset error, terapkan
+      errEl.style.display  = 'none';
+      el.style.borderColor = '#0ca678';
+      el.style.boxShadow   = '0 0 0 3px rgba(12,166,120,0.15)';
+      setEpochTargetYear(num);
+    }
+
+    function _updateWkRokanStatus(on) {
+      var el = document.getElementById('wkrokan-layer-status');
+      if (!el) return;
+      el.textContent = on ? '● Aktif' : '';
+      el.style.color = on ? '#06b6d4' : 'var(--text-muted)';
+    }
+
+    function _updatePipelineStatus(on) {
+      var el = document.getElementById('pipeline-layer-status');
+      if (!el) return;
+      el.textContent = on ? '● Aktif' : '';
+      el.style.color = on ? '#e64d3d' : 'var(--text-muted)';
+    }
+
+  </script>
+
+</body>
+</html>

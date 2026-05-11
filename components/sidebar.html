@@ -1,0 +1,484 @@
+<!-- ============================================================
+     components/sidebar.html
+     All floating left-side panels for Shifted. Dashboard
+     (Assembled inside dashboard.html)
+     ============================================================ -->
+
+<!-- ========== PANEL: LAYER ========== -->
+<div class="floating-panel" id="panel-layer">
+  <div class="panel-hd">
+    <div class="panel-hd-left">
+      <div class="panel-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+      </div>
+      <span class="panel-title">Manajemen Layer</span>
+    </div>
+    <button class="panel-close-btn" onclick="closePanel('panel-layer')">×</button>
+  </div>
+  <div class="panel-bd">
+    <p class="help-txt" style="margin-bottom:14px;">
+      Aktifkan atau nonaktifkan layer yang ditampilkan pada peta.
+    </p>
+
+    <div class="layer-card">
+      <div class="layer-left">
+        <div class="layer-pip" style="background:#4f5ef7;"></div>
+        <div>
+          <div class="layer-nm">Titik Transformasi</div>
+          <div class="layer-tp">Point Layer · WGS 84</div>
+        </div>
+      </div>
+      <label class="tog">
+        <input type="checkbox" checked onchange="toggleLayer('transform', this.checked)">
+        <span class="tog-track"></span>
+      </label>
+    </div>
+
+    <div class="layer-card">
+      <div class="layer-left">
+        <div class="layer-pip" style="background:#0ca678;"></div>
+        <div>
+          <div class="layer-nm">Titik Asal (ID74)</div>
+          <div class="layer-tp">Point Layer · ID 74</div>
+        </div>
+      </div>
+      <label class="tog">
+        <input type="checkbox" onchange="toggleLayer('origin', this.checked)">
+        <span class="tog-track"></span>
+      </label>
+    </div>
+
+    <div class="layer-card">
+      <div class="layer-left">
+        <div class="layer-pip" style="background:#f59f00;"></div>
+        <div>
+          <div class="layer-nm">Batas Wilayah</div>
+          <div class="layer-tp">Polygon Layer · Admin</div>
+        </div>
+      </div>
+      <label class="tog">
+        <input type="checkbox" onchange="toggleLayer('boundary', this.checked)">
+        <span class="tog-track"></span>
+      </label>
+    </div>
+
+    <div class="layer-card">
+      <div class="layer-left">
+        <div class="layer-pip" style="background:#1098ad;"></div>
+        <div>
+          <div class="layer-nm">Grid Koordinat</div>
+          <div class="layer-tp">Grid Layer</div>
+        </div>
+      </div>
+      <label class="tog">
+        <input type="checkbox" onchange="toggleLayer('grid', this.checked)">
+        <span class="tog-track"></span>
+      </label>
+    </div>
+
+    <div class="divider"></div>
+    <label class="field-label">Opacity Layer Utama</label>
+    <div class="range-wrap">
+      <input type="range" min="10" max="100" value="100"
+             oninput="onOpacityChange(this.value)">
+    </div>
+    <div style="text-align:right; font-size:10px; color:var(--text-muted);
+                font-family:var(--font-mono); margin-top:4px;" id="opacity-lbl">100%</div>
+  </div>
+</div>
+
+<!-- ========== PANEL: BASEMAP ========== -->
+<div class="floating-panel" id="panel-basemap">
+  <div class="panel-hd">
+    <div class="panel-hd-left">
+      <div class="panel-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+          <line x1="8" y1="2" x2="8" y2="18"/>
+          <line x1="16" y1="6" x2="16" y2="22"/>
+        </svg>
+      </div>
+      <span class="panel-title">Pilih Basemap</span>
+    </div>
+    <button class="panel-close-btn" onclick="closePanel('panel-basemap')">×</button>
+  </div>
+  <div class="panel-bd">
+    <div class="basemap-grid">
+
+      <div class="bm-card on" id="bm-osm" onclick="selectBasemap('osm')">
+        <div class="bm-thumb" style="background:linear-gradient(135deg,#c8e6c9 0%,#e8f5e9 100%);">
+          🗺️
+          <div class="bm-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                 stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </div>
+        <div class="bm-name">OpenStreetMap</div>
+      </div>
+
+      <div class="bm-card" id="bm-satellite" onclick="selectBasemap('satellite')">
+        <div class="bm-thumb" style="background:linear-gradient(135deg,#1a237e 0%,#283593 100%);">
+          🛰️
+          <div class="bm-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                 stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </div>
+        <div class="bm-name">Google Satellite</div>
+      </div>
+
+      <div class="bm-card" id="bm-terrain" onclick="selectBasemap('terrain')">
+        <div class="bm-thumb" style="background:linear-gradient(135deg,#efebe9 0%,#bcaaa4 100%);">
+          🏔️
+          <div class="bm-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                 stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </div>
+        <div class="bm-name">Terrain</div>
+      </div>
+
+      <div class="bm-card" id="bm-dark" onclick="selectBasemap('dark')">
+        <div class="bm-thumb" style="background:linear-gradient(135deg,#212121 0%,#424242 100%);">
+          🌑
+          <div class="bm-check">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                 stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </div>
+        <div class="bm-name">Dark Mode</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <p class="help-txt">
+      💡 Klik peta untuk mengambil koordinat secara interaktif. Google Satellite menyajikan citra beresolusi tinggi.
+    </p>
+  </div>
+</div>
+
+<!-- ========== PANEL: TRANSFORMASI ========== -->
+<div class="floating-panel" id="panel-transform">
+  <div class="panel-hd">
+    <div class="panel-hd-left">
+      <div class="panel-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 16V4m0 0L3 8m4-4l4 4"/>
+          <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+        </svg>
+      </div>
+      <span class="panel-title">Transformasi Koordinat</span>
+    </div>
+    <button class="panel-close-btn" onclick="closePanel('panel-transform')">×</button>
+  </div>
+  <div class="panel-bd">
+
+    <!-- Datum Asal -->
+    <div class="field">
+      <label class="field-label">Datum Asal</label>
+      <select class="field-select" id="datum-asal">
+        <option value="wgs84">WGS 84</option>
+        <option value="id74" selected>ID 74</option>
+        <option value="dki">DKI Jakarta</option>
+      </select>
+    </div>
+
+    <!-- Swap -->
+    <button class="btn-swap" onclick="swapDatum()">
+      <span class="swap-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 16V4m0 0L3 8m4-4l4 4"/>
+          <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+        </svg>
+      </span>
+      Tukar Datum
+    </button>
+
+    <!-- Datum Tujuan -->
+    <div class="field" style="margin-top:10px;">
+      <label class="field-label">Datum Tujuan</label>
+      <select class="field-select" id="datum-tujuan">
+        <option value="wgs84" selected>WGS 84</option>
+        <option value="id74">ID 74</option>
+        <option value="dki">DKI Jakarta</option>
+      </select>
+    </div>
+
+    <!-- Format Input -->
+    <div class="field">
+      <label class="field-label">Format Koordinat Input</label>
+      <select class="field-select" id="fmt-coord-input"
+              onchange="updateCoordPlaceholder(this.value)">
+        <option value="dd">DD — Decimal Degree</option>
+        <option value="dms">DMS — Derajat Menit Detik</option>
+        <option value="ddm">DDM — Derajat Menit Desimal</option>
+        <option value="utm">UTM 47N</option>
+      </select>
+    </div>
+
+    <!-- Format Output -->
+    <div class="field">
+      <label class="field-label">Format Koordinat Output</label>
+      <select class="field-select" id="fmt-coord-output">
+        <option value="dd">DD — Decimal Degree</option>
+        <option value="dms">DMS — Derajat Menit Detik</option>
+        <option value="ddm">DDM — Derajat Menit Desimal</option>
+        <option value="utm">UTM 47N</option>
+      </select>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Input mode -->
+    <div class="radio-list">
+      <!-- Manual -->
+      <div class="radio-opt">
+        <div class="radio-row">
+          <input type="radio" name="imode" id="r-manual" value="manual" checked
+                 onchange="switchInputMode('manual')">
+          <label class="radio-lbl" for="r-manual">Input Koordinat Asal</label>
+        </div>
+        <div class="radio-content" id="sec-manual">
+
+          <!-- Input biasa (DD / DMS / DDM) -->
+          <div id="input-regular">
+            <input type="text" class="field-input" id="coord-val"
+                   placeholder="-6.2088, 106.8456">
+            <p class="help-txt">Format: Lat, Lon dipisahkan koma</p>
+          </div>
+
+          <!-- Input UTM 47N — tampil saat format UTM 47N dipilih -->
+          <div id="input-utm" style="display:none;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;
+              padding:6px 10px;background:#f0f1ff;border:1.5px solid rgba(79,94,247,0.2);
+              border-radius:7px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4f5ef7"
+                   stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="8" stroke-width="3"/>
+                <line x1="12" y1="12" x2="12" y2="16"/>
+              </svg>
+              <span style="font-size:10px;font-weight:600;color:#4f5ef7;">UTM Zone 47S — WK Rokan</span>
+            </div>
+            <div style="margin-bottom:6px;">
+              <div style="font-size:10px;font-weight:600;color:#5a6278;margin-bottom:4px;">Easting (m)</div>
+              <input type="text" class="field-input" id="utm-easting"
+                     placeholder="722369.000" inputmode="decimal">
+            </div>
+            <div style="margin-bottom:2px;">
+              <div style="font-size:10px;font-weight:600;color:#5a6278;margin-bottom:4px;">Northing (m)</div>
+              <input type="text" class="field-input" id="utm-northing"
+                     placeholder="10143752.000" inputmode="decimal">
+            </div>
+            <p class="help-txt">Contoh WK Rokan: E 722369 · N 10143752</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CSV -->
+      <div class="radio-opt" style="margin-top:4px;">
+        <div class="radio-row">
+          <input type="radio" name="imode" id="r-csv" value="csv"
+                 onchange="switchInputMode('csv')">
+          <label class="radio-lbl" for="r-csv">Upload File Koordinat (.csv)</label>
+        </div>
+        <div class="radio-content" id="sec-csv" style="display:none;">
+          <label class="file-btn" for="csv-upload">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M3 7h4l2-3h6l2 3h4a2 2 0 012 2v9a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2z"/>
+            </svg>
+            <span id="csv-name">Choose File</span>
+            <input type="file" id="csv-upload" accept=".csv" onchange="onCSVLoad(this)">
+          </label>
+          <p class="help-txt">Kolom wajib: id, lat, lon</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Efek Epok Toggle -->
+    <div style="padding:10px 12px;background:#f8f9fb;border:1.5px solid #e4e7ee;
+      border-radius:var(--radius-sm);margin-top:10px;margin-bottom:6px;">
+
+      <!-- Baris atas: ikon + judul + badge + toggle -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4f5ef7"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <div style="font-size:11px;font-weight:700;color:var(--text-primary);">
+            Efek Epok
+            <span id="epoch-effect-badge" style="font-size:9px;font-weight:700;padding:1px 7px;
+              border-radius:10px;margin-left:5px;background:#f4f5f7;color:#9aa0b4;">Nonaktif</span>
+          </div>
+        </div>
+        <label class="tog" title="Aktifkan koreksi efek epok terhadap parameter epok 2021" style="cursor:pointer;flex-shrink:0;">
+          <input type="checkbox" id="epoch-effect-toggle" onchange="toggleEpochEffect(this.checked)">
+          <span class="tog-track"></span>
+        </label>
+      </div>
+
+      <!-- Baris bawah: epok target + nilai koreksi -->
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid #e4e7ee;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:10px;font-weight:600;color:#5a6278;white-space:nowrap;flex-shrink:0;">
+            Epok Target
+          </span>
+          <select id="epoch-target-year" class="field-select"
+                  style="flex:1;padding:5px 10px;font-size:11px;height:auto;"
+                  onchange="setEpochTargetYear(this.value)">
+            <option value="2021">2021 — Referensi (dt = 0)</option>
+            <option value="2022">2022 &nbsp;(dt = 1 thn)</option>
+            <option value="2023">2023 &nbsp;(dt = 2 thn)</option>
+            <option value="2024">2024 &nbsp;(dt = 3 thn)</option>
+            <option value="2025">2025 &nbsp;(dt = 4 thn)</option>
+            <option value="2026" selected>2026 &nbsp;(dt = 5 thn)</option>
+          </select>
+        </div>
+        <div id="epoch-effect-info"
+             style="font-size:9.5px;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:2px;">
+          ΔX −135.0 mm &nbsp;·&nbsp; ΔY −35.0 mm &nbsp;·&nbsp; ΔZ −20.0 mm
+        </div>
+        <div style="font-size:9px;color:var(--text-muted);">
+          Total 3D: <span id="epoch-total" style="font-family:var(--font-mono);">140.9</span> mm
+          &nbsp;·&nbsp; Vx/Vy/Vz = 27/7/4 mm/thn
+        </div>
+      </div>
+
+    </div>
+
+    <button class="btn-primary" onclick="runTransform()">Transformasi</button>
+
+    <!-- Result -->
+    <div class="result-box" id="result-box">
+      <div class="result-tag">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Hasil Transformasi
+      </div>
+      <div class="result-vals" id="result-vals">—</div>
+      <div class="result-format" id="result-fmt"></div>
+      <button class="btn-dl-inline" onclick="downloadResult()">↓ Download CSV</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== PANEL: DOWNLOAD ========== -->
+<div class="floating-panel" id="panel-download">
+  <div class="panel-hd">
+    <div class="panel-hd-left">
+      <div class="panel-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </div>
+      <span class="panel-title">Download Hasil</span>
+    </div>
+    <button class="panel-close-btn" onclick="closePanel('panel-download')">×</button>
+  </div>
+  <div class="panel-bd">
+    <div id="dl-list">
+      <div class="dl-empty" id="dl-empty">
+        <span class="dl-empty-icon">📂</span>
+        Belum ada hasil transformasi.<br>
+        Lakukan transformasi koordinat terlebih dahulu.
+      </div>
+    </div>
+    <div class="divider"></div>
+    <p class="help-txt">
+      File CSV siap digunakan di <strong>QGIS</strong>, <strong>ArcGIS</strong>, maupun <strong>Google Earth</strong>.
+    </p>
+  </div>
+</div>
+
+<!-- ========== PANEL: INFO ========== -->
+<div class="floating-panel" id="panel-info">
+  <div class="panel-hd">
+    <div class="panel-hd-left">
+      <div class="panel-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="8" stroke-width="3"/>
+          <line x1="12" y1="12" x2="12" y2="16"/>
+        </svg>
+      </div>
+      <span class="panel-title">Informasi Dashboard</span>
+    </div>
+    <button class="panel-close-btn" onclick="closePanel('panel-info')">×</button>
+  </div>
+  <div class="panel-bd">
+    <div class="info-sec">
+      <div class="info-sec-title">Tentang</div>
+      <p class="info-p">
+        <strong>Shifted.</strong> adalah alat transformasi koordinat geodetik untuk konversi antara datum Indonesia (ID74) dan sistem referensi global WGS 84 secara akurat dan real-time langsung pada peta interaktif.
+      </p>
+    </div>
+
+    <div class="info-sec">
+      <div class="info-sec-title">Datum yang Didukung</div>
+      <div>
+        <span class="info-chip">🌐 WGS 84</span>
+        <span class="info-chip">🇮🇩 ID 74</span>
+        <span class="info-chip">🏙 DKI Jakarta</span>
+      </div>
+    </div>
+
+    <div class="info-sec">
+      <div class="info-sec-title">Metode Transformasi</div>
+      <p class="info-p">
+        Menggunakan parameter <strong>Bursa-Wolf 7-parameter</strong> untuk transformasi antara ellipsoid Bessel 1841 (ID74) ke GRS 1980 / WGS 84 dengan akurasi sub-meter.
+      </p>
+    </div>
+
+    <div class="info-sec">
+      <div class="info-sec-title">Parameter ID74 → WGS84</div>
+      <div class="code-block">
+        ΔX &nbsp;: −587.8 m<br>
+        ΔY &nbsp;: +519.8 m<br>
+        ΔZ &nbsp;: +145.7 m<br>
+        Src : Bessel 1841<br>
+        Dst : WGS 84 / GRS80
+      </div>
+    </div>
+
+    <div class="info-sec">
+      <div class="info-sec-title">Shortcut Keyboard</div>
+      <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>1</kbd> — Panel Layer</div>
+      <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>2</kbd> — Panel Basemap</div>
+      <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>3</kbd> — Panel Transformasi</div>
+      <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>4</kbd> — Panel Download</div>
+      <div class="shortcut-row"><kbd>Esc</kbd> — Tutup semua panel</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="info-row"><span class="info-key">versi</span><span class="info-val">v1.0.0</span></div>
+    <div class="info-row"><span class="info-key">engine</span><span class="info-val">Bursa-Wolf 7P</span></div>
+    <div class="info-row"><span class="info-key">peta</span><span class="info-val">Leaflet 1.9.4</span></div>
+  </div>
+</div>

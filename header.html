@@ -1,0 +1,78 @@
+<!-- ════════════════════════════════════════════
+    HEADER — header.html
+    Nama & tipe user di-inject oleh dashboard.html.
+    Logout overlay & fungsi JS ada di dashboard.html.
+════════════════════════════════════════════ -->
+<header class="header">
+
+  <!-- Brand -->
+  <a class="header-brand" href="#">
+    <div class="brand-mark">
+      <img src="image/Logo.png" alt="Shifted Logo"
+           style="width:60px; height:60px; object-fit:contain;">
+    </div>
+    <div class="brand-info">
+      <img src="image/Nama.png" alt="Shifted"
+           style="width:100px; height:100px; object-fit:contain;">
+    </div>
+  </a>
+
+  <!-- Actions -->
+  <div class="header-actions">
+
+    <!-- User pill -->
+    <div class="user-pill">
+      <div class="user-avatar-circle">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7"/>
+        </svg>
+      </div>
+      <div class="user-info-wrap">
+        <span class="user-display-name" id="header-user-name">—</span>
+        <span class="user-display-tipe" id="header-user-tipe">—</span>
+      </div>
+    </div>
+
+    <!-- Tombol Keluar -->
+    <button class="btn-exit" onclick="openLogoutConfirm()">Keluar</button>
+
+  </div>
+</header>
+
+<style>
+  .user-pill {
+    display: flex; align-items: center; gap: 9px;
+    padding: 5px 14px 5px 5px;
+    background: var(--bg-hover, #f0f2f6);
+    border: 1.5px solid var(--border, #e4e7ee);
+    border-radius: 999px;
+    cursor: default; user-select: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .user-pill:hover {
+    border-color: var(--accent, #4f5ef7);
+    box-shadow: 0 0 0 3px rgba(79,94,247,0.10);
+  }
+  .user-avatar-circle {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent-soft, #eef0fd);
+    border: 1.5px solid rgba(79,94,247,0.22);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent, #4f5ef7); flex-shrink: 0;
+  }
+  .user-info-wrap { display: flex; flex-direction: column; gap: 1px; line-height: 1.2; }
+  .user-display-name {
+    font-size: 12.5px; font-weight: 600;
+    color: var(--text-primary, #1a1d2e);
+    white-space: nowrap; max-width: 160px;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .user-display-tipe {
+    font-size: 10px; font-weight: 600;
+    color: var(--accent, #4f5ef7);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+</style>
