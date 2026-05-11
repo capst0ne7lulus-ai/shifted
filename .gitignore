@@ -1,0 +1,9 @@
+# Dokumentasi
+*.md
+*.docx
+*.pdf
+~$*
+
+# Java files
+*.java
+files (1)/
