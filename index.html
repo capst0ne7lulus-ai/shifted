@@ -2260,8 +2260,8 @@
       try {
         const client = window.supabase?.createClient
           ? window.supabase.createClient(
-              'https://nacqjhpwmnafzghrnvvv.supabase.co',
-              'sb_publishable_l13aqUmqoqS2L63BAW47tg_BEefQ2nG'
+              'https://vfbuxzluwafagicjuupc.supabase.co',
+              'sb_publishable_lF1YmyuuZWn4AdO9wazrDQ_-2C_tEQD'
             )
           : null;
 
@@ -2269,8 +2269,8 @@
 
         const { data, error } = await client
           .from('users')
-          .select('id, nama, nip_nim, tipe')
-          .ilike('nama', user)
+          .select('Nama, ID, Tipe')
+          .ilike('Nama', user)
           .single();
 
         if (error || !data) {
@@ -2285,7 +2285,7 @@
 
         localStorage.setItem('isLogin', 'true');
         localStorage.setItem('shifted_user', JSON.stringify({
-          nama: data.nama, tipe: data.tipe, nipnim: data.nip_nim
+          nama: data.Nama, tipe: data.Tipe, nipnim: data.ID
         }));
         window.location.href = 'dashboard.html';
 
