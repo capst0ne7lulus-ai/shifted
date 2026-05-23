@@ -1225,7 +1225,9 @@ function continueTransformAnyway() {
     const fn = _pendingTransformFn;
     _pendingTransformFn = null;
     _skipBoundsCheck = true;
-    setTimeout(() => { fn(); _skipBoundsCheck = false; }, 240);
+    setTimeout(() => {
+      try { fn(); } finally { _skipBoundsCheck = false; }
+    }, 300);
   }
 }
 
