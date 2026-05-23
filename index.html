@@ -1286,6 +1286,13 @@
             </div>
           </button>
 
+          <button class="nav-dd-item" onclick="scrollToSection('section-dokumentasi'); closeAllDropdowns()">
+             <div class="nav-dd-icon">📸</div>
+             <div class="nav-dd-text">
+                <span class="nav-dd-label">Dokumentasi</span>
+              </div>
+            </button>
+
         </div>
       </div>
 
@@ -1886,6 +1893,104 @@
 
     </div>
   </section>
+
+  <!-- ══ DOKUMENTASI SECTION ══ -->
+<section class="dev-section" id="section-dokumentasi" style="border-top: 1px solid #e2e8f0;">
+  <div class="section">
+
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label" style="margin:0 auto 18px;">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6M3 15h6"/></svg>
+        Dokumentasi
+      </div>
+      <h2 class="section-title" style="color:#0f172a;">Dokumentasi<br>
+        <span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Shifted.</span>
+      </h2>
+      <p class="section-desc" style="color:#64748b; margin:12px auto 0; max-width:480px;">
+        Dokumentasi pengembangan dan implementasi sistem transformasi datum geodetik Shifted. di lingkungan PT Pertamina Hulu Rokan.
+      </p>
+    </div>
+
+    <!-- Slider Dokumentasi -->
+    <div class="reveal reveal-d1" style="margin-top:48px; position:relative;">
+
+      <!-- Slider Container -->
+      <div id="doc-slider-track-wrap" style="
+        overflow:hidden;
+        border-radius:16px;
+        border:1px solid #e2e8f0;
+        box-shadow:0 4px 24px rgba(26,29,46,0.08);
+        background:#f8fafc;
+        position:relative;">
+
+        <!-- Main image display -->
+        <div style="position:relative; width:100%; aspect-ratio:16/9; background:#0f172a; overflow:hidden;">
+          <img id="doc-main-img"
+            src="image/dokum 1.jpg"
+            alt="Dokumentasi 1"
+            style="width:100%;height:100%;object-fit:contain;display:block;transition:opacity 0.3s ease;"
+            onerror="this.style.display='none'; document.getElementById('doc-img-fallback').style.display='flex';">
+          <div id="doc-img-fallback" style="display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:rgba(255,255,255,0.3);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span style="font-size:13px;font-family:'JetBrains Mono',monospace;">Gambar tidak ditemukan</span>
+          </div>
+
+          <!-- Overlay counter -->
+          <div style="
+            position:absolute;bottom:16px;right:16px;
+            background:rgba(0,0,0,0.55);
+            backdrop-filter:blur(8px);
+            border-radius:999px;
+            padding:5px 14px;
+            font-size:11px;font-weight:600;
+            color:#fff;
+            font-family:'JetBrains Mono',monospace;
+            letter-spacing:0.5px;">
+            <span id="doc-counter-cur">1</span> / <span id="doc-counter-tot">16</span>
+          </div>
+
+          <!-- Nav arrows -->
+          <button onclick="docSlide(-1)" style="
+            position:absolute;left:16px;top:50%;transform:translateY(-50%);
+            width:44px;height:44px;border-radius:50%;
+            background:rgba(255,255,255,0.12);
+            border:1px solid rgba(255,255,255,0.2);
+            cursor:pointer;color:#fff;
+            display:flex;align-items:center;justify-content:center;
+            transition:background 0.2s;backdrop-filter:blur(6px);"
+            onmouseover="this.style.background='rgba(79,94,247,0.6)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button onclick="docSlide(1)" style="
+            position:absolute;right:16px;top:50%;transform:translateY(-50%);
+            width:44px;height:44px;border-radius:50%;
+            background:rgba(255,255,255,0.12);
+            border:1px solid rgba(255,255,255,0.2);
+            cursor:pointer;color:#fff;
+            display:flex;align-items:center;justify-content:center;
+            transition:background 0.2s;backdrop-filter:blur(6px);"
+            onmouseover="this.style.background='rgba(79,94,247,0.6)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <!-- Thumbnail strip -->
+        <div id="doc-thumbs" style="
+          display:flex;gap:6px;padding:12px;
+          overflow-x:auto;background:#ffffff;
+          border-top:1px solid #e2e8f0;
+          scrollbar-width:thin;scrollbar-color:rgba(79,94,247,0.3) transparent;">
+        </div>
+      </div>
+
+      <!-- Dots indicator -->
+      <div id="doc-dots" style="display:flex;justify-content:center;gap:6px;margin-top:16px;flex-wrap:wrap;"></div>
+    </div>
+
+  </div>
+</section>
 
 
   <!-- ══ LOGIN MODAL POPUP ══ -->
@@ -2513,6 +2618,95 @@
         document.body.classList.remove('modal-open');
       }
     });
+
+    // ══════════════════════════════════════
+// DOKUMENTASI SLIDER
+// ══════════════════════════════════════
+(function(){
+  const imgs = [
+    'image/dokum 1.jpg','image/dokum 2.jpg','image/dokum 3.jpg','image/dokum 4.jpg',
+    'image/dokum 5.jpg','image/dokum 6.jpg','image/dokum 7.jpg','image/dokum 8.jpg',
+    'image/dokum 9.jpg','image/dokum 10.jpg','image/dokum 11.jpg','image/dokum 12.jpg',
+    'image/dokum 13.jpg','image/dokum 14.jpg','image/dokum 15.jpg','image/dokum 16.JPG'
+  ];
+  let cur = 0;
+  const mainImg   = document.getElementById('doc-main-img');
+  const fallback  = document.getElementById('doc-img-fallback');
+  const curEl     = document.getElementById('doc-counter-cur');
+  const totEl     = document.getElementById('doc-counter-tot');
+  const thumbWrap = document.getElementById('doc-thumbs');
+  const dotsWrap  = document.getElementById('doc-dots');
+
+  if (!mainImg) return;
+  totEl.textContent = imgs.length;
+
+  // Build thumbs & dots
+  imgs.forEach((src, i) => {
+    // Thumb
+    const th = document.createElement('img');
+    th.src = src;
+    th.alt = 'Dok ' + (i+1);
+    th.id  = 'doc-th-' + i;
+    th.style.cssText = `
+      width:72px;height:52px;object-fit:cover;border-radius:8px;
+      cursor:pointer;flex-shrink:0;border:2px solid transparent;
+      transition:border-color 0.2s,opacity 0.2s;opacity:0.55;`;
+    th.onclick = () => goDoc(i);
+    thumbWrap.appendChild(th);
+
+    // Dot
+    const dot = document.createElement('button');
+    dot.id = 'doc-dot-' + i;
+    dot.style.cssText = `
+      width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;
+      background:${i===0?'#4f5ef7':'#cbd5e1'};
+      transition:background 0.2s,transform 0.2s;padding:0;`;
+    dot.onclick = () => goDoc(i);
+    dotsWrap.appendChild(dot);
+  });
+
+  function goDoc(idx) {
+    cur = (idx + imgs.length) % imgs.length;
+    mainImg.style.opacity = '0';
+    fallback.style.display = 'none';
+    mainImg.style.display  = 'block';
+    setTimeout(() => {
+      mainImg.src = imgs[cur];
+      mainImg.onerror = function(){
+        this.style.display = 'none';
+        fallback.style.display = 'flex';
+      };
+      mainImg.style.opacity = '1';
+    }, 150);
+    curEl.textContent = cur + 1;
+
+    // Update thumbs
+    imgs.forEach((_, i) => {
+      const t = document.getElementById('doc-th-' + i);
+      const d = document.getElementById('doc-dot-' + i);
+      if (t) { t.style.borderColor = i===cur ? '#4f5ef7' : 'transparent'; t.style.opacity = i===cur ? '1' : '0.55'; }
+      if (d) { d.style.background  = i===cur ? '#4f5ef7' : '#cbd5e1'; d.style.transform = i===cur ? 'scale(1.3)' : 'scale(1)'; }
+    });
+
+    // Scroll thumb into view
+    const activeTh = document.getElementById('doc-th-' + cur);
+    if (activeTh) activeTh.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+  }
+
+  // Init
+  goDoc(0);
+  window.docSlide = (dir) => goDoc(cur + dir);
+
+  // Keyboard arrow support (saat tidak ada modal terbuka)
+  document.addEventListener('keydown', function(e){
+    if (document.querySelector('.modal-overlay.open') || document.getElementById('login-modal').classList.contains('open')) return;
+    if (e.key === 'ArrowLeft')  window.docSlide(-1);
+    if (e.key === 'ArrowRight') window.docSlide(1);
+  });
+
+  // Auto-advance setiap 5 detik (opsional — hapus jika tidak diinginkan)
+  setInterval(() => window.docSlide(1), 5000);
+})();
   </script>
 
 </body>
