@@ -1220,10 +1220,9 @@ function closeBoundsWarning() {
 }
 
 function continueTransformAnyway() {
+  const fn = _pendingTransformFn;   // simpan SEBELUM close
   closeBoundsWarning();
-  if (_pendingTransformFn) {
-    const fn = _pendingTransformFn;
-    _pendingTransformFn = null;
+  if (fn) {
     _skipBoundsCheck = true;
     setTimeout(() => {
       try { fn(); } finally { _skipBoundsCheck = false; }
