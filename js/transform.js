@@ -18,6 +18,8 @@
  * ✔ renderTable()  — tabel CSV lengkap + kolom Residual
  * ✔ calcResidual() — hitung residual per titik (forward → inverse → selisih)
  * ✔ Download CSV queue
+ * ✔ [FIX 5] continueTransformAnyway() — race condition _skipBoundsCheck diperbaiki:
+ *           flag di-set SEBELUM overlay ditutup, delay 350ms > animasi 230ms
  */
 
 'use strict';
@@ -1123,13 +1125,31 @@ function closeBoundsWarning() {
 }
 
 function continueTransformAnyway() {
+  // [FIX] Simpan fn dan set _skipBoundsCheck = true SEBELUM overlay ditutup,
+  // agar flag sudah aktif ketika runTransform() dipanggil ulang.
+  // closeBoundsWarning() di-inline supaya _pendingTransformFn tidak di-null
+  // sebelum sempat disimpan ke fn.
   const fn = _pendingTransformFn;
-  closeBoundsWarning();
+  _pendingTransformFn = null;
+  _skipBoundsCheck = true;
+
+  // Tutup overlay secara inline (tanpa lewat closeBoundsWarning)
+  const overlay = document.getElementById('bounds-warn-overlay');
+  if (overlay) {
+    overlay.style.opacity = '0';
+    const box = document.getElementById('bounds-warn-box');
+    if (box) box.style.transform = 'translateY(20px) scale(0.96)';
+    setTimeout(() => { overlay.style.display = 'none'; }, 230);
+  }
+
   if (fn) {
-    _skipBoundsCheck = true;
+    // Delay sedikit lebih panjang dari animasi overlay (230 ms)
+    // agar DOM sudah bersih sebelum runTransform() dieksekusi.
     setTimeout(() => {
       try { fn(); } finally { _skipBoundsCheck = false; }
-    }, 300);
+    }, 350);
+  } else {
+    _skipBoundsCheck = false;
   }
 }
 
