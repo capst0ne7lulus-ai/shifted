@@ -32,6 +32,8 @@ let _lastResults = [];
 let epochEffectEnabled = false;
 let epochEffectYear    = 2026;   // tahun target default
 let epochEffectMonth   = 1;      // bulan target default (1 = Januari)
+let _pendingTransformFn = null;
+let _skipBoundsCheck    = false;
 
 // ──────────────────────────────────────────────
 // EPOCH EFFECT — velocity-based (EpochTransformation.java)
@@ -1051,8 +1053,6 @@ function setEpochTargetMonth(month) {
 // ══════════════════════════════════════════════
 // ★ POPUP PERINGATAN LUAR WK ROKAN
 // ══════════════════════════════════════════════
-let _pendingTransformFn = null;
-let _skipBoundsCheck    = false;
 
 function _ensureBoundsWarningOverlay() {
   if (document.getElementById('bounds-warn-overlay')) return;
