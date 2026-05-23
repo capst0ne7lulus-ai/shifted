@@ -480,13 +480,16 @@ function parseCSV(text) {
   return rows.length ? rows : null;
 }
 
-const h = 'id,lat_asal,lon_asal,lat_hasil,lon_hasil,jarak_m,arah_deg,datum_asal,datum_tujuan';
+function toCSVStr(results) {
+  const h = 'id,lat_asal,lon_asal,lat_hasil,lon_hasil,jarak_m,arah_deg,datum_asal,datum_tujuan';
   const r = results.map(r => {
     const d = calcDistance(r.latIn, r.lonIn, r.latOut, r.lonOut);
     const b = calcBearing(r.latIn, r.lonIn, r.latOut, r.lonOut);
     return `${r.id},${r.latIn},${r.lonIn},${r.latOut.toFixed(8)},${r.lonOut.toFixed(8)},`
          + `${d.toFixed(3)},${b.toFixed(2)},${r.from},${r.to}`;
   });
+  return [h, ...r].join('\n');
+}
 
 // ──────────────────────────────────────────────
 // JARAK & ARAH
@@ -822,54 +825,14 @@ function renderTable(results, fmtIn, fmtOut) {
     return { r, d, dStr, b, t };
   });
 
-  const fmtD   = v => v >= 1000 ? `${(v / 1000).toFixed(3)} km` : `${v.toFixed(2)} m`;
-  const fmtR   = v => v < 0.001 ? v.toExponential(3) : v.toFixed(6);
-  const avg    = results.length ? totalDist / results.length : 0;
-  const avgRes = results.length ? totalRes  / results.length : 0;
-
-  const rmse = Math.sqrt(
-    results.reduce((sum, r) => {
-      const res = calcResidual(r.latIn, r.lonIn, r.latOut, r.lonOut, r.from, r.to);
-      return sum + res.residual ** 2;
-    }, 0) / results.length
-  );
+  const fmtD = v => v >= 1000 ? `${(v / 1000).toFixed(3)} km` : `${v.toFixed(2)} m`;
+  const avg  = results.length ? totalDist / results.length : 0;
 
   wrapper.innerHTML = `
     <div class="tbl-header">
       <div class="tbl-header-title">
         📊 Hasil Transformasi CSV
         <span class="tbl-badge">${results.length} titik</span>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;padding:10px 12px;background:#f8f9fb;
-      border-bottom:1px solid #e4e7ee;flex-wrap:wrap;">
-      <div style="flex:1;min-width:120px;padding:8px 12px;background:#fff;
-        border:1px solid #e4e7ee;border-radius:8px;">
-        <div style="font-size:9px;font-weight:700;color:#9aa0b4;text-transform:uppercase;
-          letter-spacing:1px;margin-bottom:3px;">RMSE Residual</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;
-          color:${residualClass(rmse).color};font-weight:700;">${fmtR(rmse)} m</div>
-      </div>
-      <div style="flex:1;min-width:120px;padding:8px 12px;background:#fff;
-        border:1px solid #e4e7ee;border-radius:8px;">
-        <div style="font-size:9px;font-weight:700;color:#9aa0b4;text-transform:uppercase;
-          letter-spacing:1px;margin-bottom:3px;">Residual Min</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;
-          color:${residualClass(minRes).color};font-weight:700;">${fmtR(minRes)} m</div>
-      </div>
-      <div style="flex:1;min-width:120px;padding:8px 12px;background:#fff;
-        border:1px solid #e4e7ee;border-radius:8px;">
-        <div style="font-size:9px;font-weight:700;color:#9aa0b4;text-transform:uppercase;
-          letter-spacing:1px;margin-bottom:3px;">Residual Maks</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;
-          color:${residualClass(maxRes).color};font-weight:700;">${fmtR(maxRes)} m</div>
-      </div>
-      <div style="flex:1;min-width:120px;padding:8px 12px;background:#fff;
-        border:1px solid #e4e7ee;border-radius:8px;">
-        <div style="font-size:9px;font-weight:700;color:#9aa0b4;text-transform:uppercase;
-          letter-spacing:1px;margin-bottom:3px;">Rata-rata</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;
-          color:${residualClass(avgRes).color};font-weight:700;">${fmtR(avgRes)} m</div>
       </div>
     </div>
     <div class="tbl-scroll">
@@ -884,7 +847,7 @@ function renderTable(results, fmtIn, fmtOut) {
           </tr>
         </thead>
         <tbody>
-          ${rows.map(({ r, d, dStr, b, t, resid, residStr, cls }) => `
+          ${rows.map(({ r, dStr, b }) => `
             <tr>
               <td class="td-id">${r.id}</td>
               <td class="td-asal">${formatCoordShort(r.latIn,  r.lonIn,  fmtIn  || 'dd')}</td>
@@ -910,8 +873,6 @@ function renderTable(results, fmtIn, fmtOut) {
 function toGeoJSON(results) {
   const features = [];
   results.forEach(r => {
-    const resid = calcResidual(r.latIn, r.lonIn, r.latOut, r.lonOut, r.from, r.to);
-    const cls   = residualClass(resid.residual);
     const dist  = calcDistance(r.latIn, r.lonIn, r.latOut, r.lonOut);
     const bear  = calcBearing(r.latIn, r.lonIn, r.latOut, r.lonOut);
     features.push({
@@ -919,16 +880,14 @@ function toGeoJSON(results) {
       geometry: { type: 'Point', coordinates: [r.lonIn, r.latIn] },
       properties: { id: r.id, tipe: 'Titik Asal', datum: r.from.toUpperCase(),
         lat: r.latIn, lon: r.lonIn, jarak_m: parseFloat(dist.toFixed(3)),
-        arah_deg: parseFloat(bear.toFixed(2)), residual_m: parseFloat(resid.residual.toFixed(6)),
-        kualitas: cls.label },
+        arah_deg: parseFloat(bear.toFixed(2)) },
     });
     features.push({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [r.lonOut, r.latOut] },
       properties: { id: r.id, tipe: 'Titik Hasil', datum: r.to.toUpperCase(),
         lat: r.latOut, lon: r.lonOut, jarak_m: parseFloat(dist.toFixed(3)),
-        arah_deg: parseFloat(bear.toFixed(2)), residual_m: parseFloat(resid.residual.toFixed(6)),
-        kualitas: cls.label },
+        arah_deg: parseFloat(bear.toFixed(2)) },
     });
   });
   return JSON.stringify({
@@ -1270,13 +1229,11 @@ function _saveHistory(list) { localStorage.setItem(_HISTORY_KEY, JSON.stringify(
 function _pushHistory(results, from, to, mode) {
   if (!results?.length) return;
   const user = (() => { try { return JSON.parse(localStorage.getItem('shifted_user'))?.nama || '-'; } catch (_) { return '-'; } })();
-  const residuals = results.map(r => calcResidual(r.latIn, r.lonIn, r.latOut, r.lonOut, r.from, r.to).residual);
-  const rmse    = Math.sqrt(residuals.reduce((s, v) => s + v ** 2, 0) / residuals.length);
   const avgDist = results.reduce((s, r) => s + calcDistance(r.latIn, r.lonIn, r.latOut, r.lonOut), 0) / results.length;
   const entry = {
     id: Date.now(), timestamp: new Date().toLocaleString('id-ID'), mode,
     from: from.toUpperCase(), to: to.toUpperCase(), count: results.length,
-    rmse: parseFloat(rmse.toFixed(6)), avgDist: parseFloat(avgDist.toFixed(3)), user,
+    avgDist: parseFloat(avgDist.toFixed(3)), user,
     preview: results.slice(0, 3).map(r => ({ id: r.id, latIn: r.latIn, lonIn: r.lonIn,
       latOut: parseFloat(r.latOut.toFixed(8)), lonOut: parseFloat(r.lonOut.toFixed(8)) })),
     results,
@@ -1296,9 +1253,7 @@ function renderHistory() {
   if (countEl) countEl.textContent = list.length;
   if (!list.length) { if (emptyEl) emptyEl.style.display = 'block'; container.innerHTML = ''; return; }
   if (emptyEl) emptyEl.style.display = 'none';
-  const fmtR = v => v < 0.001 ? v.toExponential(3) : v.toFixed(6);
   const fmtD = v => v >= 1000 ? `${(v/1000).toFixed(2)} km` : `${v.toFixed(2)} m`;
-  const cls  = v => residualClass(v);
   container.innerHTML = list.map((e, i) => `
     <div style="border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden;transition:border-color var(--trans);"
       onmouseover="this.style.borderColor='var(--border-focus)'" onmouseout="this.style.borderColor='var(--border)'">
@@ -1316,10 +1271,6 @@ function renderHistory() {
           <span style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);">${e.count} titik</span>
         </div>
         <div style="display:flex;gap:6px;margin-bottom:8px;">
-          <div style="flex:1;padding:5px 8px;background:var(--bg-input);border-radius:6px;border:1px solid var(--border);">
-            <div style="font-size:9px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">RMSE</div>
-            <div style="font-family:var(--font-mono);font-size:11px;color:${cls(e.rmse).color};font-weight:700;">${fmtR(e.rmse)} m</div>
-          </div>
           <div style="flex:1;padding:5px 8px;background:var(--bg-input);border-radius:6px;border:1px solid var(--border);">
             <div style="font-size:9px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Avg Jarak</div>
             <div style="font-family:var(--font-mono);font-size:11px;color:var(--accent);font-weight:700;">${fmtD(e.avgDist)}</div>
