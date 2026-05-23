@@ -352,22 +352,6 @@ function transform(lat, lon, from, to, h = 0, epochTarget) {
   return molodensky7param(lat, lon, dir, epochTarget);
 }
 
-// ══════════════════════════════════════════════
-// ★ RESIDUAL CALCULATOR
-// ══════════════════════════════════════════════
-function calcResidual(latIn, lonIn, latOut, lonOut, from, to) {
-  const back = transform(latOut, lonOut, to, from);
-  const residual = calcDistance(latIn, lonIn, back.lat, back.lon);
-  return { residual, latBack: back.lat, lonBack: back.lon };
-}
-
-function residualClass(r) {
-  if (r < 0.01)  return { label: 'Sangat Baik', color: '#0ca678', bg: '#e8f8f2' };
-  if (r < 0.10)  return { label: 'Baik',        color: '#1098ad', bg: '#e3f8ff' };
-  if (r < 0.50)  return { label: 'Cukup',       color: '#f59f00', bg: '#fff8e1' };
-  if (r < 1.00)  return { label: 'Rendah',      color: '#fd7e14', bg: '#fff3e0' };
-  return               { label: 'Buruk',        color: '#fa5252', bg: '#fff0f0' };
-}
 
 // ──────────────────────────────────────────────
 // FORMAT UTILITIES
@@ -496,18 +480,13 @@ function parseCSV(text) {
   return rows.length ? rows : null;
 }
 
-function toCSVStr(results) {
-  const h = 'id,lat_asal,lon_asal,lat_hasil,lon_hasil,jarak_m,arah_deg,residual_m,kualitas,datum_asal,datum_tujuan';
+const h = 'id,lat_asal,lon_asal,lat_hasil,lon_hasil,jarak_m,arah_deg,datum_asal,datum_tujuan';
   const r = results.map(r => {
-    const d   = calcDistance(r.latIn, r.lonIn, r.latOut, r.lonOut);
-    const b   = calcBearing(r.latIn, r.lonIn, r.latOut, r.lonOut);
-    const res = calcResidual(r.latIn, r.lonIn, r.latOut, r.lonOut, r.from, r.to);
-    const cls = residualClass(res.residual);
+    const d = calcDistance(r.latIn, r.lonIn, r.latOut, r.lonOut);
+    const b = calcBearing(r.latIn, r.lonIn, r.latOut, r.lonOut);
     return `${r.id},${r.latIn},${r.lonIn},${r.latOut.toFixed(8)},${r.lonOut.toFixed(8)},`
-         + `${d.toFixed(3)},${b.toFixed(2)},${res.residual.toFixed(6)},${cls.label},${r.from},${r.to}`;
+         + `${d.toFixed(3)},${b.toFixed(2)},${r.from},${r.to}`;
   });
-  return [h, ...r].join('\n');
-}
 
 // ──────────────────────────────────────────────
 // JARAK & ARAH
@@ -751,27 +730,13 @@ function runTransform() {
     const res = transform(parsed.lat, parsed.lon, from, to);
     const fmt = formatCoord(res.lat, res.lon, fmtOut);
 
-    const resid = calcResidual(parsed.lat, parsed.lon, res.lat, res.lon, from, to);
-    const cls   = residualClass(resid.residual);
-
     const rb = document.getElementById('result-box');
     const rv = document.getElementById('result-vals');
     const rf = document.getElementById('result-fmt');
     if (rb) rb.classList.add('show');
     if (rv) rv.innerHTML =
       `<span style="color:#5a6278;font-size:10px;font-weight:600;">${fmt.latLabel || 'LAT'}</span> ${fmt.latStr}<br>` +
-      `<span style="color:#5a6278;font-size:10px;font-weight:600;">${fmt.lonLabel || 'LON'}</span> ${fmt.lonStr}<br>` +
-      `<div style="margin-top:8px;padding:6px 8px;background:${cls.bg};border-radius:6px;
-        display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:10px;color:#5a6278;font-weight:600;">RESIDUAL</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${cls.color};font-weight:700;">
-          ${resid.residual < 0.001
-            ? resid.residual.toExponential(3)
-            : resid.residual.toFixed(6)} m
-          &nbsp;<span style="font-size:9px;background:${cls.color};color:#fff;
-            padding:1px 6px;border-radius:10px;">${cls.label}</span>
-        </span>
-      </div>`;
+      `<span style="color:#5a6278;font-size:10px;font-weight:600;">${fmt.lonLabel || 'LON'}</span> ${fmt.lonStr}`;
     if (rf) rf.textContent = `[${fmt.label}]`;
 
     if (window.plotPointPair) {
@@ -843,7 +808,6 @@ function renderTable(results, fmtIn, fmtOut) {
   if (!wrapper) return;
 
   let totalDist = 0, minDist = Infinity, maxDist = -Infinity;
-  let totalRes  = 0, minRes  = Infinity, maxRes  = -Infinity;
 
   const rows = results.map(r => {
     const d   = calcDistance(r.latIn, r.lonIn, r.latOut, r.lonOut);
@@ -851,21 +815,11 @@ function renderTable(results, fmtIn, fmtOut) {
     const t   = bearingToText(b);
     const dStr = d >= 1000 ? `${(d / 1000).toFixed(3)} km` : `${d.toFixed(2)} m`;
 
-    const resid = calcResidual(r.latIn, r.lonIn, r.latOut, r.lonOut, r.from, r.to);
-    const cls   = residualClass(resid.residual);
-    const residStr = resid.residual < 0.001
-      ? resid.residual.toExponential(3)
-      : resid.residual.toFixed(6);
-
     totalDist += d;
     if (d < minDist) minDist = d;
     if (d > maxDist) maxDist = d;
 
-    totalRes += resid.residual;
-    if (resid.residual < minRes) minRes = resid.residual;
-    if (resid.residual > maxRes) maxRes = resid.residual;
-
-    return { r, d, dStr, b, t, resid, residStr, cls };
+    return { r, d, dStr, b, t };
   });
 
   const fmtD   = v => v >= 1000 ? `${(v / 1000).toFixed(3)} km` : `${v.toFixed(2)} m`;
@@ -927,8 +881,6 @@ function renderTable(results, fmtIn, fmtOut) {
             <th>Koordinat Hasil<br><em style="font-weight:400;color:#9aa0b4;">${(fmtOut||'dd').toUpperCase()}</em></th>
             <th>Jarak</th>
             <th>Arah °</th>
-            <th>Residual (m)</th>
-            <th>Kualitas</th>
           </tr>
         </thead>
         <tbody>
@@ -939,14 +891,6 @@ function renderTable(results, fmtIn, fmtOut) {
               <td class="td-hasil">${formatCoordShort(r.latOut, r.lonOut, fmtOut || 'dd')}</td>
               <td class="td-jarak">${dStr}</td>
               <td class="td-arah">${b.toFixed(2)}°</td>
-              <td style="font-family:'JetBrains Mono',monospace;font-size:10.5px;
-                color:${cls.color};font-weight:600;">${residStr}</td>
-              <td>
-                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;
-                  background:${cls.bg};color:${cls.color};white-space:nowrap;">
-                  ${cls.label}
-                </span>
-              </td>
             </tr>`).join('')}
         </tbody>
       </table>
