@@ -7,3 +7,6 @@
 # Java files
 *.java
 files (1)/
+
+# Components
+components/
