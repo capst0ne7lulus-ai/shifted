@@ -1868,25 +1868,6 @@
 
       </div>
 
-      <!-- Capstone info -->
-      <div class="reveal reveal-d2" style="margin-top:52px; padding:28px 32px; background:#0f172a; border-radius:16px; text-align:center;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,0.35);font-family:'JetBrains Mono',monospace;margin-bottom:14px;">Capstone Project</p>
-        <p style="font-size:15px;font-weight:700;color:#fff;line-height:1.55;max-width:620px;margin:0 auto 16px;">
-          Pembangunan Sistem Informasi Transformasi Datum Menggunakan Data Perubahan Kerangka dan Data Deformasi Lempeng di Lingkungan Pertamina Hulu Rokan
-        </p>
-        <p style="font-size:12px;color:rgba(255,255,255,0.38);margin-bottom:20px;">
-          Teknik Geodesi dan Geomatika · Institut Teknologi Bandung
-        </p>
-        <a href="#" class="btn-masuk" style="font-size:13px;padding:10px 28px;display:inline-flex;" onclick="openLoginModal(); return false;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          Masuk ke Dashboard
-          <svg class="btn-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-
-    </div>
-  </section>
-
 <!-- ══ DOKUMENTASI LAPANGAN ══ -->
 <section class="dokum-section" id="section-dokumentasi">
   <div class="section">
@@ -1928,6 +1909,26 @@
 
   </div>
 </section>
+
+      <!-- Capstone info -->
+      <div class="reveal reveal-d2" style="margin-top:52px; padding:28px 32px; background:#0f172a; border-radius:16px; text-align:center;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,0.35);font-family:'JetBrains Mono',monospace;margin-bottom:14px;">Capstone Project</p>
+        <p style="font-size:15px;font-weight:700;color:#fff;line-height:1.55;max-width:620px;margin:0 auto 16px;">
+          Pembangunan Sistem Informasi Transformasi Datum Menggunakan Data Perubahan Kerangka dan Data Deformasi Lempeng di Lingkungan Pertamina Hulu Rokan
+        </p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.38);margin-bottom:20px;">
+          Teknik Geodesi dan Geomatika · Institut Teknologi Bandung
+        </p>
+        <a href="#" class="btn-masuk" style="font-size:13px;padding:10px 28px;display:inline-flex;" onclick="openLoginModal(); return false;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Masuk ke Dashboard
+          <svg class="btn-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
 
   <!-- ══ LOGIN MODAL POPUP ══ -->
   <div class="login-modal-overlay" id="login-modal" onclick="handleLoginOverlay(event)">
@@ -2556,68 +2557,39 @@
     });
 
     // ══ DOKUMENTASI LAPANGAN SLIDER ══
-(function() {
-  const TOTAL_DOKUM = 16;
-  const PER_PAGE_DOKUM = 3;
-  let dokumCurrent = 0;
-  const dokumMaxStep = TOTAL_DOKUM - PER_PAGE_DOKUM;
+function buildDokumSlides() {
+  dokumTrack.innerHTML = '';
+  
+  // Nama file eksak sesuai folder image/
+  const fileNames = [
+    'dokum 1.jpg',
+    'dokum 2.jpg',
+    'dokum 3.jpg',
+    'dokum 4.jpg',
+    'dokum 5.jpg',
+    'dokum 6.jpg',
+    'dokum 7.jpg',
+    'dokum 8.jpg',
+    'dokum 9.jpg',
+    'dokum 10.jpg',
+    'dokum 11.jpg',
+    'dokum 13.jpg',
+    'dokum 14.jpg',
+    'dokum 15.JPG',
+    'dokum 16.JPG'
+  ];
 
-  const dokumTrack = document.getElementById('dokumTrack');
-  const dokumDotsEl = document.getElementById('dokumDots');
-  const dokumCounter = document.getElementById('dokumCounter');
-
-  function buildDokumSlides() {
-    dokumTrack.innerHTML = '';
-    for (let i = 1; i <= TOTAL_DOKUM; i++) {
-      const slide = document.createElement('div');
-      slide.className = 'dokum-slide';
-      slide.innerHTML = `
-        <img src="image/dokum ${i}.jpg" alt="Dokumentasi lapangan ${i}"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-        <div class="dokum-slide-fallback">📷 dokum ${i}.jpg</div>
-        <div class="dokum-slide-num">Foto ${i}</div>
-        <div class="dokum-slide-overlay"></div>`;
-      dokumTrack.appendChild(slide);
-    }
-  }
-
-  function buildDokumDots() {
-    dokumDotsEl.innerHTML = '';
-    for (let i = 0; i <= dokumMaxStep; i++) {
-      const d = document.createElement('button');
-      d.className = 'dokum-dot' + (i === 0 ? ' active' : '');
-      d.setAttribute('aria-label', 'Halaman ' + (i+1));
-      d.onclick = () => dokumGoTo(i);
-      dokumDotsEl.appendChild(d);
-    }
-  }
-
-  function getDokumSlideWidth() {
-    const slides = dokumTrack.querySelectorAll('.dokum-slide');
-    if (!slides.length) return 0;
-    const gap = 12;
-    return slides[0].offsetWidth + gap;
-  }
-
-  window.dokumGoTo = function(idx) {
-    dokumCurrent = Math.max(0, Math.min(idx, dokumMaxStep));
-    dokumTrack.style.transform = `translateX(-${dokumCurrent * getDokumSlideWidth()}px)`;
-    document.querySelectorAll('.dokum-dot').forEach((d,i) => d.classList.toggle('active', i===dokumCurrent));
-    document.getElementById('dokumPrev').disabled = dokumCurrent === 0;
-    document.getElementById('dokumNext').disabled = dokumCurrent === dokumMaxStep;
-    const end = Math.min(dokumCurrent + PER_PAGE_DOKUM, TOTAL_DOKUM);
-    dokumCounter.textContent = `${dokumCurrent+1} – ${end} dari ${TOTAL_DOKUM} foto`;
-  };
-
-  window.dokumSlide = function(dir) { dokumGoTo(dokumCurrent + dir); };
-
-  buildDokumSlides();
-  buildDokumDots();
-  dokumGoTo(0);
-
-  window.addEventListener('resize', () => dokumGoTo(dokumCurrent));
-})();
-  </script>
-
+  fileNames.forEach(function(fname, idx) {
+    const slide = document.createElement('div');
+    slide.className = 'dokum-slide';
+    slide.innerHTML = `
+      <img src="image/${fname}" alt="Dokumentasi lapangan ${idx + 1}"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="dokum-slide-fallback">📷 ${fname}</div>
+      <div class="dokum-slide-num">Foto ${idx + 1}</div>
+      <div class="dokum-slide-overlay"></div>`;
+    dokumTrack.appendChild(slide);
+  });
+}
 </body>
 </html>
