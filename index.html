@@ -1868,48 +1868,6 @@
 
       </div>
 
-<!-- ══ DOKUMENTASI LAPANGAN ══ -->
-<section class="dokum-section" id="section-dokumentasi">
-  <div class="section">
-
-    <div class="reveal" style="text-align:center;">
-      <div class="section-label" style="margin:0 auto 18px;">
-        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-        Dokumentasi Lapangan
-      </div>
-      <h2 class="section-title" style="color:#0f172a;">Foto Kegiatan<br><span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Pengukuran di Lapangan</span></h2>
-      <p class="section-desc" style="color:#64748b; margin:12px auto 0; max-width:520px;">
-        Dokumentasi kegiatan pengukuran titik sekutu untuk penentuan parameter transformasi datum di Wilayah Kerja PT. Pertamina Hulu Rokan.
-      </p>
-    </div>
-
-    <!-- SLIDER -->
-    <div class="dokum-slider-outer reveal reveal-d1" id="dokumSliderOuter">
-      <button class="dokum-btn prev" id="dokumPrev" onclick="dokumSlide(-1)" aria-label="Sebelumnya">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div class="dokum-track-wrap">
-        <div class="dokum-track" id="dokumTrack"></div>
-      </div>
-      <button class="dokum-btn next" id="dokumNext" onclick="dokumSlide(1)" aria-label="Berikutnya">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-    </div>
-
-    <!-- Dots -->
-    <div class="dokum-dots" id="dokumDots"></div>
-    <div class="dokum-counter" id="dokumCounter"></div>
-
-    <!-- Stats -->
-    <div class="dokum-stats reveal reveal-d2">
-      <div class="dokum-stat"><div class="dokum-stat-val">16</div><div class="dokum-stat-lbl">Total Foto</div></div>
-      <div class="dokum-stat"><div class="dokum-stat-val">9</div><div class="dokum-stat-lbl">Titik Sekutu</div></div>
-      <div class="dokum-stat"><div class="dokum-stat-val">PHR</div><div class="dokum-stat-lbl">Wilayah Kerja</div></div>
-    </div>
-
-  </div>
-</section>
-
       <!-- Capstone info -->
       <div class="reveal reveal-d2" style="margin-top:52px; padding:28px 32px; background:#0f172a; border-radius:16px; text-align:center;">
         <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,0.35);font-family:'JetBrains Mono',monospace;margin-bottom:14px;">Capstone Project</p>
@@ -2555,41 +2513,7 @@
         document.body.classList.remove('modal-open');
       }
     });
+  </script>
 
-    // ══ DOKUMENTASI LAPANGAN SLIDER ══
-function buildDokumSlides() {
-  dokumTrack.innerHTML = '';
-  
-  // Nama file eksak sesuai folder image/
-  const fileNames = [
-    'dokum 1.jpg',
-    'dokum 2.jpg',
-    'dokum 3.jpg',
-    'dokum 4.jpg',
-    'dokum 5.jpg',
-    'dokum 6.jpg',
-    'dokum 7.jpg',
-    'dokum 8.jpg',
-    'dokum 9.jpg',
-    'dokum 10.jpg',
-    'dokum 11.jpg',
-    'dokum 13.jpg',
-    'dokum 14.jpg',
-    'dokum 15.JPG',
-    'dokum 16.JPG'
-  ];
-
-  fileNames.forEach(function(fname, idx) {
-    const slide = document.createElement('div');
-    slide.className = 'dokum-slide';
-    slide.innerHTML = `
-      <img src="image/${fname}" alt="Dokumentasi lapangan ${idx + 1}"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-      <div class="dokum-slide-fallback">📷 ${fname}</div>
-      <div class="dokum-slide-num">Foto ${idx + 1}</div>
-      <div class="dokum-slide-overlay"></div>`;
-    dokumTrack.appendChild(slide);
-  });
-}
 </body>
 </html>
