@@ -1220,4 +1220,171 @@ kbd {
   line-height: 1.6;
   margin-top: 5px;
 }
+/* ══ DOKUMENTASI LAPANGAN ══ */
+.dokum-section {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+.dokum-section .section-label {
+  background: rgba(79,94,247,0.08);
+  border-color: rgba(79,94,247,0.2);
+  color: #4f5ef7;
+}
 
+.dokum-slider-outer {
+  position: relative;
+  width: 100%;
+  margin-top: 48px;
+  padding: 0 28px;
+}
+
+.dokum-track-wrap {
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.dokum-track {
+  display: flex;
+  gap: 12px;
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+  will-change: transform;
+}
+
+.dokum-slide {
+  flex: 0 0 calc(33.333% - 8px);
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e2e8f0;
+  aspect-ratio: 4/3;
+  border: 1px solid #e2e8f0;
+}
+
+.dokum-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.dokum-slide:hover img {
+  transform: scale(1.04);
+}
+
+.dokum-slide-num {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(10,10,30,0.60);
+  color: #fff;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(6px);
+}
+
+.dokum-slide-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(to top, rgba(10,10,30,0.45), transparent);
+  pointer-events: none;
+}
+
+.dokum-slide-fallback {
+  display: none;
+  position: absolute; inset: 0;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 8px;
+  background: #eef0fd;
+  font-size: 11px; color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.dokum-btn {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  z-index: 10;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: #1a1d2e;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.dokum-btn:hover {
+  background: #f8fafc;
+  border-color: rgba(79,94,247,0.3);
+  box-shadow: 0 4px 20px rgba(79,94,247,0.18);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.dokum-btn:disabled {
+  opacity: 0.35; cursor: default;
+}
+.dokum-btn:disabled:hover {
+  transform: translateY(-50%) scale(1);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border-color: #e2e8f0;
+}
+
+.dokum-btn.prev { left: 0; }
+.dokum-btn.next { right: 0; }
+
+.dokum-dots {
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; margin-top: 22px; flex-wrap: wrap;
+}
+
+.dokum-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #cbd5e1; cursor: pointer;
+  border: none; padding: 0;
+  transition: background 0.22s, width 0.22s;
+}
+
+.dokum-dot.active {
+  background: #4f5ef7;
+  width: 20px; border-radius: 4px;
+}
+
+.dokum-counter {
+  text-align: center; margin-top: 10px;
+  font-size: 11px; color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.5px;
+}
+
+.dokum-stats {
+  display: flex;
+  margin-top: 36px;
+  background: #0f172a;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.dokum-stat {
+  flex: 1; padding: 28px 20px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+.dokum-stat:last-child { border-right: none; }
+
+.dokum-stat-val {
+  font-size: 28px; font-weight: 800; color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.5px; margin-bottom: 6px;
+}
+
+.dokum-stat-lbl {
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase; letter-spacing: 0.8px;
+}
