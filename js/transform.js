@@ -30,10 +30,12 @@ let dlQueue = [];
 let _legendControl = null;
 let _lastResults = [];
 let epochEffectEnabled = false;
-let epochEffectYear    = 2026;   // tahun target default
-let epochEffectMonth   = 1;      // bulan target default (1 = Januari)
+let epochEffectYear    = 2026;
+let epochEffectMonth   = 1;
 let _pendingTransformFn = null;
 let _skipBoundsCheck    = false;
+
+const _BULAN_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
 
 // ──────────────────────────────────────────────
 // EPOCH EFFECT — velocity-based (EpochTransformation.java)
@@ -992,7 +994,6 @@ function downloadResult() { if (dlQueue.length) triggerDownload(0); }
 // ──────────────────────────────────────────────
 // TOGGLE & UPDATE UI EFEK EPOK
 // ──────────────────────────────────────────────
-const _BULAN_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
 
 function _updateEpochUI() {
   const corr  = _getEpochCorrection();
