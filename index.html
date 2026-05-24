@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shifted. | Transformasi Koordinat Geodetik</title>
+  <link rel="icon" id="favicon" type="image/png" href="image/Logo.png">
+  <script>(function(){var c=document.createElement('canvas');c.width=c.height=64;var x=c.getContext('2d');x.fillStyle='#fff';x.beginPath();x.arc(32,32,32,0,Math.PI*2);x.fill();var i=new Image();i.onload=function(){x.drawImage(i,6,6,52,52);document.getElementById('favicon').href=c.toDataURL();};i.src='image/Logo.png';})();</script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -252,9 +254,9 @@
       position: absolute; inset: 0;
       background: url('image/Landing.png') center/cover no-repeat;
       z-index: 0;
-      transform: scale(1.04);
+      transform: scale(2);
       animation: bgZoom 18s ease-in-out infinite alternate;
-      opacity: 0.18;
+      opacity: 100;
     }
 
     @keyframes bgZoom { from{transform:scale(1.04)} to{transform:scale(1.10)} }
@@ -447,7 +449,7 @@
       height: 180px;
       flex-shrink: 0;
     }
-    .news-card.featured .news-card-img-wrap { height: 220px; }
+    .news-card-img-wrap { height: 180px; }
     .news-card.full-row .news-card-img-wrap {
       width: 220px;
       min-width: 220px;
@@ -509,7 +511,7 @@
     .wb-text strong { color: #b45309; }
     /* Grid pembungkus kartu — shadow tipis agar menonjol di latar putih */
     .news-section .news-grid { box-shadow: 0 4px 24px rgba(26,29,46,0.10), 0 1px 4px rgba(26,29,46,0.06); }
-    .news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: rgba(255,255,255,0.035); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+    .news-grid { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(420px, auto); gap: 2px; background: rgba(255,255,255,0.035); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
 
     /* News cards */
     .news-card { background: #0e1029; padding: 30px; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: background 0.25s, transform 0.25s; border: none; text-align: left; width: 100%; font-family: 'Sora', sans-serif; }
@@ -519,12 +521,6 @@
     .news-card:hover .news-title { color: #fff; }
     .news-card:hover .news-read { gap: 10px; color: #a5b4fc; }
     .news-card:active { transform: scale(0.995); }
-    .news-card.featured { grid-row: span 2; border-right: 2px solid rgba(255,255,255,0.035); }
-    .news-card.featured .news-title { font-size: 21px; line-height: 1.32; }
-    .news-card.featured .news-excerpt { display: block; }
-    .news-card.full-row { grid-column: span 2; flex-direction: row; align-items: center; gap: 36px; border-top: 2px solid rgba(255,255,255,0.035); }
-    .full-row-left { flex: 1; }
-    .full-row-right { flex: 1; border-left: 1px solid rgba(255,255,255,0.06); padding-left: 36px; }
 
     /* Source badge */
     .news-source { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 999px; font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
@@ -538,7 +534,7 @@
 
     .news-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.13); margin-bottom: 10px; letter-spacing: 1px; }
     .news-title { font-size: 14.5px; font-weight: 700; color: rgba(255,255,255,0.87); line-height: 1.45; margin-bottom: 10px; transition: color 0.2s; }
-    .news-excerpt { font-size: 12.5px; color: rgba(255,255,255,0.38); line-height: 1.75; flex: 1; display: none; margin-bottom: 18px; }
+    .news-excerpt { font-size: 12px; color: rgba(255,255,255,0.38); line-height: 1.75; flex: 1; display: block; margin-bottom: 18px; }
     .news-impact { margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; }
     .impact-ico { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
     .impact-ico.red    { background: rgba(250,82,82,0.13); }
@@ -559,10 +555,9 @@
     .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
     .modal-box::-webkit-scrollbar { width: 4px; }
     .modal-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-    .modal-hero { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; border-radius: 20px 20px 0 0; }
-    .modal-hero-bg { position: absolute; inset: 0; background-image: linear-gradient(rgba(79,94,247,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(79,94,247,0.06) 1px, transparent 1px); background-size: 40px 40px; }
-    .modal-hero-icon { position: relative; z-index: 1; font-size: 56px; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4)); }
-    .modal-hero-grad { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to bottom, transparent, #0e1029); }
+    .modal-hero { width: 100%; height: 260px; position: relative; overflow: hidden; border-radius: 20px 20px 0 0; }
+    .modal-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.75); }
+    .modal-hero-grad { position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(to bottom, transparent, #0e1029); }
     .modal-close { position: absolute; top: 16px; right: 16px; z-index: 10; width: 34px; height: 34px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 18px; line-height: 1; transition: background 0.2s, color 0.2s; }
     .modal-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
     .modal-body { padding: 28px 36px 36px; }
@@ -1281,23 +1276,13 @@
             <div class="nav-dd-icon">📰</div>
             <div class="nav-dd-text">
               <span class="nav-dd-label">Berita</span>
-              <span class="nav-dd-desc">Insiden & laporan industri migas</span>
             </div>
           </button>
 
           <button class="nav-dd-item" onclick="scrollToSection('section-video'); closeAllDropdowns()">
             <div class="nav-dd-icon">🎬</div>
             <div class="nav-dd-text">
-              <span class="nav-dd-label">Video</span>
-              <span class="nav-dd-desc">Video edukasi transformasi datum</span>
-            </div>
-          </button>
-
-          <button class="nav-dd-item" onclick="scrollToSection('section-panduan'); closeAllDropdowns()">
-            <div class="nav-dd-icon">🎥</div>
-            <div class="nav-dd-text">
-              <span class="nav-dd-label">Video Panduan</span>
-              <span class="nav-dd-desc">Panduan penggunaan dashboard Shifted.</span>
+              <span class="nav-dd-label">Video Edukasi</span>
             </div>
           </button>
 
@@ -1319,7 +1304,6 @@
             <div class="nav-dd-icon">🗺️</div>
             <div class="nav-dd-text">
               <span class="nav-dd-label">Profil Dashboard Shifted.</span>
-              <span class="nav-dd-desc">Sistem transformasi koordinat ID74 ↔ WGS84</span>
             </div>
           </button>
 
@@ -1327,7 +1311,6 @@
             <div class="nav-dd-icon">👩‍💻</div>
             <div class="nav-dd-text">
               <span class="nav-dd-label">Developer</span>
-              <span class="nav-dd-desc">Tim pengembang Shifted.</span>
             </div>
           </button>
 
@@ -1365,13 +1348,13 @@
         Geodetic Coordinate Transformation System
       </div>
       <h1 class="hero-title">Transformasi Koordinat<br><span class="accent">ID74 ↔ WGS 84</span></h1>
-      <p class="hero-subtitle">Platform transformasi koordinat geodetik presisi tinggi menggunakan metode <strong style="color:#1e3a8a;">Molodensky-Badekas 10 Parameter</strong> dengan visualisasi peta interaktif berbasis GIS untuk keperluan survei dan pemetaan.</p>
+      <p class="hero-subtitle">Platform transformasi koordinat geodetik presisi tinggi menggunakan metode <strong style="color:#1e3a8a;">Molodensky-Badekas 10 Parameter</strong> dengan visualisasi peta interaktif berbasis GIS untuk keperluan survei dan pemetaan pada Wilayah Kerja PT. Pertamina Hulu Rokan</p>
     </div>
     <div class="scroll-hint"><div class="scroll-mouse"><div class="scroll-wheel"></div></div>Scroll</div>
     <div class="landing-bottom">
       <div class="bottom-items">
-        <div class="bottom-item"><span class="bottom-val">10<span class="unit">P</span></span><span class="bottom-lbl">Molodensky-Badekaslf</span></div>
-        <div class="bottom-item"><span class="bottom-val">sub-<span style="font-size:14px;">m</span></span><span class="bottom-lbl">Akurasi</span></div>
+        <div class="bottom-item"><span class="bottom-val">10<span class="unit">P</span></span><span class="bottom-lbl">Molodensky-Badekas</span></div>
+        <div class="bottom-item"><span class="bottom-val"> <5 <span style="font-size:14px;">cm</span></span><span class="bottom-lbl">Akurasi Parameter Transformasi</span></div>
         <div class="bottom-item"><span class="bottom-val">ID74</span><span class="bottom-lbl">Datum Asal</span></div>
         <div class="bottom-item"><span class="bottom-val">WGS84</span><span class="bottom-lbl">Datum Tujuan</span></div>
         <div class="bottom-item"><span class="bottom-val">GIS</span><span class="bottom-lbl">Visualisasi</span></div>
@@ -1387,25 +1370,25 @@
       <div class="reveal">
         <div class="section-label">
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          Laporan & Berita
+          Berita
         </div>
-        <h2 class="section-title">Insiden Nyata yang<br><span class="hl">Mengguncang Industri</span></h2>
-        <p class="section-desc">Kumpulan berita dan laporan terpercaya mengenai kasus-kasus kesalahan operasional pengeboran di Indonesia yang menyebabkan kerugian besar — pengingat pentingnya akurasi koordinat dan datum dalam setiap tahap operasi migas.</p>
+        <h2 class="section-title">Insiden Nyata yang<br><span class="hl">Terjadi pada Industri Migas</span></h2>
+        <p class="section-desc">Kumpulan berita mengenai kasus-kasus kesalahan operasional pengeboran di Indonesia yang menyebabkan kerugian serta pentingnya akurasi koordinat dan datum dalam setiap tahap operasional migas.</p>
       </div>
 
       <div class="warning-banner reveal reveal-d1">
         <div class="wb-icon">⚠️</div>
-        <div class="wb-text"><strong>Catatan Penting:</strong> Kesalahan operasional pengeboran — termasuk inkonsistensi datum koordinat — dapat memicu semburan liar, kerugian finansial triliunan rupiah, dan dampak lingkungan jangka panjang yang tidak dapat dipulihkan.</div>
+        <div class="wb-text"><strong>Catatan Penting:</strong> Kesalahan operasional pengeboran, termasuk inkonsistensi penggunaan datum dapat memicu semburan minyak, kerugian finansial hingga triliun rupiah, dan dampak lingkungan berkepanjangan yang sulit untuk dipulihkan.</div>
       </div>
 
       <div class="news-grid reveal reveal-d2">
 
         <!-- ★ ARTIKEL 1 — Featured (Lumpur Lapindo · Kompas) ★ -->
-        <button class="news-card featured" onclick="openModal('modal-1')">
+        <button class="news-card" onclick="openModal('modal-1')">
           <div class="news-card-img-wrap">
             <img
               class="news-card-img"
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Lapindo_mud_2007.jpg/800px-Lapindo_mud_2007.jpg"
+              src="image/berita 1.jpg"
               alt="Lumpur Lapindo Sidoarjo 2007"
               onerror="this.parentElement.style.display='none'"
             >
@@ -1414,7 +1397,7 @@
           <div class="news-cat danger"><div class="news-cat-dot"></div>Kesalahan Pengeboran</div>
           <div class="news-num">01 · NASIONAL · 7 AGUSTUS 2012</div>
           <h3 class="news-title">Pakar: Lumpur Sidoarjo Murni Kesalahan Pengeboran</h3>
-          <p class="news-excerpt">Hasil penelitian Drilling Engineers Club mengungkapkan bahwa luapan lumpur di Sidoarjo, Jawa Timur, diakibatkan oleh kesalahan operasional pengeboran yang disengaja atau intentional default — bukan bencana alam seperti yang diklaim sebelumnya.</p>
+          <p class="news-excerpt">Hasil penelitian Drilling Engineers Club mengungkapkan bahwa luapan lumpur di Sidoarjo, Jawa Timur, diakibatkan oleh kesalahan operasional pengeboran yang disengaja atau intentional default, bukan bencana alam seperti yang diklaim sebelumnya.</p>
           <div class="news-impact">
             <div class="impact-ico red">🌋</div>
             <div class="impact-txt"><strong>Dampak: Ribuan Hektar Tenggelam</strong>Semburan lumpur panas sejak 2006 · Sidoarjo, Jawa Timur</div>
@@ -1441,7 +1424,7 @@
         <button class="news-card" onclick="openModal('modal-2')">
           <div class="news-card-img-wrap">
             <img class="news-card-img"
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Geothermal_well_head_Indonesia.jpg/800px-Geothermal_well_head_Indonesia.jpg"
+              src="image/berita 2.jpg"
               alt="Pengeboran panas bumi Sorik Marapi"
               onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Wellhead_geothermal.jpg/800px-Wellhead_geothermal.jpg'">
           </div>
@@ -1449,11 +1432,12 @@
           <div class="news-cat warning"><div class="news-cat-dot"></div>Salah Koordinat</div>
           <div class="news-num">02 · EKONOMI · 23 AGUSTUS 2022</div>
           <h3 class="news-title">Mata Bor Salah Koordinat di Sorik Marapi, Halliburton Bakal Kena Sanksi</h3>
-          <div class="news-impact" style="margin-top:auto;padding-top:14px;">
+          <p class="news-excerpt">Kesalahan koordinat pengeboran di PLTP Sorik Marapi menyebabkan blowout lumpur panas bercampur gas H2S. Halliburton selaku kontraktor pengeboran terancam sanksi berat dari regulator energi Indonesia atas insiden yang membahayakan keselamatan pekerja dan lingkungan sekitar.</p>
+          <div class="news-impact">
             <div class="impact-ico amber">⛏️</div>
             <div class="impact-txt"><strong>Blowout Lumpur Panas & Gas H2S</strong>PLTP Sorik Marapi · Halliburton Drilling Systems</div>
           </div>
-          <div class="news-meta" style="margin-top:14px;">
+          <div class="news-meta">
             <div class="news-meta-item">23 Agustus 2022</div>
             <div class="meta-div"></div>
             <div class="news-meta-item">Sorik Marapi, Sumut</div>
@@ -1470,7 +1454,7 @@
         <button class="news-card" onclick="openModal('modal-3')">
           <div class="news-card-img-wrap">
             <img class="news-card-img"
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Oil_platform_P-51_%28Brazil%29.jpg/800px-Oil_platform_P-51_%28Brazil%29.jpg"
+              src="image/berita 3.jpg"
               alt="Platform migas laut dalam"
               onerror="this.parentElement.style.display='none'">
           </div>
@@ -1478,11 +1462,12 @@
           <div class="news-cat critical"><div class="news-cat-dot"></div>Kerugian Eksplorasi</div>
           <div class="news-num">03 · ESDM.GO.ID</div>
           <h3 class="news-title">12 KKKS Asing Rugi Rp19 Triliun Cari Cadangan Migas di Laut Dalam Indonesia</h3>
-          <div class="news-impact" style="margin-top:auto;padding-top:14px;">
+          <p class="news-excerpt">Sebanyak 12 Kontraktor Kontrak Kerja Sama asing mencatat kerugian kumulatif Rp19 triliun akibat gagal menemukan cadangan migas di perairan laut dalam Indonesia. Kegagalan eksplorasi ini sebagian disebabkan oleh ketidakakuratan data koordinat dan datum geodetik yang digunakan dalam survei seismik.</p>
+          <div class="news-impact">
             <div class="impact-ico purple">💰</div>
             <div class="impact-txt"><strong>Kerugian Kumulatif: Rp 19 Triliun</strong>12 KKKS asing gagal temukan cadangan migas laut dalam</div>
           </div>
-          <div class="news-meta" style="margin-top:14px;">
+          <div class="news-meta">
             <div class="news-meta-item">Kementerian ESDM RI</div>
             <div class="meta-div"></div>
             <div class="news-meta-item">Laut Dalam Indonesia</div>
@@ -1495,84 +1480,37 @@
           </a>
         </button>
 
-        <!-- ★ ARTIKEL 4 — PAD C Sukowati (Suara Banyuurip) — Full Row ★ -->
-        <button class="news-card full-row" onclick="openModal('modal-4')">
+        <!-- ★ ARTIKEL 4 — PAD C Sukowati (Suara Banyuurip) ★ -->
+        <button class="news-card" onclick="openModal('modal-4')">
           <div class="news-card-img-wrap">
             <img class="news-card-img"
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Oil_well_Sukowati.jpg/800px-Oil_well_Sukowati.jpg"
+              src="image/berita 4.jpg"
               alt="Sumur minyak Sukowati Bojonegoro"
-              onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Oil_well_Indonesia.jpg/800px-Oil_well_Indonesia.jpg'">
+              onerror="this.parentElement.style.display='none'">
           </div>
-          <div class="full-row-left">
-            <div class="news-source">🗞️ SuaraBanyuurip.com</div>
-            <div class="news-cat info"><div class="news-cat-dot"></div>Mitigasi Risiko</div>
-            <div class="news-num">04 · MIGAS · 21 JUNI 2021</div>
-            <h3 class="news-title" style="font-size:16px;max-width:420px;">Punya Risiko Besar, Lokasi Pengeboran Sumur Baru PAD C Sukowati Digeser ke Selatan</h3>
+          <div class="news-source">🗞️ SuaraBanyuurip.com</div>
+          <div class="news-cat info"><div class="news-cat-dot"></div>Mitigasi Risiko</div>
+          <div class="news-num">04 · MIGAS · 21 JUNI 2021</div>
+          <h3 class="news-title">Punya Risiko Besar, Lokasi Pengeboran Sumur Baru PAD C Sukowati Digeser ke Selatan</h3>
+          <p class="news-excerpt">Pengembangan sumur baru PAD C Sukowati di Banjarsari, Bojonegoro, dipaksa menggeser lokasi pengeboran setelah analisis mendalam menemukan potensi risiko besar berupa patahan geologi besar yang harus dilalui jika tetap menggunakan titik koordinat awal.</p>
+          <div class="news-impact">
+            <div class="impact-ico blue">📍</div>
+            <div class="impact-txt"><strong>Lokasi Digeser Beberapa Ratus Meter</strong>Pertamina EP Cepu Zona 11 · Bojonegoro, Jawa Timur</div>
           </div>
-          <div class="full-row-right">
-            <p class="news-excerpt" style="display:block;margin-bottom:16px;">Pengembangan sumur baru PAD C Sukowati di Banjarsari, Bojonegoro, dipaksa menggeser lokasi pengeboran setelah analisis mendalam menemukan potensi risiko besar berupa patahan geologi besar yang harus dilalui jika tetap menggunakan titik koordinat awal.</p>
-            <div class="news-impact" style="padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);">
-              <div class="impact-ico blue">📍</div>
-              <div class="impact-txt"><strong>Lokasi Digeser Beberapa Ratus Meter</strong>Pertamina EP Cepu Zona 11 · Bojonegoro, Jawa Timur</div>
-            </div>
-            <span class="news-read" style="margin-top:16px;">Baca Selengkapnya <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-            <a href="https://suarabanyuurip.com/2021/06/21/punya-risiko-besar-lokasi-pengeboran-sumur-baru-pad-c-sukowati-digeser-ke-selatan/"
-               target="_blank" class="news-card-link" style="margin-top:12px;" onclick="event.stopPropagation()">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              Buka Artikel Asli
-            </a>
+          <div class="news-meta">
+            <div class="news-meta-item">21 Juni 2021</div>
+            <div class="meta-div"></div>
+            <div class="news-meta-item">Bojonegoro, Jawa Timur</div>
           </div>
+          <span class="news-read">Baca Selengkapnya <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+          <a href="https://suarabanyuurip.com/2021/06/21/punya-risiko-besar-lokasi-pengeboran-sumur-baru-pad-c-sukowati-digeser-ke-selatan/"
+             target="_blank" class="news-card-link" onclick="event.stopPropagation()">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Buka Artikel Asli
+          </a>
         </button>
 
       </div><!-- /news-grid -->
-    </div>
-  </section>
-
-
-  <!-- ══ VIDEO PANDUAN SECTION ══ -->
-  <section class="video-section" id="section-panduan">
-    <div class="section">
-      <div class="reveal">
-        <div class="section-label">
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-          Video Panduan
-        </div>
-        <h2 class="section-title">Panduan Penggunaan<br><span style="background:linear-gradient(90deg,#7c8dfa,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Dashboard Shifted.</span></h2>
-        <p class="section-desc">Video panduan penggunaan dashboard Shifted. untuk membantu pengguna dalam melakukan transformasi koordinat datum secara efektif.</p>
-      </div>
-      <div class="video-grid">
-
-        <!-- Video Panduan Dashboard Shifted. -->
-        <div class="video-card v-featured reveal reveal-d1">
-          <div class="video-embed" id="ve-panduan">
-            <div class="yt-thumb" onclick="loadYT('ve-panduan','BH5dX-zpXW0')"
-                 style="background-image:url('https://img.youtube.com/vi/BH5dX-zpXW0/maxresdefault.jpg');">
-              <div class="yt-overlay"></div>
-              <button class="yt-play" aria-label="Putar video">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
-                  <polygon points="5 3 19 12 5 21 5 3"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="video-info">
-            <div class="video-tag">
-              <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              Panduan · YouTube
-            </div>
-            <div class="video-title">Panduan Penggunaan Dashboard Shifted.</div>
-            <div class="video-desc">Klik video di atas untuk memutar panduan penggunaan dashboard Shifted. langsung di halaman ini.</div>
-            <div class="video-meta">
-              <div class="vm-item">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
-                YouTube
-              </div>
-              <a href="https://youtu.be/BH5dX-zpXW0" target="_blank" style="font-size:10px;color:#4f5ef7;font-family:'JetBrains Mono',monospace;text-decoration:none;">Buka di YouTube ↗</a>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </div>
   </section>
 
@@ -1586,11 +1524,11 @@
           Video Edukasi
         </div>
         <h2 class="section-title">Pelajari Lebih Dalam<br><span style="background:linear-gradient(90deg,#7c8dfa,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Transformasi Datum</span></h2>
-        <p class="section-desc">Koleksi video teknis mengenai pentingnya akurasi datum dalam operasi pengeboran, metode Molodensky-Badekas, dan penerapan sistem koordinat geodetik di industri migas.</p>
+        <p class="section-desc">Video edukasi mengenai datum yang berisi penjelasan singkat untuk memahami konsep penggunaan datum dalam transformasi.</p>
       </div>
       <div class="video-grid">
 
-        <!-- Video 1 — xKGlMp__jog (Featured, full width) -->
+        <!-- A Simple Explanation of Datum (Featured, full width) -->
         <div class="video-card v-featured reveal reveal-d1">
           <div class="video-embed" id="ve-1">
             <div class="yt-thumb" onclick="loadYT('ve-1','xKGlMp__jog')"
@@ -1608,8 +1546,8 @@
               <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
               Featured · YouTube
             </div>
-            <div class="video-title">Video 1 — youtu.be/xKGlMp__jog</div>
-            <div class="video-desc">Klik thumbnail di atas untuk memutar video langsung di halaman ini.</div>
+            <div class="video-title">A Simple Explanation of Datum</div>
+            <div class="video-desc">Klik video di atas untuk memutar video langsung di halaman ini.</div>
             <div class="video-meta">
               <div class="vm-item">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
@@ -1620,7 +1558,7 @@
           </div>
         </div>
 
-        <!-- Video 2 — kXTHaMY3cVk (full width) -->
+        <!-- What are Datum Geodetics? (full width) -->
         <div class="video-card v-featured reveal reveal-d2">
           <div class="video-embed" id="ve-2">
             <div class="yt-thumb" onclick="loadYT('ve-2','kXTHaMY3cVk')"
@@ -1638,8 +1576,8 @@
               <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
               YouTube
             </div>
-            <div class="video-title">Video 2 — youtu.be/kXTHaMY3cVk</div>
-            <div class="video-desc">Klik thumbnail di atas untuk memutar video langsung di halaman ini.</div>
+            <div class="video-title">What are Datum Geodetics?</div>
+            <div class="video-desc">Klik video di atas untuk memutar video langsung di halaman ini.</div>
             <div class="video-meta">
               <div class="vm-item">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
@@ -1665,7 +1603,7 @@
         </div>
         <h2 class="section-title" style="color:#0f172a;">Profil Dashboard<br><span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Shifted.</span></h2>
         <p class="section-desc" style="color:#64748b; margin-bottom:0;">
-          <strong style="color:#1e3a8a;">Shifted.</strong> adalah platform WebGIS berbasis web yang dirancang untuk melakukan transformasi datum geodetik secara presisi tinggi antara sistem referensi koordinat <strong style="color:#1e3a8a;">Indonesia Datum 1974 (ID74)</strong> dan <strong style="color:#1e3a8a;">World Geodetic System 1984 (WGS 84)</strong>. Platform ini dikembangkan sebagai bagian dari Capstone Project mahasiswa Teknik Geodesi dan Geomatika dalam lingkup operasional PT Pertamina Hulu Rokan.
+          <strong style="color:#1e3a8a;">Shifted.</strong> adalah dashboard WebGIS berbasis web yang dirancang untuk melakukan transformasi datum geodetik dengan ketelitian transformasi dibawah 5cm antar sistem referensi koordinat <strong style="color:#1e3a8a;">Indonesia Datum 1974 (ID74)</strong> dan <strong style="color:#1e3a8a;">World Geodetic System 1984 (WGS 84)</strong>. Platform ini dikembangkan sebagai bagian dari Capstone Project mahasiswa Teknik Geodesi dan Geomatika Institut Teknologi Bandung dalam lingkup operasional PT Pertamina Hulu Rokan.
         </p>
       </div>
 
@@ -1674,38 +1612,38 @@
 
         <div class="feat-card">
           <div class="feat-icon">🔢</div>
-          <div class="feat-title">Molodensky-Badekas 10-Parameter</div>
-          <div class="feat-desc">Engine transformasi menggunakan metode Molodensky-Badekas dengan 10 parameter yang diturunkan dari 9 titik kontrol proyek, memberikan akurasi sub-sentimeter pada wilayah operasi Pertamina Hulu Rokan.</div>
+          <div class="feat-title">Molodensky-Badekas 10 Parameter</div>
+          <div class="feat-desc">Dashboard transformasi menggunakan metode Molodensky-Badekas dengan 10 parameter yang diturunkan dari 9 titik sekutu, memberikan akurasi sub-sentimeter pada wilayah operasi Pertamina Hulu Rokan.</div>
         </div>
 
         <div class="feat-card">
           <div class="feat-icon">🗺️</div>
-          <div class="feat-title">Visualisasi GIS Interaktif</div>
-          <div class="feat-desc">Peta interaktif berbasis Leaflet.js menampilkan titik koordinat asal dan hasil transformasi secara real-time, dilengkapi layer WMS dari GeoServer untuk data pipeline dan wilayah kerja ONWJ.</div>
+          <div class="feat-title">Visualisasi Peta GIS Interaktif</div>
+          <div class="feat-desc">Peta interaktif berbasis Leaflet.js menampilkan titik koordinat asal dan hasil transformasi secara real-time, dilengkapi layer WMS dari Supabase untuk fasilitas dan area kerja Pertamina Hulu Rokan.</div>
         </div>
 
         <div class="feat-card">
           <div class="feat-icon">📂</div>
           <div class="feat-title">Batch Processing CSV</div>
-          <div class="feat-desc">Mendukung transformasi massal ratusan titik koordinat sekaligus melalui unggah file CSV, dengan output berupa tabel hasil lengkap dan file CSV yang dapat diunduh untuk digunakan di QGIS maupun ArcGIS.</div>
+          <div class="feat-desc">Mendukung transformasi titik koordinat sekaligus melalui unggah file CSV, dengan output berupa tabel hasil lengkap dan file CSV yang dapat diunduh untuk digunakan di QGIS maupun ArcGIS.</div>
         </div>
 
         <div class="feat-card">
           <div class="feat-icon">↔️</div>
           <div class="feat-title">Transformasi Dua Arah</div>
-          <div class="feat-desc">Mendukung konversi ID74 → WGS84 maupun WGS84 → ID74 dengan tombol tukar datum, serta tiga format koordinat: Decimal Degree (DD), Degree-Minute-Second (DMS), dan Degree Decimal Minute (DDM).</div>
+          <div class="feat-desc">Mendukung konversi ID74 → WGS84 maupun WGS84 → ID74 dengan tombol tukar datum, serta dua format koordinat: Decimal Degree (DD) dan Degree-Minute-Second (DMS).</div>
         </div>
 
         <div class="feat-card">
           <div class="feat-icon">🛰️</div>
-          <div class="feat-title">Integrasi GeoServer WMS</div>
-          <div class="feat-desc">Layer data spasial dari GeoServer — termasuk pipeline dan batas wilayah kerja — ditampilkan langsung di atas peta dengan kontrol visibilitas per layer dan pengaturan opacity.</div>
+          <div class="feat-title">Integrasi Supabase</div>
+          <div class="feat-desc">Layer data spasial disimpan ke dalam Supabase, termasuk data fasilitas akan ditampilkan langsung di atas peta dengan kontrol visibilitas per layer dan pengaturan opacity.</div>
         </div>
 
         <div class="feat-card">
           <div class="feat-icon">🔒</div>
           <div class="feat-title">Autentikasi & Keamanan</div>
-          <div class="feat-desc">Sistem login berbasis localStorage dengan proteksi halaman dashboard. Setiap akses ke dashboard diverifikasi terlebih dahulu, memastikan data transformasi hanya dapat diakses oleh pengguna yang berwenang.</div>
+          <div class="feat-desc">Sistem login berbasis username dan ID pegawai dengan proteksi halaman dashboard. Setiap mengakses ke dalam dashboard diverifikasi terlebih dahulu, memastikan data transformasi hanya dapat diakses oleh pengguna yang berwenang.</div>
         </div>
 
       </div>
@@ -1714,39 +1652,21 @@
       <div class="about-stats reveal reveal-d2">
         <div class="about-stat">
           <div class="about-stat-val">10<span>P</span></div>
-          <div class="about-stat-lbl">Parameter Transformasi</div>
+          <div class="about-stat-lbl">Parameter Transformasi Molodensky-Badekas</div>
         </div>
         <div class="about-stat">
-          <div class="about-stat-val">9<span>×</span></div>
-          <div class="about-stat-lbl">Titik Kontrol Proyek</div>
+          <div class="about-stat-val">9</span></div>
+          <div class="about-stat-lbl">Titik sekutu</div>
         </div>
         <div class="about-stat">
-          <div class="about-stat-val">&lt;0.5<span>cm</span></div>
-          <div class="about-stat-lbl">Ketelitian Posisi</div>
+          <div class="about-stat-val"><5 <span>cm</span></div>
+          <div class="about-stat-lbl">Ketelitian Hasil Transformasi Koordinat</div>
         </div>
         <div class="about-stat">
           <div class="about-stat-val">2<span>←→</span></div>
           <div class="about-stat-lbl">Arah Transformasi</div>
         </div>
       </div>
-
-      <!-- Tech stack -->
-      <div class="reveal reveal-d3" style="margin-top:40px;">
-        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:16px;font-family:'JetBrains Mono',monospace;">Teknologi yang Digunakan</p>
-        <div class="about-tech">
-          <span class="tech-pill"><span class="tech-dot" style="background:#f59f00;"></span>MATLAB</span>
-          <span class="tech-pill"><span class="tech-dot" style="background:#e76f51;"></span>Java</span>
-          <span class="tech-pill"><span class="tech-dot" style="background:#4f5ef7;"></span>JavaScript</span>
-          <span class="tech-pill"><span class="tech-dot" style="background:#38b2ac;"></span>Leaflet.js</span>
-          <span class="tech-pill"><span class="tech-dot" style="background:#48bb78;"></span>GeoServer WMS</span>
-          <span class="tech-pill"><span class="tech-dot" style="background:#ed64a6;"></span>HTML & CSS</span>
-          <span class="tech-pill"><span class="tech-dot" style="background:#9f7aea;"></span>WebGIS</span>
-          <span class="tech-pill"><span class="tech-dot" style="background:#0ca678;"></span>Molodensky-Badekas</span>
-        </div>
-      </div>
-
-    </div>
-  </section>
 
 
   <!-- ══ DEVELOPER SECTION ══ -->
@@ -1760,7 +1680,7 @@
         </div>
         <h2 class="section-title" style="color:#0f172a;">Developer<br><span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Shifted.</span></h2>
         <p class="section-desc" style="color:#64748b; margin:12px auto 0; max-width:480px;">
-          Dikembangkan oleh mahasiswa Teknik Geodesi dan Geomatika sebagai bagian dari Capstone Project berjudul <em>"Pembangunan Sistem Informasi Transformasi Datum"</em> di lingkungan PT Pertamina Hulu Rokan.
+          Dikembangkan oleh mahasiswa Teknik Geodesi dan Geomatika Institut Teknologi Bandung sebagai bagian dari Tugas Akhir Capstone Project berjudul <em>"Pembangunan Sistem Informasi Transformasi Datum Menggunakan Data Perubahan Kerangka dan Data Deformasi Lempeng </em> di Lingkungan PT Pertamina Hulu Rokan".
         </p>
       </div>
 
@@ -1959,7 +1879,7 @@
         </p>
         <a href="#" class="btn-masuk" style="font-size:13px;padding:10px 28px;display:inline-flex;" onclick="openLoginModal(); return false;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          Coba Dashboard Shifted.
+          Masuk ke Dashboard
           <svg class="btn-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
       </div>
@@ -2041,12 +1961,11 @@
   <!-- ══ FOOTER ══ -->
   <footer class="site-footer">
     <div class="footer-brand"><img src="image/Nama.png" alt="Shifted"></div>
-    <div class="footer-copy">© 2024 Shifted. · Geodetic Coordinate Transformation System · v1.0.0</div>
+    <div class="footer-copy">© 2026 Shifted. · Geodetic Coordinate Transformation System · v1.0.0</div>
     <div class="footer-links">
       <a href="#" class="footer-link" onclick="scrollToSection('section-about'); return false;">Tentang</a>
       <a href="#" class="footer-link" onclick="scrollToSection('section-developer'); return false;">Dokumentasi</a>
-      <a href="#" class="footer-link" onclick="scrollToSection('section-developer'); return false;">Hubungi Kami</a>
-      <a href="login.html" class="footer-link">Dashboard</a>
+      <a href="#" class="footer-link" onclick="scrollToSection('section-developer'); return false;">Tim Pengembang</a>
     </div>
   </footer>
 
@@ -2057,8 +1976,7 @@
   <div class="modal-overlay" id="modal-1" onclick="handleOverlayClick(event,'modal-1')">
     <div class="modal-box">
       <div class="modal-hero" style="background:linear-gradient(135deg,#2d0a00,#1a0d0d);">
-        <div class="modal-hero-bg"></div>
-        <div class="modal-hero-icon">🌋</div>
+        <img class="modal-hero-img" src="image/berita 1.jpg" alt="Lumpur Lapindo Sidoarjo">
         <div class="modal-hero-grad"></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-1')">×</button>
@@ -2101,8 +2019,7 @@
   <div class="modal-overlay" id="modal-2" onclick="handleOverlayClick(event,'modal-2')">
     <div class="modal-box">
       <div class="modal-hero" style="background:linear-gradient(135deg,#1a1000,#201500);">
-        <div class="modal-hero-bg"></div>
-        <div class="modal-hero-icon">⛏️</div>
+        <img class="modal-hero-img" src="image/berita 2.jpg" alt="Pengeboran Sorik Marapi">
         <div class="modal-hero-grad"></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-2')">×</button>
@@ -2147,8 +2064,7 @@
   <div class="modal-overlay" id="modal-3" onclick="handleOverlayClick(event,'modal-3')">
     <div class="modal-box">
       <div class="modal-hero" style="background:linear-gradient(135deg,#1a0d2e,#0d0820);">
-        <div class="modal-hero-bg"></div>
-        <div class="modal-hero-icon">💰</div>
+        <img class="modal-hero-img" src="image/berita 3.jpg" alt="Platform Migas Laut Dalam">
         <div class="modal-hero-grad"></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-3')">×</button>
@@ -2189,8 +2105,7 @@
   <div class="modal-overlay" id="modal-4" onclick="handleOverlayClick(event,'modal-4')">
     <div class="modal-box">
       <div class="modal-hero" style="background:linear-gradient(135deg,#0d1a40,#091530);">
-        <div class="modal-hero-bg"></div>
-        <div class="modal-hero-icon">📍</div>
+        <img class="modal-hero-img" src="image/berita 4.jpg" alt="Sumur PAD C Sukowati">
         <div class="modal-hero-grad"></div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-4')">×</button>
@@ -2228,6 +2143,63 @@
         <div class="modal-footer-meta">SuaraBanyuurip.com · 21 Juni 2021 · Bojonegoro, Jawa Timur</div>
         <button class="btn-modal-close" onclick="closeModal('modal-4')">Tutup</button>
       </div>
+    </div>
+  </div>
+
+
+  <!-- ══ AUTO POPUP — Informasi Cakupan Wilayah Transformasi Datum ══ -->
+  <div id="wkr-info-overlay" onclick="closeWkrInfoOverlay(event)" style="
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(8,9,26,0.65);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;
+    padding:24px;opacity:0;transition:opacity 0.22s ease;">
+    <div id="wkr-info-box" style="
+      background:#ffffff;border-radius:18px;
+      padding:32px 28px 24px;width:100%;max-width:380px;
+      text-align:center;position:relative;
+      box-shadow:0 20px 60px rgba(0,0,0,0.18),0 4px 16px rgba(0,0,0,0.08);
+      transform:translateY(20px) scale(0.96);
+      transition:transform 0.26s cubic-bezier(0.34,1.56,0.64,1);
+      font-family:'Sora',sans-serif;">
+      <button onclick="dismissWkrInfo()" style="
+        position:absolute;top:14px;right:14px;
+        width:28px;height:28px;border-radius:50%;
+        background:#f1f5f9;border:none;
+        display:flex;align-items:center;justify-content:center;
+        cursor:pointer;color:#94a3b8;font-size:18px;line-height:1;
+        transition:background 0.2s,color 0.2s;"
+        onmouseover="this.style.background='#e2e8f0';this.style.color='#475569';"
+        onmouseout="this.style.background='#f1f5f9';this.style.color='#94a3b8';">×</button>
+      <div style="
+        width:56px;height:56px;border-radius:50%;
+        background:#fff7ed;border:2px solid #fed7aa;
+        display:flex;align-items:center;justify-content:center;
+        margin:0 auto 16px;color:#f97316;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16" stroke-width="3"/>
+        </svg>
+      </div>
+      <h3 style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:4px;letter-spacing:-0.3px;">Informasi</h3>
+      <p style="font-size:12.5px;font-weight:600;color:#f97316;margin-bottom:12px;">Cakupan Wilayah Transformasi Datum</p>
+      <p style="font-size:12px;color:#64748b;line-height:1.65;margin-bottom:8px;">
+        Transformasi datum hanya dapat dilakukan pada koordinat yang berada dalam <strong>Wilayah Kerja (WK) Rokan, Riau</strong> dan belum divalidasi untuk diluar wilayah tersebut.
+      </p>
+      <button onclick="dismissWkrInfo()" style="
+        width:100%;padding:11px 14px;
+        border:none;border-radius:10px;
+        background:#f97316;color:#fff;
+        font-size:13px;font-weight:700;font-family:'Sora',sans-serif;
+        cursor:pointer;
+        box-shadow:0 4px 14px rgba(249,115,22,0.3);
+        transition:background 0.2s,transform 0.15s,box-shadow 0.2s;"
+        onmouseover="this.style.background='#ea6c0a';this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(249,115,22,0.4)';"
+        onmouseout="this.style.background='#f97316';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(249,115,22,0.3)';">
+        Mengerti
+      </button>
     </div>
   </div>
 
@@ -2287,8 +2259,8 @@
       try {
         const client = window.supabase?.createClient
           ? window.supabase.createClient(
-              'https://nacqjhpwmnafzghrnvvv.supabase.co',
-              'sb_publishable_l13aqUmqoqS2L63BAW47tg_BEefQ2nG'
+              'https://vfbuxzluwafagicjuupc.supabase.co',
+              'sb_publishable_lF1YmyuuZWn4AdO9wazrDQ_-2C_tEQD'
             )
           : null;
 
@@ -2296,8 +2268,8 @@
 
         const { data, error } = await client
           .from('users')
-          .select('id, nama, nip_nim, tipe')
-          .ilike('nama', user)
+          .select('Nama, ID, Tipe')
+          .ilike('Nama', user)
           .single();
 
         if (error || !data) {
@@ -2305,14 +2277,14 @@
           errEl.style.display = 'block'; return;
         }
 
-        if (String(data.nip_nim) !== String(pass)) {
+        if (String(data.ID) !== String(pass)) {
           errEl.textContent = 'Password salah.';
           errEl.style.display = 'block'; return;
         }
 
         localStorage.setItem('isLogin', 'true');
         localStorage.setItem('shifted_user', JSON.stringify({
-          nama: data.nama, tipe: data.tipe, nipnim: data.nip_nim
+          nama: data.Nama, tipe: data.Tipe, ID: data.ID
         }));
         window.location.href = 'dashboard.html';
 
@@ -2502,6 +2474,24 @@
     }, { threshold: 0.10, rootMargin: '0px 0px -30px 0px' });
     document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 
+    // ══ AUTO POPUP — WK Rokan Info ══
+    function dismissWkrInfo() {
+      const overlay = document.getElementById('wkr-info-overlay');
+      overlay.style.opacity = '0';
+      setTimeout(() => { overlay.style.display = 'none'; }, 230);
+    }
+    function closeWkrInfoOverlay(e) {
+      if (e.target === document.getElementById('wkr-info-overlay')) dismissWkrInfo();
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.getElementById('wkr-info-overlay');
+      overlay.style.display = 'flex';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        document.getElementById('wkr-info-box').style.transform = 'translateY(0) scale(1)';
+      }));
+    });
+
     // Modal
     function openModal(id) {
       document.getElementById(id).classList.add('open');
@@ -2517,6 +2507,8 @@
     }
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
+        const wkrOverlay = document.getElementById('wkr-info-overlay');
+        if (wkrOverlay && wkrOverlay.style.display === 'flex') { dismissWkrInfo(); return; }
         document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
         document.body.classList.remove('modal-open');
       }
