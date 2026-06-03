@@ -6,7 +6,7 @@
  * ✔ WMS Layer management (GeoServer)
  * ✔ plotPointPair — marker asal + hasil + garis putus-putus
  * ✔ Legend kotak info di pojok kiri bawah peta
- * ✔ Supabase Shapefile Layer (data_peta) — UTM 48S → WGS84
+ * ✔ Supabase Shapefile Layer (data_peta) — UTM 48S → SRGI 2013
  */
 
 'use strict';
@@ -174,7 +174,7 @@ function switchBasemap(key) {
 // ══════════════════════════════════════════════
 
 /**
- * Konversi koordinat UTM Zone 47N → [lat, lon] WGS84
+ * Konversi koordinat UTM Zone 47N → [lat, lon] SRGI 2013
  * Digunakan untuk layer Minas_Batak (EPSG:32647).
  * Menggunakan proj4js bila tersedia, fallback aproksimasi jika tidak.
  */
@@ -183,9 +183,9 @@ function _utmToLatLng(x, y) {
     // Definisi EPSG:32647 (UTM Zone 47 North)
     if (!proj4.defs('EPSG:32647')) {
       proj4.defs('EPSG:32647',
-        '+proj=utm +zone=47 +datum=WGS84 +units=m +no_defs');
+        '+proj=utm +zone=47 +datum=SRGI2013 +units=m +no_defs');
     }
-    const [lng, lat] = proj4('EPSG:32647', 'WGS84', [x, y]);
+    const [lng, lat] = proj4('EPSG:32647', 'SRGI2013', [x, y]);
     return [lat, lng];
   }
   // Fallback aproksimasi Zone 47N (kurang akurat, pastikan proj4js dimuat)
@@ -196,7 +196,7 @@ function _utmToLatLng(x, y) {
 
 /**
  * Parse WKT MULTIPOLYGON / POLYGON (dengan atau tanpa Z) ke GeoJSON.
- * Koordinat dikonversi UTM 48S → WGS84.
+ * Koordinat dikonversi UTM 48S → SRGI 2013.
  */
 function _parseWKTtoGeoJSON(wktStr) {
   if (!wktStr) return null;
@@ -377,7 +377,7 @@ async function toggleSupabaseLayer(on) {
 // ★ DATA JALAN LAYER (MULTILINESTRING)
 // ══════════════════════════════════════════════
 
-/** Parse WKT MULTILINESTRING Z ke GeoJSON, konversi UTM 48S → WGS84 */
+/** Parse WKT MULTILINESTRING Z ke GeoJSON, konversi UTM 48S → SRGI 2013 */
 function _parseLinestringWKT(wktStr) {
   if (!wktStr) return null;
   try {
@@ -1114,7 +1114,7 @@ function _onMapClick(e) {
   _clickedCoord = { lat, lon: lng };
 
   let id74 = { lat: lat - 0.0002, lon: lng - 0.0003 };
-  try { if (window.TE) id74 = window.TE.wgs84ToId74(lat, lng); } catch (_) {}
+  try { if (window.TE) id74 = window.TE.srgi2013ToId74(lat, lng); } catch (_) {}
 
   L.popup({ maxWidth: 250, closeButton: true })
     .setLatLng(e.latlng)

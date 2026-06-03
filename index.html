@@ -1358,7 +1358,7 @@
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
         Geodetic Coordinate Transformation System
       </div>
-      <h1 class="hero-title">Transformasi Koordinat<br><span class="accent">ID74 ↔ WGS 84</span></h1>
+      <h1 class="hero-title">Transformasi Koordinat<br><span class="accent">ID74 ↔ SRGI 2013</span></h1>
       <p class="hero-subtitle">Platform transformasi koordinat geodetik presisi tinggi menggunakan metode <strong style="color:#1e3a8a;">Molodensky-Badekas 10 Parameter</strong> dengan visualisasi peta interaktif berbasis GIS untuk keperluan survei dan pemetaan pada Wilayah Kerja PT. Pertamina Hulu Rokan</p>
     </div>
     <div class="scroll-hint"><div class="scroll-mouse"><div class="scroll-wheel"></div></div>Scroll</div>
@@ -1367,7 +1367,7 @@
         <div class="bottom-item"><span class="bottom-val">10<span class="unit">P</span></span><span class="bottom-lbl">Molodensky-Badekas</span></div>
         <div class="bottom-item"><span class="bottom-val"> <5 <span style="font-size:14px;">cm</span></span><span class="bottom-lbl">Akurasi Parameter Transformasi</span></div>
         <div class="bottom-item"><span class="bottom-val">ID74</span><span class="bottom-lbl">Datum Asal</span></div>
-        <div class="bottom-item"><span class="bottom-val">WGS84</span><span class="bottom-lbl">Datum Tujuan</span></div>
+        <div class="bottom-item"><span class="bottom-val">SRGI 2013</span><span class="bottom-lbl">Datum Tujuan</span></div>
         <div class="bottom-item"><span class="bottom-val">GIS</span><span class="bottom-lbl">Visualisasi</span></div>
       </div>
     </div>
@@ -1661,7 +1661,7 @@
         </div>
         <h2 class="section-title" style="color:#0f172a;">Profil Dashboard<br><span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Shifted.</span></h2>
         <p class="section-desc" style="color:#64748b; margin-bottom:0;">
-          <strong style="color:#1e3a8a;">Shifted.</strong> adalah dashboard WebGIS berbasis web yang dirancang untuk melakukan transformasi datum geodetik dengan ketelitian transformasi dibawah 5cm antar sistem referensi koordinat <strong style="color:#1e3a8a;">Indonesia Datum 1974 (ID74)</strong> dan <strong style="color:#1e3a8a;">World Geodetic System 1984 (WGS 84)</strong>. Platform ini dikembangkan sebagai bagian dari Capstone Project mahasiswa Teknik Geodesi dan Geomatika Institut Teknologi Bandung dalam lingkup operasional PT Pertamina Hulu Rokan.
+          <strong style="color:#1e3a8a;">Shifted.</strong> adalah dashboard WebGIS berbasis web yang dirancang untuk melakukan transformasi datum geodetik dengan ketelitian transformasi dibawah 5cm antar sistem referensi koordinat <strong style="color:#1e3a8a;">Indonesia Datum 1974 (ID74)</strong> dan <strong style="color:#1e3a8a;">Sistem Referensi Geospasial Indonesia 2013 (SRGI 2013)</strong>. Platform ini dikembangkan sebagai bagian dari Capstone Project mahasiswa Teknik Geodesi dan Geomatika Institut Teknologi Bandung dalam lingkup operasional PT Pertamina Hulu Rokan.
         </p>
       </div>
 
@@ -1689,7 +1689,7 @@
         <div class="feat-card">
           <div class="feat-icon">↔️</div>
           <div class="feat-title">Transformasi Dua Arah</div>
-          <div class="feat-desc">Mendukung konversi ID74 → WGS84 maupun WGS84 → ID74 dengan tombol tukar datum, serta dua format koordinat: Decimal Degree (DD) dan Degree-Minute-Second (DMS).</div>
+          <div class="feat-desc">Mendukung konversi ID74 → SRGI 2013 maupun SRGI 2013 → ID74 dengan tombol tukar datum, serta dua format koordinat: Decimal Degree (DD) dan Degree-Minute-Second (DMS).</div>
         </div>
 
         <div class="feat-card">
@@ -2374,7 +2374,7 @@
     // Index konten yang dapat dicari
     const SEARCH_INDEX = [
       // Hero
-      { icon:'🛰️', title:'Transformasi Koordinat ID74 ↔ WGS84', desc:'Platform transformasi koordinat geodetik presisi tinggi dengan visualisasi GIS interaktif.', section:'hero', keywords:'transformasi koordinat datum geodetik shifted' },
+      { icon:'🛰️', title:'Transformasi Koordinat ID74 ↔ SRGI 2013', desc:'Platform transformasi koordinat geodetik presisi tinggi dengan visualisasi GIS interaktif.', section:'hero', keywords:'transformasi koordinat datum geodetik shifted' },
       // News
       { icon:'🌋', title:'Lumpur Sidoarjo — Kesalahan Pengeboran', desc:'Pakar: Lumpur Sidoarjo murni akibat kesalahan operasional pengeboran yang disengaja.', section:'section-news', keywords:'lumpur sidoarjo lapindo pengeboran kesalahan berita' },
       { icon:'⛏️', title:'Mata Bor Salah Koordinat — Halliburton', desc:'Blowout di Sorik Marapi akibat koordinat mata bor yang keliru. Halliburton terancam sanksi.', section:'section-news', keywords:'halliburton sorik marapi koordinat blowout sanksi berita' },
@@ -2384,7 +2384,7 @@
       { icon:'🎬', title:'Simple Explanation of Datum', desc:'Video penjelasan singkat mengenai datum geodetik dalam penentuan posisi di Bumi.', section:'section-video', keywords:'video datum geodetik penjelasan youtube' },
       { icon:'🎬', title:'What are Geodetic Datums?', desc:'Video edukasi tentang datum geodetik dan penggunaannya dalam sistem koordinat.', section:'section-video', keywords:'video datum geodetik edukasi youtube' },
       // About
-      { icon:'🗺️', title:'Profil Dashboard Shifted.', desc:'Platform WebGIS untuk transformasi datum ID74 ↔ WGS84 menggunakan Molodensky-Badekas 10 Parameter.', section:'section-about', keywords:'profil dashboard shifted webgis transformasi molodensky badekas' },
+      { icon:'🗺️', title:'Profil Dashboard Shifted.', desc:'Platform WebGIS untuk transformasi datum ID74 ↔ SRGI 2013 menggunakan Molodensky-Badekas 10 Parameter.', section:'section-about', keywords:'profil dashboard shifted webgis transformasi molodensky badekas' },
       { icon:'🔢', title:'Molodensky-Badekas 10 Parameter', desc:'Engine transformasi dengan 9 titik kontrol proyek, akurasi sub-sentimeter.', section:'section-about', keywords:'molodensky badekas 10 parameter titik kontrol akurasi engine' },
       { icon:'📂', title:'Batch Processing CSV', desc:'Transformasi massal ratusan titik koordinat via upload file CSV.', section:'section-about', keywords:'batch csv upload transformasi massal koordinat' },
       { icon:'🛰️', title:'Integrasi GeoServer WMS', desc:'Layer pipeline dan batas wilayah kerja dari GeoServer ditampilkan di peta.', section:'section-about', keywords:'geoserver wms layer pipeline peta integrasi' },
