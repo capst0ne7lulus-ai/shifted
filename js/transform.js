@@ -1,23 +1,5 @@
 /**
  * js/transform.js
- * Koordinat Transformation Engine + Transform UI
- * — Shifted. Dashboard —
- *
- * ✔ Engine Molodensky-Badekas 10-parameter (ID74 ↔ SRGI2013)
- *   (7 param transformasi + 3 centroid/pivot)
- * ✔ [FIX 1] Ellipsoid ID74 diperbaiki: GRS67 (bukan Bessel 1841)
- * ✔ [FIX 2] Faktor skala diperbaiki: ds = delta skala (bukan faktor penuh)
- * ✔ [FIX 3] Koreksi epok time-dependent (Ve/Vn/Vup dari SRGI BIG)
- *           ID74(1980) → SRGI2013(2021) → koreksi → SRGI2013(2025 default / 2026 validasi)
- * ✔ molodensky7() — engine ECEF ↔ ECEF (titik pivot / centroid)
- * ✔ molodensky7param() — fungsi transformasi publik (geografis)
- * ✔ applyEpochCorrection() — koreksi epok ECEF
- * ✔ Validasi input kosong sebelum transformasi
- * ✔ Format koordinat INPUT dan OUTPUT terpisah
- * ✔ runTransform() — plot marker + garis + legend di peta
- * ✔ renderTable()  — tabel CSV lengkap + kolom Residual
- * ✔ calcResidual() — hitung residual per titik (forward → inverse → selisih)
- * ✔ Download CSV queue
  */
 
 'use strict';
@@ -30,12 +12,8 @@ let dlQueue = [];
 let _legendControl = null;
 let _lastResults = [];
 let epochEffectEnabled = false;
-let epochEffectYear    = 2026;
-let epochEffectMonth   = 1;
-let _pendingTransformFn = null;
-let _skipBoundsCheck    = false;
-
-const _BULAN_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+let epochEffectYear    = 2026;   // tahun target default
+let epochEffectMonth   = 1;      // bulan target default (1 = Januari)
 
 // ──────────────────────────────────────────────
 // EPOCH EFFECT — velocity-based (EpochTransformation.java)
@@ -77,9 +55,6 @@ const _HISTORY_MAX = 50;
 
 // ──────────────────────────────────────────────
 // WK ROKAN BOUNDING BOX
-//   Parameter transformasi diestimasi dari titik sekutu
-//   di wilayah WK Rokan (Riau). Transformasi di luar
-//   area ini belum divalidasi.
 // ──────────────────────────────────────────────
 const WK_ROKAN_BOUNDS = {
   south:  0.0,   // °LU
@@ -95,15 +70,12 @@ function _isOutsideWKRokan(lat, lon) {
 
 // ──────────────────────────────────────────────
 // ELLIPSOID DEFINITIONS
-// [FIX 1] ID74 memakai GRS67, BUKAN Bessel 1841.
-//         Bessel 1841 adalah ellipsoid datum PKU (lokal Jawa).
-//         ID74 berbasis GRS67 (geosentris) — sesuai proposal halaman 6.
 // ──────────────────────────────────────────────
 const ELLS = {
   bessel: { a: 6377397.155,  invf: 299.1528128   },  // PKU — bukan ID74
   grs67:  { a: 6378160.0,    invf: 298.247167427  },  // ID74 ← BENAR
   grs80:  { a: 6378137.0,    invf: 298.257222101  },
-  srgi2013:  { a: 6378137.0,    invf: 298.257223563  },
+  wgs84:  { a: 6378137.0,    invf: 298.257223563  },
 };
 
 function ell(key) {
@@ -113,64 +85,40 @@ function ell(key) {
 
 // ══════════════════════════════════════════════
 // ★ PARAMETER MOLODENSKY-BADEKAS 10-PARAMETER
-//   7 param transformasi + 3 centroid (Xc, Yc, Zc)
-//
-// [FIX 2] ds = DELTA SKALA, bukan faktor skala penuh.
-//   Formula MB: X_tgt = T + (1 + ds) * R * (X - Xc) + Xc
-//   ds_fwd = 0.999990508941089 - 1 = -9.491058911e-6
-//   ds_inv = 1.00000948897926  - 1 = +9.48897926e-6
-//
-//   Sebelumnya kode memakai k=0.999990... langsung sebagai
-//   faktor skala penuh di dalam molodensky7(), yang berarti
-//   (1 + k) ≈ 1.9999905 — salah besar.
 // ══════════════════════════════════════════════
 const P_FWD = {
-  dX: -21.18310123244390000,          // Translasi X (meter)
-  dY: -28.42945507615220000,          // Translasi Y (meter)
-  dZ:   4.65405961965131000,          // Translasi Z (meter)
-  ds:   0.9999927458489710000 - 1,    // delta skala = S - 1 = -7.2541510e-6
-  rX:  -0.00008009778439665730,       // Rotasi X (radian)
-  rY:  -0.00001172162087323510,       // Rotasi Y (radian) — [UPDATE dari spreadsheet baris 27]
-  rZ:   0.00000856025959727141,       // Rotasi Z (radian)
-  Xc:  -1249136.3955333300,           // Centroid/pivot ID74 X
-  Yc:   6254162.3901666700,           // Centroid/pivot ID74 Y
-  Zc:     79114.4555444444,           // Centroid/pivot ID74 Z
+  dX: -21.19842214573270,
+  dY: -28.40729066147050,
+  dZ:   4.64619397366998,
+  ds:  -9.491058911e-6,          // 
+  rX:  -0.00008009778439665730,  // radian
+  rY:  -0.00001172162087323510,
+  rZ:   0.00000856025959727141,
+  Xc:  -1249136.39553482,        // centroid/pivot ID74 (epok 2021)
+  Yc:   6254162.39016529,
+  Zc:     79114.45553701810,
 };
 
 const P_INV = {
-  dX:  21.18310599802770000000,        // Translasi X (meter)
-  dY:  28.42944130721750000000,        // Translasi Y (meter)
-  dZ:  -4.65406328078394000000,        // Translasi Z (meter)
-  ds:   1.00000725391282000000 - 1,    // delta skala = S - 1 = +7.2539128e-6
-  rX:   0.00007797680136519240,        // Rotasi X (radian)
-  rY:   0.00001116119205485240,        // Rotasi Y (radian)
-  rZ:  -0.00000816628126770126,        // Rotasi Z (radian)
-  Xc:  -1249157.59308889,              // Centroid/pivot SRGI2013 X
-  Yc:    6254133.98235556,             // Centroid/pivot SRGI2013 Y
-  Zc:    79119.0997222222,             // Centroid/pivot SRGI2013 Z
+  dX:  21.1984213025931,
+  dY:  28.4072905075436,
+  dZ:  -4.6461937321203,
+  ds:   9.48897926e-6,            
+  rX:   0.0000800997584898269,
+  rY:   0.000011722237154875,
+  rZ:  -0.00000856076405416893,
+  Xc:  -1249157.59308889,         // centroid/pivot WGS84 (epok 2021)
+  Yc:   6254133.98235556,
+  Zc:     79119.09972222220,
 };
 
 // ══════════════════════════════════════════════
-// ★ [FIX 3] KOREKSI EPOK — TIME-DEPENDENT
+// ★ KOREKSI EPOK — TIME-DEPENDENT
 //
 //   Kecepatan lempeng WK Rokan (SRGI BIG, 2025):
 //     Ve  = -0.0265 m/tahun  (ke Timur)
 //     Vn  = -0.0076 m/tahun  (ke Utara)
 //     Vup = -0.0046 m/tahun  (vertikal)
-//
-//   Posisi sentral WK Rokan: ~1.3°LU, ~101.0°BT
-//
-//   Konversi Ve/Vn/Vup → Vx/Vy/Vz (ECEF):
-//     Vx = -Ve*sin(lon) - Vn*sin(lat)*cos(lon) + Vup*cos(lat)*cos(lon)
-//     Vy =  Ve*cos(lon) - Vn*sin(lat)*sin(lon) + Vup*cos(lat)*sin(lon)
-//     Vz =               Vn*cos(lat)           + Vup*sin(lat)
-//
-//   Formula koreksi:
-//     X(t2) = X(t1) + Vx * (t2 - t1)
-//
-//   Alur:
-//     ID74(1980) → MB → SRGI2013(2021) → +Δt → SRGI2013(2025) default output
-//                                    → +Δt → SRGI2013(2026) untuk validasi titik ikat
 // ══════════════════════════════════════════════
 const EPOCH = {
   param:     2021.0,   // epok saat parameter MB diestimasi
@@ -185,7 +133,6 @@ const EPOCH = {
 
 /**
  * Konversi kecepatan toposentrik (Ve/Vn/Vup) ke ECEF (Vx/Vy/Vz).
- * Dihitung sekali saat load menggunakan posisi sentral WK Rokan.
  */
 function _computeVelocityECEF(latDeg, lonDeg) {
   const lat    = latDeg * Math.PI / 180;
@@ -261,25 +208,6 @@ function fromECEF(X, Y, Z, ellKey) {
 
 // ══════════════════════════════════════════════
 // ★ molodensky7 — Engine ECEF → ECEF
-//
-// [FIX 2] Formula: X_tgt = T + (1+ds)*R*(X-Xc) + Xc
-//   ds = delta skala (bukan faktor penuh)
-//
-// [FIX 4] Sign convention rotasi: COORDINATE FRAME
-//   Ada dua konvensi standar yang berbeda tanda rotasinya:
-//
-//   Position Vector  (salah untuk parameter ini):
-//     [ dx + rZ*dy - rY*dz ]
-//     [-rZ*dx + dy + rX*dz ]
-//     [ rY*dx - rX*dy + dz ]
-//
-//   Coordinate Frame (benar untuk parameter ini) ← DIPAKAI
-//     [ dx - rZ*dy + rY*dz ]
-//     [ rZ*dx + dy - rX*dz ]
-//     [-rY*dx + rX*dy + dz ]
-//
-//   Perbedaan ini menyebabkan error ~16 cm di komponen lat.
-//   Parameter Helmert kamu menggunakan Coordinate Frame convention.
 // ══════════════════════════════════════════════
 function molodensky7(X, Y, Z, p) {
   const { dX, dY, dZ, ds, rX, rY, rZ, Xc, Yc, Zc } = p;
@@ -297,85 +225,37 @@ function molodensky7(X, Y, Z, p) {
 
 // ══════════════════════════════════════════════
 // ★ PUBLIC TRANSFORM API
-//
-// [FIX 1+2+3] Semua perbaikan terintegrasi di sini.
-//
-//   Alur ID74(1980) → SRGI2013(epochTarget):
-//     1. toECEF dengan GRS67   ← [FIX 1]
-//     2. molodensky7 (ds fix)  ← [FIX 2] → SRGI2013 ECEF epok 2021
-//     3. applyEpochCorrection(2021 → epochTarget) ← [FIX 3]
-//     4. fromECEF dengan SRGI2013
-//
-//   Alur SRGI2013(epochTarget) → ID74(1980):
-//     1. toECEF dengan SRGI2013
-//     2. applyEpochCorrection(epochTarget → 2021)  ← balik arah [FIX 3]
-//     3. molodensky7 inverse (ds fix) ← [FIX 2] → ID74 ECEF
-//     4. fromECEF dengan GRS67 ← [FIX 1]
-//
-//   @param {number} [epochTarget] epok SRGI2013 output, default EPOCH.target (2025)
-//                                 Gunakan EPOCH.ikat (2026) untuk validasi titik ikat
 // ══════════════════════════════════════════════
 function molodensky7param(lat, lon, dir, epochTarget) {
-  // Parameter P_FWD/P_INV diestimasi dari titik sekutu yang diketahui
-  // koordinatnya di ID74 dan SRGI2013 epok 2021. Hasil transformasi
-  // murni (epochEffectEnabled=false) adalah SRGI2013 epok 2021.
-  //
-  // Efek epok (deformasi lempeng) bersifat OPSIONAL (toggle user):
-  //   false (default) : output = SRGI2013 epok 2021
-  //   true            : output = SRGI2013 epok target (2021 + dt)
-  //
-  // Acuan epok selalu 2021.0 (epok estimasi parameter MB).
-
-  const fwd  = (dir === 'id74_srgi2013');
-  const tTgt = (epochTarget !== undefined) ? epochTarget : _epochDecimalYear();
+  const fwd = (dir === 'id74_wgs84');
 
   if (fwd) {
-    // ID74(1980) -> SRGI2013
-    // Step 1: Geodetik ID74 -> ECEF (GRS67)
-    const ecef0 = toECEF(lat, lon, 0, 'grs67');
-
-    // Step 2: MB transform -> SRGI2013 ECEF epok 2021
-    const ecef21 = molodensky7(ecef0.X, ecef0.Y, ecef0.Z, P_FWD);
-
-    // Step 3 (opsional): koreksi deformasi epok 2021 -> epochTarget
-    const ecefOut = epochEffectEnabled
-      ? applyEpochCorrection(ecef21, EPOCH.param, tTgt)
-      : ecef21;
-
-    // Step 4: ECEF -> Geodetik SRGI2013
-    return fromECEF(ecefOut.X, ecefOut.Y, ecefOut.Z, 'srgi2013');
+    // ID74(1980) → WGS84
+    const ecef0  = toECEF(lat, lon, 0, 'grs67');                   // [GRS67]
+    const ecef21 = molodensky7(ecef0.X, ecef0.Y, ecef0.Z, P_FWD);  // MB transform
+    return fromECEF(ecef21.X, ecef21.Y, ecef21.Z, 'wgs84');
 
   } else {
-    // SRGI2013 -> ID74(1980)
-    // Step 1: Geodetik SRGI2013 -> ECEF
-    const ecefT = toECEF(lat, lon, 0, 'srgi2013');
-
-    // Step 2 (opsional): balik koreksi deformasi epochTarget -> 2021
-    const ecef21 = epochEffectEnabled
-      ? applyEpochCorrection(ecefT, tTgt, EPOCH.param)
-      : ecefT;
-
-    // Step 3: MB inverse -> ID74 ECEF
-    const ecef74 = molodensky7(ecef21.X, ecef21.Y, ecef21.Z, P_INV);
-
-    // Step 4: ECEF -> Geodetik ID74 (GRS67)
-    return fromECEF(ecef74.X, ecef74.Y, ecef74.Z, 'grs67');
+    // WGS84 → ID74(1980)
+    const ecefT  = toECEF(lat, lon, 0, 'wgs84');
+    const ecef74 = molodensky7(ecefT.X, ecefT.Y, ecefT.Z, P_INV);  // MB inverse
+    return fromECEF(ecef74.X, ecef74.Y, ecef74.Z, 'grs67');         // [GRS67]
   }
 }
 
-function id74ToSrgi2013(lat, lon, _h = 0, epochTarget) {
-  return molodensky7param(lat, lon, 'id74_srgi2013', epochTarget);
+function id74ToWgs84(lat, lon, _h = 0, epochTarget) {
+  return molodensky7param(lat, lon, 'id74_wgs84', epochTarget);
 }
 
-function srgi2013ToId74(lat, lon, _h = 0, epochTarget) {
-  return molodensky7param(lat, lon, 'srgi2013_id74', epochTarget);
+function wgs84ToId74(lat, lon, _h = 0, epochTarget) {
+  return molodensky7param(lat, lon, 'wgs84_id74', epochTarget);
 }
 
 function passThrough(lat, lon, h = 0) { return { lat, lon, h }; }
 
 function transform(lat, lon, from, to, h = 0, epochTarget) {
   if (from === to) return passThrough(lat, lon, h);
-  const dir = (from === 'id74' && to === 'srgi2013') ? 'id74_srgi2013' : 'srgi2013_id74';
+  const dir = (from === 'id74' && to === 'wgs84') ? 'id74_wgs84' : 'wgs84_id74';
   return molodensky7param(lat, lon, dir, epochTarget);
 }
 
@@ -543,35 +423,9 @@ function bearingToText(b) {
 }
 
 // ══════════════════════════════════════════════
-// ★ RESIDUAL — forward → inverse → selisih posisi
-//   Hitung seberapa jauh titik kembali ke posisi asal
-//   setelah transformasi maju lalu balik.
-//   Nilai kecil = parameter transformasi konsisten.
-// ══════════════════════════════════════════════
-function calcResidual(latIn, lonIn, latOut, lonOut, from, to) {
-  // Transformasi balik: hasil → asal
-  const inv = transform(latOut, lonOut, to, from);
-  // Residual = jarak antara titik asal asli dan titik hasil balik
-  const residual = calcDistance(latIn, lonIn, inv.lat, inv.lon);
-  return { residual, invLat: inv.lat, invLon: inv.lon };
-}
-
-/**
- * Klasifikasi kualitas residual.
- * @param {number} r - residual dalam meter
- * @returns {{ label: string, color: string }}
- */
-function residualClass(r) {
-  if (r < 0.01)  return { label: 'Sangat Baik', color: '#0ca678' };
-  if (r < 0.1)   return { label: 'Baik',        color: '#4f5ef7' };
-  if (r < 0.5)   return { label: 'Cukup',       color: '#f59f00' };
-  return               { label: 'Perlu Cek',    color: '#ef4444' };
-}
-
-// ══════════════════════════════════════════════
-// ★ UTM CONVERSION (SRGI2013 ellipsoid)
-//   Konversi menggunakan SRGI2013 untuk semua datum.
-//   Selisih GRS67 vs SRGI2013 < 2 m — dapat diterima.
+// ★ UTM CONVERSION (WGS84 ellipsoid)
+//   Konversi menggunakan WGS84 untuk semua datum.
+//   Selisih GRS67 vs WGS84 < 2 m — dapat diterima.
 // ══════════════════════════════════════════════
 function _latLonToUTM(lat, lon) {
   const a   = 6378137.0, f = 1 / 298.257223563;
@@ -786,13 +640,28 @@ function runTransform() {
     const res = transform(parsed.lat, parsed.lon, from, to);
     const fmt = formatCoord(res.lat, res.lon, fmtOut);
 
+    const dist    = calcDistance(parsed.lat, parsed.lon, res.lat, res.lon);
+    const bearing = calcBearing(parsed.lat, parsed.lon, res.lat, res.lon);
+    const distStr = dist >= 1000 ? `${(dist / 1000).toFixed(3)} km` : `${dist.toFixed(2)} m`;
+    const bearDir = bearingToText(bearing);
+
     const rb = document.getElementById('result-box');
     const rv = document.getElementById('result-vals');
     const rf = document.getElementById('result-fmt');
     if (rb) rb.classList.add('show');
     if (rv) rv.innerHTML =
       `<span style="color:#5a6278;font-size:10px;font-weight:600;">${fmt.latLabel || 'LAT'}</span> ${fmt.latStr}<br>` +
-      `<span style="color:#5a6278;font-size:10px;font-weight:600;">${fmt.lonLabel || 'LON'}</span> ${fmt.lonStr}`;
+      `<span style="color:#5a6278;font-size:10px;font-weight:600;">${fmt.lonLabel || 'LON'}</span> ${fmt.lonStr}` +
+      `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #e4e7ee;display:flex;gap:8px;">` +
+        `<div style="flex:1;padding:7px 10px;background:#f8f9fb;border:1px solid #e4e7ee;border-radius:8px;">` +
+          `<div style="font-size:9px;font-weight:700;color:#9aa0b4;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">JARAK PERGESERAN</div>` +
+          `<div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#f59f00;">${distStr}</div>` +
+        `</div>` +
+        `<div style="flex:1;padding:7px 10px;background:#f8f9fb;border:1px solid #e4e7ee;border-radius:8px;">` +
+          `<div style="font-size:9px;font-weight:700;color:#9aa0b4;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">ARAH PERGESERAN</div>` +
+          `<div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#4f5ef7;">${bearing.toFixed(2)}° (${bearDir})</div>` +
+        `</div>` +
+      `</div>`;
     if (rf) rf.textContent = `[${fmt.label}]`;
 
     if (window.plotPointPair) {
@@ -1017,6 +886,7 @@ function downloadResult() { if (dlQueue.length) triggerDownload(0); }
 // ──────────────────────────────────────────────
 // TOGGLE & UPDATE UI EFEK EPOK
 // ──────────────────────────────────────────────
+const _BULAN_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
 
 function _updateEpochUI() {
   const corr  = _getEpochCorrection();
@@ -1077,6 +947,8 @@ function setEpochTargetMonth(month) {
 // ══════════════════════════════════════════════
 // ★ POPUP PERINGATAN LUAR WK ROKAN
 // ══════════════════════════════════════════════
+let _pendingTransformFn = null;
+let _skipBoundsCheck    = false;
 
 function _ensureBoundsWarningOverlay() {
   if (document.getElementById('bounds-warn-overlay')) return;
@@ -1173,26 +1045,13 @@ function closeBoundsWarning() {
 }
 
 function continueTransformAnyway() {
-  // [FIX 5] Set _skipBoundsCheck = true SEBELUM overlay ditutup,
-  // dan inline animasi tutup agar _pendingTransformFn tidak di-null duluan.
   const fn = _pendingTransformFn;
-  _pendingTransformFn = null;
-  _skipBoundsCheck = true;
-
-  const overlay = document.getElementById('bounds-warn-overlay');
-  if (overlay) {
-    overlay.style.opacity = '0';
-    const box = document.getElementById('bounds-warn-box');
-    if (box) box.style.transform = 'translateY(20px) scale(0.96)';
-    setTimeout(() => { overlay.style.display = 'none'; }, 230);
-  }
-
+  closeBoundsWarning();
   if (fn) {
+    _skipBoundsCheck = true;
     setTimeout(() => {
       try { fn(); } finally { _skipBoundsCheck = false; }
-    }, 350);
-  } else {
-    _skipBoundsCheck = false;
+    }, 300);
   }
 }
 
@@ -1448,7 +1307,7 @@ function _toast(msg, type = 'blue') {
 // ──────────────────────────────────────────────
 window.TE = {
   transform, molodensky7param, molodensky7,
-  id74ToSrgi2013, srgi2013ToId74,
+  id74ToWgs84, wgs84ToId74,
   applyEpochCorrection, EPOCH,
   calcResidual, residualClass,
   P_FWD, P_INV,

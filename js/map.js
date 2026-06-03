@@ -1,12 +1,5 @@
 /**
  * js/map.js
- * Leaflet Map Controller — Shifted. Dashboard
- *
- * ✔ Map init, basemap switching
- * ✔ WMS Layer management (GeoServer)
- * ✔ plotPointPair — marker asal + hasil + garis putus-putus
- * ✔ Legend kotak info di pojok kiri bawah peta
- * ✔ Supabase Shapefile Layer (data_peta) — UTM 48S → SRGI 2013
  */
 
 'use strict';
@@ -41,7 +34,6 @@ let _originGroup  = null;
 let _resultGroup  = null;
 let _markers      = null;
 let _clickedCoord = null;
-
 
 
 // Supabase layer state — data_peta (polygon)
@@ -176,7 +168,6 @@ function switchBasemap(key) {
 /**
  * Konversi koordinat UTM Zone 47N → [lat, lon] SRGI 2013
  * Digunakan untuk layer Minas_Batak (EPSG:32647).
- * Menggunakan proj4js bila tersedia, fallback aproksimasi jika tidak.
  */
 function _utmToLatLng(x, y) {
   if (window.proj4) {
@@ -230,9 +221,6 @@ function _parseWKTtoGeoJSON(wktStr) {
     if (type === 'POLYGON') {
       return { type: 'Polygon', coordinates: rings };
     }
-
-    // MULTIPOLYGON: grup rings per pasangan kurung terluar
-    // Sederhana: setiap ring diperlakukan sebagai polygon terpisah
     const polys = rings.map(r => [r]);
     return { type: 'MultiPolygon', coordinates: polys };
 
@@ -242,7 +230,7 @@ function _parseWKTtoGeoJSON(wktStr) {
   }
 }
 
-/** Ambil semua baris dari Supabase dengan pagination */
+/** Ambil semua baris dari Supabase */
 async function _fetchAllSupabaseRows() {
   if (!_supabaseClient) {
     throw new Error('Supabase client belum diinisialisasi. Pastikan @supabase/supabase-js dimuat.');
