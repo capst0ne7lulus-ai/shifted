@@ -4,6 +4,15 @@
 
 'use strict';
 
+
+// Definisi CRS — daftarkan sekali saat file dimuat
+if (window.proj4) {
+  proj4.defs('EPSG:32647',
+    '+proj=utm +zone=47 +ellps=GRS80 +units=m +no_defs');
+  proj4.defs('SRGI2013',
+    '+proj=longlat +ellps=GRS80 +no_defs');
+}
+
 // ══════════════════════════════════════════════
 // ★ KONFIGURASI GEOSERVER
 // ══════════════════════════════════════════════
@@ -171,15 +180,6 @@ function switchBasemap(key) {
  */
 function _utmToLatLng(x, y) {
   if (window.proj4) {
-    // SRGI2013 berbasis ITRF2008 — parameter ellipsoid identik dengan WGS84/GRS80
-    if (!proj4.defs('EPSG:32647')) {
-      proj4.defs('EPSG:32647',
-        '+proj=utm +zone=47 +ellps=GRS80 +units=m +no_defs');
-    }
-    if (!proj4.defs('SRGI2013')) {
-      proj4.defs('SRGI2013',
-        '+proj=longlat +ellps=GRS80 +no_defs');
-    }
     const [lng, lat] = proj4('EPSG:32647', 'SRGI2013', [x, y]);
     return [lat, lng];
   }
