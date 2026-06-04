@@ -115,7 +115,7 @@ const P_INV = {
 // ══════════════════════════════════════════════
 // ★ KOREKSI EPOK — TIME-DEPENDENT
 //
-//   Kecepatan lempeng WK Rokan (SRGI BIG, 2025):
+//   Kecepatan lempeng WK Rokan:
 //     Ve  = -0.0265 m/tahun  (ke Timur)
 //     Vn  = -0.0076 m/tahun  (ke Utara)
 //     Vup = -0.0046 m/tahun  (vertikal)

@@ -1,16 +1,10 @@
 /* ═══════════════════════════════════════════════
    js/auth.js — Shifted. Auth Management
-   Berisi semua logika: login, logout, guard halaman.
-   Di-load oleh login.html DAN dashboard.html.
-
-   Login yang didukung:
-   1. Admin  → username: admin      | password: 12345
-   2. User   → username: kolom Nama | password: kolom ID
    ═══════════════════════════════════════════════ */
 
 var AUTH_KEY = 'isLogin';
 
-// ⚠️ Ganti URL & KEY di bawah jika kamu pindah project Supabase
+// SUPABASE 
 var _SB_URL = 'https://vfbuxzluwafagicjuupc.supabase.co';
 var _SB_KEY = 'sb_publishable_lF1YmyuuZWn4AdO9wazrDQ_-2C_tEQD';
 var _sbClient = null;
@@ -57,14 +51,14 @@ async function login() {
     return;
   }
 
-  // ── 1. Cek admin hardcode ──
+  // ── 1. Cek admin  ──
   if (user === 'admin' && pass === '12345') {
     _saveSession({ nama: 'Admin', tipe: 'Admin', nipnim: '-' });
     window.location.href = 'dashboard.html';
     return;
   }
 
-  // ── 2. Cek user dari Supabase (nama = username, nip_nim = password) ──
+  // ── 2. Cek user dari Supabase (nama = username, ID = password) ──
   var client = _getClient();
   if (!client) {
     if (errEl) { errEl.textContent = 'Koneksi server gagal. Muat ulang halaman.'; errEl.style.display = 'block'; }

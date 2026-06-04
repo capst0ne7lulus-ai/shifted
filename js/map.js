@@ -171,15 +171,19 @@ function switchBasemap(key) {
  */
 function _utmToLatLng(x, y) {
   if (window.proj4) {
-    // Definisi EPSG:32647 (UTM Zone 47 North)
+    // SRGI2013 berbasis ITRF2008 — parameter ellipsoid identik dengan WGS84/GRS80
     if (!proj4.defs('EPSG:32647')) {
       proj4.defs('EPSG:32647',
-        '+proj=utm +zone=47 +datum=SRGI2013 +units=m +no_defs');
+        '+proj=utm +zone=47 +ellps=GRS80 +units=m +no_defs');
+    }
+    if (!proj4.defs('SRGI2013')) {
+      proj4.defs('SRGI2013',
+        '+proj=longlat +ellps=GRS80 +no_defs');
     }
     const [lng, lat] = proj4('EPSG:32647', 'SRGI2013', [x, y]);
     return [lat, lng];
   }
-  // Fallback aproksimasi Zone 47N (kurang akurat, pastikan proj4js dimuat)
+  // Fallback aproksimasi Zone 47N
   const lng = (x - 500000) / 111320 + 99;
   const lat = y / 110540;
   return [lat, lng];
@@ -1117,7 +1121,7 @@ function _onMapClick(e) {
           Koordinat Klik
         </div>
         <div class="map-popup-row">
-          <div class="map-popup-label">WGS 84</div>
+          <div class="map-popup-label">SRGI 2013</div>
           <div class="map-popup-coord">${lat.toFixed(7)}, ${lng.toFixed(7)}</div>
         </div>
         <div class="map-popup-row">

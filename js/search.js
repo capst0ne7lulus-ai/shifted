@@ -1,8 +1,6 @@
 /**
  * js/search.js
  * Geocoding Search — Shifted. Dashboard
- * Uses Nominatim (OpenStreetMap) — no API key required
- * Search bar lives inside the header.
  */
 
 'use strict';

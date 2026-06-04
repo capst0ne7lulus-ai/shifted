@@ -1,14 +1,5 @@
 /**
  * js/ui.js
- * UI Controller — Shifted. Dashboard
- *
- * ✔ Manajemen panel (open / close / toggle)
- * ✔ Selektor basemap
- * ✔ Swap datum
- * ✔ Toggle input mode (manual / CSV)
- * ✔ Toggle layer
- * ✔ Toast notification
- * ✔ Panel riwayat transformasi
  */
 'use strict';
 

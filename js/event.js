@@ -1,6 +1,5 @@
 /**
  * js/event.js
- * Event Wiring — Shifted. Dashboard
  * DOM ready, keyboard shortcuts, toolbar wiring, resize handler
  */
 
