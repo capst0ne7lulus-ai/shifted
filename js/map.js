@@ -123,7 +123,7 @@ function initMap() {
   _map.on('mousemove', _onMouseMove);
   _map.on('mouseout',  _onMouseOut);
 
-  // ★ Scale bar — disembunyikan dari peta, nilainya ditampilkan di status bar kanan bawah
+ // ── Scale bar: sembunyikan visual, tampilkan rasio numerik ──
   const _scaleCtrl = L.control.scale({
     position: 'bottomleft',
     metric:   true,
@@ -131,24 +131,42 @@ function initMap() {
     maxWidth: 150,
   }).addTo(_map);
 
-  // Sembunyikan elemen scale bar Leaflet setelah render
   setTimeout(() => {
     const scaleEl = document.querySelector('.leaflet-control-scale');
     if (scaleEl) scaleEl.style.display = 'none';
   }, 100);
 
-  // Update teks skala di status bar setiap zoom berubah
   function _updateScaleStatus() {
-    const scaleLineEl = document.querySelector('.leaflet-control-scale-line');
-    const statusEl    = document.getElementById('scale-status');
-    if (scaleLineEl && statusEl) {
-      statusEl.textContent = scaleLineEl.textContent || '—';
-    }
-  }
+  const statusEl = document.getElementById('scale-status');
+  if (!statusEl || !_map) return;
 
-  _map.on('zoomend',  _updateScaleStatus);
-  _map.on('moveend',  _updateScaleStatus);
-  setTimeout(_updateScaleStatus, 300);
+  const zoom = _map.getZoom();
+  const lat  = _map.getCenter().lat;
+
+  // Meter per CSS-pixel di posisi saat ini (Web Mercator)
+  // C = keliling bumi di ekuator ≈ 40 075 016.686 m
+  // Leaflet tile 256×256 px → 2^(zoom+8) tile-pixel per bujursangkar dunia
+  const metersPerPx = 40075016.686 * Math.cos(lat * Math.PI / 180)
+                      / Math.pow(2, zoom + 8);
+
+  // 1 CSS pixel ≡ 1/96 inch (standar CSS) = 0.0254/96 meter di layar
+  const screenMPerPx = 0.0254 / 96;
+
+  // Rasio skala = jarak nyata / jarak di layar
+  const rawRatio = metersPerPx / screenMPerPx;
+
+  // Bulatkan ke angka "cantik": 1, 2, 2.5, 5, 10 × 10^n
+  const mag    = Math.pow(10, Math.floor(Math.log10(rawRatio)));
+  const n      = rawRatio / mag;
+  const nice   = n < 1.5 ? 1 : n < 3.5 ? 2.5 : n < 7.5 ? 5 : 10;
+  const rounded = Math.round(nice * mag);
+
+  statusEl.textContent = `1 : ${rounded.toLocaleString('id-ID')}`;
+}
+
+  _map.on('zoomend', _updateScaleStatus);
+  _map.on('moveend', _updateScaleStatus);
+  setTimeout(_updateScaleStatus, 400);
 
   _injectStyles();
 

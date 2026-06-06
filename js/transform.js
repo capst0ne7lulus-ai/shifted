@@ -1309,7 +1309,6 @@ window.TE = {
   transform, molodensky7param, molodensky7,
   id74ToWgs84, wgs84ToId74,
   applyEpochCorrection, EPOCH,
-  calcResidual, residualClass,
   P_FWD, P_INV,
   formatCoord, parseLatLon, parseCSV, toCSVStr, toGeoJSON,
   latLonToUTM: _latLonToUTM, utmToLatLon: _utmToLatLon,
