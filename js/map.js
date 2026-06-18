@@ -142,9 +142,7 @@ function initMap() {
 
   const zoom = _map.getZoom();
   const lat  = _map.getCenter().lat;
-
-  // Meter per CSS-pixel di posisi saat ini (Web Mercator)
-  // C = keliling bumi di ekuator ≈ 40 075 016.686 m
+  
   // Leaflet tile 256×256 px → 2^(zoom+8) tile-pixel per bujursangkar dunia
   const metersPerPx = 40075016.686 * Math.cos(lat * Math.PI / 180)
                       / Math.pow(2, zoom + 8);
