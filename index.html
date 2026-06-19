@@ -1731,168 +1731,126 @@
           <div class="about-stat-lbl">Arah Transformasi</div>
         </div>
       </div>
+<!-- ══ DOKUMEN PANDUAN TEKNIS ══ -->
+<!-- ══ DOKUMEN PANDUAN TEKNIS ══ -->
+<div id="section-dokumen" class="reveal reveal-d3" style="margin-top:80px;">
+  <div class="section-label">
+    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Dokumen
+  </div>
+  <h2 class="section-title" style="color:#0f172a;">Panduan Teknis<br>
+    <span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Penggunaan Dashboard Shifted.</span>
+  </h2>
+  <p class="section-desc" style="color:#64748b; margin-bottom:0;">
+    Dokumen panduan lengkap penggunaan dashboard <strong style="color:#1e3a8a;">Shifted.</strong> tersedia untuk diunduh oleh pengguna. Panduan ini mencakup cara login, input koordinat, transformasi datum, batch processing, hingga interpretasi hasil pada peta interaktif.
+  </p>
 
-      <!-- ══ DOKUMEN PANDUAN TEKNIS ══ -->
-<section class="about-section" id="section-dokumen" style="border-top: 1px solid #e2e8f0;">
-  <div class="section">
-
-    <div class="reveal">
-      <div class="section-label">
-        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Dokumen
-      </div>
-      <h2 class="section-title" style="color:#0f172a;">Panduan Teknis<br>
-        <span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Penggunaan Dashboard Shifted.</span>
-      </h2>
-      <p class="section-desc" style="color:#64748b; margin-bottom:0;">
-        Dokumen panduan lengkap penggunaan dashboard <strong style="color:#1e3a8a;">Shifted.</strong> tersedia untuk diunduh oleh pengguna. Panduan ini mencakup cara login, input koordinat, transformasi datum, batch processing, hingga interpretasi hasil pada peta interaktif.
-      </p>
+  <div style="
+    margin-top:40px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:16px;
+    padding:32px;
+    display:flex; gap:28px; align-items:center;
+    width:100%;
+    transition:border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+  "
+    onmouseover="this.style.borderColor='rgba(79,94,247,0.3)';this.style.boxShadow='0 8px 32px rgba(79,94,247,0.10)';this.style.transform='translateY(-3px)';"
+    onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='none';this.style.transform='translateY(0)';"
+  >
+    <!-- Ikon PDF -->
+    <div style="
+      width:64px; height:74px; flex-shrink:0;
+      background:#fff;
+      border:1px solid #e2e8f0;
+      border-radius:10px;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap:4px;
+    ">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+           stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      <span style="font-size:10px;font-weight:700;color:#e53e3e;letter-spacing:0.5px;font-family:'JetBrains Mono',monospace;">PDF</span>
     </div>
 
-    <!-- Card dokumen PDF -->
-    <div class="reveal reveal-d1" style="margin-top:40px; display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
+    <!-- Info dokumen -->
+    <div style="flex:1; display:flex; gap:32px; align-items:center;">
 
-      <div style="
-        flex:1; min-width:280px; max-width:480px;
-        background:#f8fafc;
-        border:1px solid #e2e8f0;
-        border-radius:16px;
-        padding:28px;
-        display:flex; gap:20px; align-items:flex-start;
-        transition:border-color 0.25s, box-shadow 0.25s, transform 0.25s;
-      "
-        onmouseover="this.style.borderColor='rgba(79,94,247,0.3)';this.style.boxShadow='0 8px 32px rgba(79,94,247,0.10)';this.style.transform='translateY(-3px)';"
-        onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='none';this.style.transform='translateY(0)';"
-      >
-        <!-- Ikon PDF -->
+      <div style="flex:1;">
         <div style="
-          width:52px; height:60px; flex-shrink:0;
-          background:#fff;
-          border:1px solid #e2e8f0;
-          border-radius:10px;
-          display:flex; flex-direction:column;
-          align-items:center; justify-content:center;
-          gap:4px;
-        ">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-               stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
-          </svg>
-          <span style="font-size:9px;font-weight:700;color:#e53e3e;letter-spacing:0.5px;font-family:'JetBrains Mono',monospace;">PDF</span>
+          display:inline-flex;align-items:center;gap:5px;
+          padding:2px 10px;
+          background:rgba(79,94,247,0.08);
+          border:1px solid rgba(79,94,247,0.18);
+          border-radius:999px;
+          font-size:9px;font-weight:700;color:#4f5ef7;
+          letter-spacing:0.8px;text-transform:uppercase;
+          font-family:'JetBrains Mono',monospace;
+          margin-bottom:8px;
+        ">Panduan Pengguna</div>
+
+        <div style="font-size:16px;font-weight:700;color:#0f172a;line-height:1.4;margin-bottom:8px;">
+          Panduan Teknis Penggunaan Dashboard Shifted.
         </div>
 
-        <!-- Info dokumen -->
-        <div style="flex:1;">
-          <div style="
-            display:inline-flex;align-items:center;gap:5px;
-            padding:2px 10px;
-            background:rgba(79,94,247,0.08);
-            border:1px solid rgba(79,94,247,0.18);
-            border-radius:999px;
-            font-size:9px;font-weight:700;color:#4f5ef7;
-            letter-spacing:0.8px;text-transform:uppercase;
-            font-family:'JetBrains Mono',monospace;
-            margin-bottom:8px;
-          ">Panduan Pengguna</div>
+        <div style="font-size:12.5px;color:#64748b;line-height:1.7;margin-bottom:14px;max-width:560px;">
+          Dokumen ini memuat panduan lengkap mulai dari login, input koordinat manual, batch upload CSV, pembacaan hasil transformasi, hingga navigasi peta GIS interaktif.
+        </div>
 
-          <div style="font-size:14px;font-weight:700;color:#0f172a;line-height:1.4;margin-bottom:6px;">
-            Panduan Teknis Penggunaan Dashboard Shifted.
+        <!-- Meta info -->
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026
           </div>
-
-          <div style="font-size:12px;color:#64748b;line-height:1.65;margin-bottom:14px;">
-            Dokumen ini memuat panduan lengkap mulai dari login, input koordinat manual, batch upload CSV, pembacaan hasil transformasi, hingga navigasi peta GIS interaktif.
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Format PDF
           </div>
-
-          <!-- Meta info -->
-          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
-            <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              2026
-            </div>
-            <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Format PDF
-            </div>
-            <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-              Bahasa Indonesia
-            </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+            Bahasa Indonesia
           </div>
-
-          <!-- Tombol unduh -->
-          
-          <a href="image/Dokumen_Teknis_Shifted.pdf"
-            download
-            target="_blank"
-            style="
-              display:inline-flex;align-items:center;gap:8px;
-              padding:10px 22px;
-              background:#4f5ef7;
-              color:#fff;
-              border-radius:999px;
-              font-size:13px;font-weight:700;
-              font-family:'Sora',sans-serif;
-              text-decoration:none;
-              box-shadow:0 4px 16px rgba(79,94,247,0.30);
-              transition:background 0.2s,transform 0.15s,box-shadow 0.2s;
-            "
-            onmouseover="this.style.background='#3d4de5';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(79,94,247,0.42)';"
-            onmouseout="this.style.background='#4f5ef7';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(79,94,247,0.30)';"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Unduh Panduan (PDF)
-          </a>
         </div>
       </div>
 
-      <!-- Panel info singkat isi dokumen -->
-      <div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:12px;">
-
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-family:'JetBrains Mono',monospace;margin-bottom:4px;">
-          Isi Dokumen
-        </div>
-
-        <!-- Poin-poin isi -->
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <!-- Item -->
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
-            <div style="width:30px;height:30px;border-radius:8px;background:rgba(79,94,247,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">🔐</div>
-            <div>
-              <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:2px;">Login & Autentikasi</div>
-              <div style="font-size:11px;color:#64748b;line-height:1.5;">Cara login ke dalam dashboard.</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
-            <div style="width:30px;height:30px;border-radius:8px;background:rgba(79,94,247,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">📍</div>
-            <div>
-              <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:2px;">Input Koordinat Manual</div>
-              <div style="font-size:11px;color:#64748b;line-height:1.5;">Panduan input koordinat dalam format DD, DMS, maupun UTM,serta pemilihan datum asal dan tujuan.</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
-            <div style="width:30px;height:30px;border-radius:8px;background:rgba(79,94,247,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">📂</div>
-            <div>
-              <div style="font-size:12px;font-weight:700;color:#0f172a;margin-bottom:2px;">Batch Upload CSV</div>
-              <div style="font-size:11px;color:#64748b;line-height:1.5;">Cara upload file CSV, format kolom yang diwajibkan, dan mengunduh hasil transformasi.</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </div><!-- /flex row -->
-
+      <!-- Tombol unduh -->
+      <a href="image/Dokumen_Teknis_Shifted.pdf"
+        download
+        target="_blank"
+        style="
+          display:inline-flex;align-items:center;gap:8px;
+          padding:12px 26px;
+          background:#4f5ef7;
+          color:#fff;
+          border-radius:999px;
+          font-size:13px;font-weight:700;
+          font-family:'Sora',sans-serif;
+          text-decoration:none;
+          white-space:nowrap;
+          flex-shrink:0;
+          box-shadow:0 4px 16px rgba(79,94,247,0.30);
+          transition:background 0.2s,transform 0.15s,box-shadow 0.2s;
+        "
+        onmouseover="this.style.background='#3d4de5';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(79,94,247,0.42)';"
+        onmouseout="this.style.background='#4f5ef7';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(79,94,247,0.30)';"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Unduh Panduan (PDF)
+      </a>
+    </div>
   </div>
-</section>
   <!-- ══ DEVELOPER SECTION ══ -->
   <section class="dev-section" id="section-developer">
     <div class="section">
