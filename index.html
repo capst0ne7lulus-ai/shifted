@@ -1245,6 +1245,112 @@
     .lm-divider-line { flex: 1; height: 1px; background: #e2e8f0; }
     .lm-divider-text { font-size: 11px; color: #94a3b8; white-space: nowrap; }
 
+    /* ══ PDF VIEWER MODAL ══ */
+    .pdf-modal-overlay {
+      position: fixed; inset: 0; z-index: 1100;
+      background: rgba(4,5,15,0.90);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 28px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .pdf-modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .pdf-modal-box {
+      background: #1a1d2e;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      width: 100%; max-width: 920px;
+      height: 90vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.4);
+      transform: translateY(24px) scale(0.97);
+      transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+    }
+    .pdf-modal-overlay.open .pdf-modal-box { transform: translateY(0) scale(1); }
+
+    .pdf-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px;
+      padding: 16px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+    .pdf-modal-title-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .pdf-modal-icon {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: rgba(229,62,62,0.12);
+      border: 1px solid rgba(229,62,62,0.25);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pdf-modal-title {
+      font-size: 14px; font-weight: 700; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pdf-modal-subtitle {
+      font-size: 10.5px; color: rgba(255,255,255,0.4);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .pdf-modal-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+    .pdf-action-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 11.5px; font-weight: 600;
+      font-family: 'Sora', sans-serif;
+      text-decoration: none; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.7);
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .pdf-action-btn:hover {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+    .pdf-action-btn.primary {
+      background: #4f5ef7;
+      border-color: #4f5ef7;
+      color: #fff;
+    }
+    .pdf-action-btn.primary:hover { background: #3d4de5; }
+
+    .pdf-modal-close {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: rgba(255,255,255,0.6);
+      font-size: 17px; line-height: 1;
+      transition: background 0.2s, color 0.2s;
+    }
+    .pdf-modal-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    .pdf-modal-body {
+      flex: 1; min-height: 0;
+      background: #0f1020;
+      position: relative;
+    }
+    .pdf-modal-iframe {
+      width: 100%; height: 100%;
+      border: none; display: block;
+      background: #fff;
+    }
+    .pdf-modal-fallback {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; padding: 32px; text-align: center;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+    }
+
     @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
   </style>
 </head>
@@ -1731,126 +1837,122 @@
           <div class="about-stat-lbl">Arah Transformasi</div>
         </div>
       </div>
-<!-- ══ DOKUMEN PANDUAN TEKNIS ══ -->
-<!-- ══ DOKUMEN PANDUAN TEKNIS ══ -->
-<div id="section-dokumen" class="reveal reveal-d3" style="margin-top:80px;">
-  <div class="section-label">
-    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    Dokumen
-  </div>
-  <h2 class="section-title" style="color:#0f172a;">Panduan Teknis<br>
-    <span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Penggunaan Dashboard Shifted.</span>
-  </h2>
-  <p class="section-desc" style="color:#64748b; margin-bottom:0;">
-    Dokumen panduan lengkap penggunaan dashboard <strong style="color:#1e3a8a;">Shifted.</strong> tersedia untuk diunduh oleh pengguna. Panduan ini mencakup cara login, input koordinat, transformasi datum, batch processing, hingga interpretasi hasil pada peta interaktif.
-  </p>
 
-  <div style="
-    margin-top:40px;
-    background:#f8fafc;
-    border:1px solid #e2e8f0;
-    border-radius:16px;
-    padding:32px;
-    display:flex; gap:28px; align-items:center;
-    width:100%;
-    transition:border-color 0.25s, box-shadow 0.25s, transform 0.25s;
-  "
-    onmouseover="this.style.borderColor='rgba(79,94,247,0.3)';this.style.boxShadow='0 8px 32px rgba(79,94,247,0.10)';this.style.transform='translateY(-3px)';"
-    onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='none';this.style.transform='translateY(0)';"
-  >
-    <!-- Ikon PDF -->
-    <div style="
-      width:64px; height:74px; flex-shrink:0;
-      background:#fff;
-      border:1px solid #e2e8f0;
-      border-radius:10px;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      gap:4px;
-    ">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-           stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/>
-        <line x1="16" y1="17" x2="8" y2="17"/>
-        <polyline points="10 9 9 9 8 9"/>
-      </svg>
-      <span style="font-size:10px;font-weight:700;color:#e53e3e;letter-spacing:0.5px;font-family:'JetBrains Mono',monospace;">PDF</span>
-    </div>
-
-    <!-- Info dokumen -->
-    <div style="flex:1; display:flex; gap:32px; align-items:center;">
-
-      <div style="flex:1;">
-        <div style="
-          display:inline-flex;align-items:center;gap:5px;
-          padding:2px 10px;
-          background:rgba(79,94,247,0.08);
-          border:1px solid rgba(79,94,247,0.18);
-          border-radius:999px;
-          font-size:9px;font-weight:700;color:#4f5ef7;
-          letter-spacing:0.8px;text-transform:uppercase;
-          font-family:'JetBrains Mono',monospace;
-          margin-bottom:8px;
-        ">Panduan Pengguna</div>
-
-        <div style="font-size:16px;font-weight:700;color:#0f172a;line-height:1.4;margin-bottom:8px;">
-          Panduan Teknis Penggunaan Dashboard Shifted.
+      <!-- ══ DOKUMEN PANDUAN TEKNIS ══ -->
+      <div class="reveal reveal-d3" style="margin-top:80px;" id="section-dokumen">
+        <div class="section-label">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Dokumen
         </div>
+        <h2 class="section-title" style="color:#0f172a;">Panduan Teknis<br>
+          <span style="background:linear-gradient(90deg,#4f5ef7,#1e3a8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Penggunaan Dashboard Shifted.</span>
+        </h2>
+        <p class="section-desc" style="color:#64748b;">
+          Dokumen panduan lengkap penggunaan dashboard <strong style="color:#1e3a8a;">Shifted.</strong> tersedia untuk dibaca langsung di halaman ini. Panduan ini mencakup cara login, input koordinat, transformasi datum, batch processing, hingga interpretasi hasil pada peta interaktif.
+        </p>
 
-        <div style="font-size:12.5px;color:#64748b;line-height:1.7;margin-bottom:14px;max-width:560px;">
-          Dokumen ini memuat panduan lengkap mulai dari login, input koordinat manual, batch upload CSV, pembacaan hasil transformasi, hingga navigasi peta GIS interaktif.
-        </div>
+        <!-- Card dokumen — gaya disamakan dengan .feat-card (about-features) -->
+        <div class="feat-card" style="
+          margin-top:8px;
+          display:flex; gap:22px; align-items:flex-start;
+          padding:28px;
+        ">
+          <!-- Ikon PDF -->
+          <div style="
+            width:56px; height:64px; flex-shrink:0;
+            background:#ffffff;
+            border:1px solid #e2e8f0;
+            border-radius:10px;
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            gap:4px;
+          ">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                 stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            <span style="font-size:9px;font-weight:700;color:#e53e3e;letter-spacing:0.5px;font-family:'JetBrains Mono',monospace;">PDF</span>
+          </div>
 
-        <!-- Meta info -->
-        <div style="display:flex;gap:16px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            2026
-          </div>
-          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Format PDF
-          </div>
-          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-            Bahasa Indonesia
+          <!-- Info dokumen -->
+          <div style="flex:1; min-width:0;">
+            <div style="
+              display:inline-flex;align-items:center;gap:5px;
+              padding:2px 10px;
+              background:rgba(79,94,247,0.08);
+              border:1px solid rgba(79,94,247,0.18);
+              border-radius:999px;
+              font-size:9px;font-weight:700;color:#4f5ef7;
+              letter-spacing:0.8px;text-transform:uppercase;
+              font-family:'JetBrains Mono',monospace;
+              margin-bottom:10px;
+            ">Panduan Pengguna</div>
+
+            <div class="feat-title" style="margin-bottom:8px;">
+              Panduan Teknis Penggunaan Dashboard Shifted.
+            </div>
+
+            <div class="feat-desc" style="margin-bottom:16px; max-width:680px;">
+              Dokumen ini memuat panduan lengkap mulai dari login, input koordinat manual, batch upload CSV, pembacaan hasil transformasi, hingga navigasi peta GIS interaktif. Klik "Lihat Dokumen" untuk membaca langsung tanpa perlu mengunduh.
+            </div>
+
+            <!-- Meta info + tombol aksi sejajar -->
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+
+              <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  2026
+                </div>
+                <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Format PDF
+                </div>
+                <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#94a3b8;font-family:'JetBrains Mono',monospace;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+                  Bahasa Indonesia
+                </div>
+              </div>
+
+              <!-- Tombol lihat dokumen (inline viewer, tanpa download otomatis) -->
+              <button type="button"
+                onclick="openPdfViewer('image/Dokumen_Teknis_Shifted.pdf','Panduan Teknis Penggunaan Dashboard Shifted.')"
+                style="
+                  display:inline-flex;align-items:center;gap:8px;
+                  padding:10px 22px;
+                  background:#4f5ef7;
+                  color:#fff;
+                  border:none;
+                  border-radius:999px;
+                  font-size:13px;font-weight:700;
+                  font-family:'Sora',sans-serif;
+                  cursor:pointer;
+                  box-shadow:0 4px 16px rgba(79,94,247,0.30);
+                  transition:background 0.2s,transform 0.15s,box-shadow 0.2s;
+                  flex-shrink:0;
+                  white-space:nowrap;
+                "
+                onmouseover="this.style.background='#3d4de5';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(79,94,247,0.42)';"
+                onmouseout="this.style.background='#4f5ef7';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(79,94,247,0.30)';"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Lihat Dokumen
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Tombol unduh -->
-      <a href="image/Dokumen_Teknis_Shifted.pdf"
-        download
-        target="_blank"
-        style="
-          display:inline-flex;align-items:center;gap:8px;
-          padding:12px 26px;
-          background:#4f5ef7;
-          color:#fff;
-          border-radius:999px;
-          font-size:13px;font-weight:700;
-          font-family:'Sora',sans-serif;
-          text-decoration:none;
-          white-space:nowrap;
-          flex-shrink:0;
-          box-shadow:0 4px 16px rgba(79,94,247,0.30);
-          transition:background 0.2s,transform 0.15s,box-shadow 0.2s;
-        "
-        onmouseover="this.style.background='#3d4de5';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(79,94,247,0.42)';"
-        onmouseout="this.style.background='#4f5ef7';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 16px rgba(79,94,247,0.30)';"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        Unduh Panduan (PDF)
-      </a>
     </div>
-  </div>
+  </section>
   <!-- ══ DEVELOPER SECTION ══ -->
   <section class="dev-section" id="section-developer">
     <div class="section">
@@ -2329,6 +2431,43 @@
   </div>
 
 
+  <!-- ══════════════════════════════════
+       PDF VIEWER MODAL — Lihat Dokumen Tanpa Unduh
+  ══════════════════════════════════ -->
+  <div class="pdf-modal-overlay" id="pdf-viewer-modal" onclick="handlePdfOverlayClick(event)">
+    <div class="pdf-modal-box">
+      <div class="pdf-modal-header">
+        <div class="pdf-modal-title-wrap">
+          <div class="pdf-modal-icon">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div style="min-width:0;">
+            <div class="pdf-modal-title" id="pdf-modal-title">Panduan Teknis</div>
+            <div class="pdf-modal-subtitle">Dokumen PDF · Shifted.</div>
+          </div>
+        </div>
+        <div class="pdf-modal-actions">
+          <a id="pdf-modal-newtab" href="#" target="_blank" class="pdf-action-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Tab Baru
+          </a>
+          <a id="pdf-modal-download" href="#" download class="pdf-action-btn primary">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Unduh
+          </a>
+          <button class="pdf-modal-close" onclick="closePdfViewer()">×</button>
+        </div>
+      </div>
+      <div class="pdf-modal-body">
+        <iframe id="pdf-modal-iframe" class="pdf-modal-iframe" src="" title="Dokumen Panduan Teknis"></iframe>
+      </div>
+    </div>
+  </div>
+
+
   <!-- ══ AUTO POPUP — Informasi Cakupan Wilayah Transformasi Datum ══ -->
   <div id="wkr-info-overlay" onclick="closeWkrInfoOverlay(event)" style="
     position:fixed;inset:0;z-index:9999;
@@ -2387,6 +2526,38 @@
 
 
   <script>
+    // ══════════════════════════════════════
+    // PDF VIEWER MODAL (Lihat Dokumen Tanpa Unduh)
+    // ══════════════════════════════════════
+    function openPdfViewer(pdfUrl, title) {
+      const overlay  = document.getElementById('pdf-viewer-modal');
+      const iframe   = document.getElementById('pdf-modal-iframe');
+      const titleEl  = document.getElementById('pdf-modal-title');
+      const newTabEl = document.getElementById('pdf-modal-newtab');
+      const dlEl     = document.getElementById('pdf-modal-download');
+
+      titleEl.textContent = title || 'Dokumen';
+      // #toolbar=1&navpanes=0 → tampilkan toolbar viewer PDF native browser, sembunyikan panel samping
+      iframe.src = pdfUrl + '#toolbar=1&navpanes=0&view=FitH';
+      newTabEl.href = pdfUrl;
+      dlEl.href = pdfUrl;
+
+      overlay.classList.add('open');
+      document.body.classList.add('modal-open');
+    }
+
+    function closePdfViewer() {
+      const overlay = document.getElementById('pdf-viewer-modal');
+      overlay.classList.remove('open');
+      document.body.classList.remove('modal-open');
+      // Kosongkan src agar audio/render PDF berhenti saat ditutup
+      setTimeout(() => { document.getElementById('pdf-modal-iframe').src = ''; }, 300);
+    }
+
+    function handlePdfOverlayClick(e) {
+      if (e.target === document.getElementById('pdf-viewer-modal')) closePdfViewer();
+    }
+
     // ══════════════════════════════════════
     // LOGIN MODAL
     // ══════════════════════════════════════
@@ -2513,7 +2684,7 @@
       { icon:'📂', title:'Batch Processing CSV', desc:'Transformasi massal ratusan titik koordinat via upload file CSV.', section:'section-about', keywords:'batch csv upload transformasi massal koordinat' },
       { icon:'🛰️', title:'Integrasi GeoServer WMS', desc:'Layer pipeline dan batas wilayah kerja dari GeoServer ditampilkan di peta.', section:'section-about', keywords:'geoserver wms layer pipeline peta integrasi' },
       //Panduan
-      { icon:'📄', title:'Dokumen Panduan Teknis Shifted.', desc:'Unduh PDF panduan penggunaan dashboard: login, transformasi koordinat, batch CSV, peta GIS.', section:'section-dokumen', keywords:'dokumen panduan teknis pdf unduh download manual shifted' },
+      { icon:'📄', title:'Dokumen Panduan Teknis Shifted.', desc:'Baca langsung dokumen PDF panduan penggunaan dashboard: login, transformasi koordinat, batch CSV, peta GIS.', section:'section-dokumen', keywords:'dokumen panduan teknis pdf baca lihat unduh download manual shifted' },
       // Developer
       { icon:'👩‍💻', title:'Developer — Nashwa Clarissa Maharani', desc:'Mahasiswi Teknik Geodesi dan Geomatika ITB, pengembang platform Shifted.', section:'section-developer', keywords:'nashwa clarissa developer pengembang itb geodesi' },
       { icon:'👩‍💻', title:'Developer — Balqis Ainnurra Azzahra', desc:'Mahasiswi Teknik Geodesi dan Geomatika ITB, pengembang platform Shifted.', section:'section-developer', keywords:'balqis ainnurra azzahra developer pengembang itb geodesi' },
@@ -2693,6 +2864,8 @@
       if (e.key === 'Escape') {
         const wkrOverlay = document.getElementById('wkr-info-overlay');
         if (wkrOverlay && wkrOverlay.style.display === 'flex') { dismissWkrInfo(); return; }
+        const pdfModal = document.getElementById('pdf-viewer-modal');
+        if (pdfModal && pdfModal.classList.contains('open')) { closePdfViewer(); return; }
         document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
         document.body.classList.remove('modal-open');
       }
