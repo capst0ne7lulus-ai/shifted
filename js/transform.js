@@ -18,30 +18,34 @@ let epochEffectMonth   = 1;      // bulan target default (1 = Januari)
 // ──────────────────────────────────────────────
 // EPOCH EFFECT — velocity-based (EpochTransformation.java)
 //   X(t) = X(t0) + Vx * (t − t0)
-//   Epok referensi t0 = 2021.0
-//   Vx = −0.027 m/thn, Vy = −0.007 m/thn, Vz = −0.004 m/thn
+//   Epok referensi t0 = EPOCH.param (2021.0) — disamakan dengan
+//   epoch param MB di bawah, supaya satu sumber kebenaran.
 //   dt dihitung dari tahun desimal: year + (month−1)/12
+//
+//   NOTE: Vx/Vy/Vz untuk badge UI sekarang diambil dari _V
+//   (hasil _computeVelocityECEF, lihat blok EPOCH di bawah),
+//   bukan dari konstanta terpisah lagi — supaya nilai yang
+//   ditampilkan di UI selalu konsisten dengan koreksi yang
+//   benar-benar diterapkan ke hasil transformasi.
 // ──────────────────────────────────────────────
-const EPOCH_EFFECT_REF  = 2021.0;
-const EPOCH_EFFECT_VELO = { Vx: -0.027, Vy: -0.007, Vz: -0.004 };  // m/tahun
 
 function _epochDecimalYear() {
   return epochEffectYear + (epochEffectMonth - 1) / 12;
 }
 
 function _getEpochCorrection() {
-  const dt = _epochDecimalYear() - EPOCH_EFFECT_REF;
+  const dt = _epochDecimalYear() - EPOCH.param;
   return {
-    dX: EPOCH_EFFECT_VELO.Vx * dt,
-    dY: EPOCH_EFFECT_VELO.Vy * dt,
-    dZ: EPOCH_EFFECT_VELO.Vz * dt,
+    dX: _V.Vx * dt,
+    dY: _V.Vy * dt,
+    dZ: _V.Vz * dt,
     dt,
   };
 }
 
 /** Format dt (dalam tahun desimal) menjadi "X thn Y bln" */
 function _dtLabel() {
-  const totalMonths = Math.round((_epochDecimalYear() - EPOCH_EFFECT_REF) * 12);
+  const totalMonths = Math.round((_epochDecimalYear() - EPOCH.param) * 12);
   const yrs = Math.floor(Math.abs(totalMonths) / 12);
   const mns = Math.abs(totalMonths) % 12;
   const sign = totalMonths < 0 ? '−' : '';
@@ -232,12 +236,24 @@ function molodensky7param(lat, lon, dir, epochTarget) {
   if (fwd) {
     // ID74(1980) → WGS84
     const ecef0  = toECEF(lat, lon, 0, 'grs67');                   // [GRS67]
-    const ecef21 = molodensky7(ecef0.X, ecef0.Y, ecef0.Z, P_FWD);  // MB transform
+    let   ecef21 = molodensky7(ecef0.X, ecef0.Y, ecef0.Z, P_FWD);  // MB transform (epok param EPOCH.param)
+
+    // Efek epok: geser dari epok param ke epok target (hanya jika diaktifkan)
+    if (epochEffectEnabled && epochTarget != null) {
+      ecef21 = applyEpochCorrection(ecef21, EPOCH.param, epochTarget);
+    }
+
     return fromECEF(ecef21.X, ecef21.Y, ecef21.Z, 'wgs84');
 
   } else {
     // WGS84 → ID74(1980)
-    const ecefT  = toECEF(lat, lon, 0, 'wgs84');
+    let ecefT = toECEF(lat, lon, 0, 'wgs84');
+
+    // Efek epok: geser dari epok target ke epok param sebelum MB inverse
+    if (epochEffectEnabled && epochTarget != null) {
+      ecefT = applyEpochCorrection(ecefT, epochTarget, EPOCH.param);
+    }
+
     const ecef74 = molodensky7(ecefT.X, ecefT.Y, ecefT.Z, P_INV);  // MB inverse
     return fromECEF(ecef74.X, ecef74.Y, ecef74.Z, 'grs67');         // [GRS67]
   }
@@ -256,7 +272,9 @@ function passThrough(lat, lon, h = 0) { return { lat, lon, h }; }
 function transform(lat, lon, from, to, h = 0, epochTarget) {
   if (from === to) return passThrough(lat, lon, h);
   const dir = (from === 'id74' && to === 'wgs84') ? 'id74_wgs84' : 'wgs84_id74';
-  return molodensky7param(lat, lon, dir, epochTarget);
+  // Jika epochTarget tidak dikirim eksplisit, ambil dari epok target UI (tahun+bulan)
+  const ep = epochTarget != null ? epochTarget : _epochDecimalYear();
+  return molodensky7param(lat, lon, dir, ep);
 }
 
 
@@ -1327,7 +1345,7 @@ window.triggerDownload          = triggerDownload;
 window.triggerDownloadGeoJSON   = triggerDownloadGeoJSON;
 window.invertAllPoints          = invertAllPoints;
 window.renderHistory            = renderHistory;
-window.reloadHistory            = reloadHistory;
+window.reloadHistory             = reloadHistory;
 window.downloadHistoryCSV       = downloadHistoryCSV;
 window.downloadHistoryGeoJSON   = downloadHistoryGeoJSON;
 window.clearHistoryEntry            = clearHistoryEntry;
