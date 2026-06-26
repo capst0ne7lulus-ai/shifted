@@ -2598,14 +2598,6 @@
         return;
       }
 
-      // ── Admin hardcode ──
-      if (user === 'admin' && pass === '12345') {
-        localStorage.setItem('isLogin', 'true');
-        localStorage.setItem('shifted_user', JSON.stringify({ nama: 'Admin', tipe: 'Admin', nipnim: '-' }));
-        window.location.href = 'dashboard.html';
-        return;
-      }
-
       // ── Supabase lookup ──
       btn.textContent = 'Memverifikasi…'; btn.disabled = true;
 
