@@ -51,14 +51,7 @@ async function login() {
     return;
   }
 
-  // ── 1. Cek admin  ──
-  if (user === 'admin' && pass === '12345') {
-    _saveSession({ nama: 'Admin', tipe: 'Admin', nipnim: '-' });
-    window.location.href = 'dashboard.html';
-    return;
-  }
-
-  // ── 2. Cek user dari Supabase (nama = username, ID = password) ──
+  // ── Cek user dari Supabase (nama = username, ID = password) ──
   var client = _getClient();
   if (!client) {
     if (errEl) { errEl.textContent = 'Koneksi server gagal. Muat ulang halaman.'; errEl.style.display = 'block'; }
