@@ -61,10 +61,10 @@ const _HISTORY_MAX = 50;
 // WK ROKAN BOUNDING BOX
 // ──────────────────────────────────────────────
 const WK_ROKAN_BOUNDS = {
-  south:  0.0,   // °LU
-  north:  2.7,   // °LU
-  west:  99.5,   // °BT
-  east:  102.5,  // °BT
+  south:  0.605206,   // °LU
+  north:  0.914079,   // °LU
+  west:   101.033843,  // °BT
+  east:   101.535296,  // °BT
 };
 
 function _isOutsideWKRokan(lat, lon) {
